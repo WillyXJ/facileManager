@@ -31,7 +31,13 @@ printHeader();
 
 echo printPageHeader((string) $response, null, currentUserCan($required_permission, $_SESSION['module']));
 
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', 'wlan_user_login', 'wlan_user_', null, null, false, $sort_direction);
+$sort_direction = null;
+$sort_field = 'wlan_user_login';
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', array($sort_field, 'wlan_user_login'), 'wlan_user_', null, null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 $fm_wifi_wlan_users->rows($result, $page, $total_pages);

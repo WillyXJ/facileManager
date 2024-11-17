@@ -48,7 +48,7 @@ class fm_wifi_wlan_users {
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => $type
 					);
@@ -63,8 +63,13 @@ class fm_wifi_wlan_users {
 				'class' => 'header-tiny header-nosort'
 			);
 		}
-		$title_array = array_merge((array) $title_array, array(_('Login'), __('MAC Address'), __('Associated WLANs'), _('Comment')));
-		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		$title_array = array_merge((array) $title_array, array(
+			array('title' => _('Login'), 'rel' => 'wlan_user_login'),
+			array('title' => __('MAC Address'), 'rel' => 'wlan_user_mac'),
+			array('title' => __('Associated WLANs'), 'class' => 'header-nosort'),
+			array('title' => _('Comment'), 'class' => 'header-nosort')
+		));
+		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
 		echo displayTableHeader($table_info, $title_array);
 

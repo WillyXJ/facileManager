@@ -49,7 +49,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if (is_array($bulk_actions_list)) {
 			$title_array[] = array(
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
-								'class' => 'header-tiny'
+								'class' => 'header-tiny header-nosort'
 							);
 		} else {
 			$title_array[] = array(
@@ -63,7 +63,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'servers'
 					);
