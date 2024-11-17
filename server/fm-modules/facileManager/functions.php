@@ -2520,7 +2520,7 @@ function handleSortOrder() {
 		} elseif (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction'])) {
 			$sort_direction = $_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']]['sort_direction'];
 		} else {
-			$sort_direction = 'DESC';
+			$sort_direction = 'ASC';
 		}
 		@session_start();
 		$_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']] = array(
