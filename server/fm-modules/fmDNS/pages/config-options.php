@@ -27,13 +27,14 @@ if (!array_key_exists('domain_id', $_GET)) {
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_options.php');
 
-$option_type = (isset($_GET['type'])) ? sanitize(ucfirst($_GET['type'])) : 'Global';
-if (!array_key_exists(strtolower($option_type), $__FM_CONFIG['options']['avail_types'])) {
+$option_type = (isset($_GET['type'])) ? sanitize($_GET['type']) : 'global';
+if (!array_key_exists($option_type, $__FM_CONFIG['options']['avail_types'])) {
 	header('Location: ' . $GLOBALS['basename']);
 	exit;
 }
-$display_option_type = $__FM_CONFIG['options']['avail_types'][strtolower($option_type)];
-$display_option_type_sql = strtolower($option_type);
+$display_option_type = $__FM_CONFIG['options']['avail_types'][$option_type];
+$display_option_type_sql = $option_type;
+$display_option_sub = null;
 $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST['server_serial_no']) : 0;
 
 /* Configure options for a view */
@@ -44,14 +45,14 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 		exit;
 	}
 	
-	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', $view_id, 'view_', 'view_id');
+	basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'views', $view_id, 'view_', 'view_id');
 	if (!$fmdb->num_rows) {
 		header('Location: config-views.php');
 		exit;
 	}
 	$view_info = $fmdb->last_result;
 	
-	$display_option_type = $view_info[0]->view_name;
+	$display_option_sub = $view_info[0]->view_name;
 	$display_option_type_sql .= "' AND view_id='$view_id";
 	
 	$name = 'view_id';
@@ -75,27 +76,27 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 	}
 	$domain_info = $fmdb->last_result;
 	
-	$display_option_type = displayFriendlyDomainName($domain_info[0]->domain_name);
+	$display_option_sub = displayFriendlyDomainName($domain_info[0]->domain_name);
 	$display_option_type_sql .= "' AND domain_id='$domain_id";
 	
 	$name = 'domain_id';
 	$rel = $domain_id;
-/* Configure options for a server */
-} elseif (array_key_exists('server_id', $_GET)) {
+/* Configure options for a server (not server overrides) */
+} elseif (array_key_exists('server_id', $_GET) && $display_option_type_sql != 'rpz') {
 	$server_id = (isset($_GET['server_id'])) ? sanitize($_GET['server_id']) : null;
 	if (!$server_id) {
 		header('Location: ' . $GLOBALS['basename']);
 		exit;
 	}
 	
-	basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $server_id, 'server_', 'server_id');
+	basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', $server_id, 'server_', 'server_id');
 	if (!$fmdb->num_rows) {
 		header('Location: config-servers.php');
 		exit;
 	}
 	$server_info = $fmdb->last_result;
 	
-	$display_option_type = $server_info[0]->server_name;
+	$display_option_sub = $server_info[0]->server_name;
 	$display_option_type_sql .= "' AND server_id='$server_id";
 	
 	$name = 'server_id';
@@ -103,13 +104,17 @@ if (array_key_exists('view_id', $_GET) && !array_key_exists('server_id', $_GET))
 } else {
 	$view_id = $domain_id = $name = $rel = null;
 	$display_option_type_sql .= "' AND view_id='0";
-	if ($option_type == 'Global') $display_option_type_sql .= "' AND domain_id='0' AND server_id='0";
+	if ($option_type == 'global') $display_option_type_sql .= "' AND domain_id='0' AND server_id='0";
+}
+
+if ($display_option_sub) {
+	$display_option_sub = sprintf(' (%s)', $display_option_sub);
 }
 
 printHeader();
 @printMenu();
 
-$addl_title_blocks[] = buildSubMenu(strtolower($option_type), $__FM_CONFIG['options']['avail_types'], array('domain_id'));
+$addl_title_blocks[] = buildSubMenu($option_type, $__FM_CONFIG['options']['avail_types'], array('domain_id'));
 if (!array_key_exists('server_id', $_GET) && !array_key_exists('domain_id', $_GET)) {
 	$addl_title_blocks[] = buildViewSubMenu($view_id);
 }
@@ -119,17 +124,49 @@ if (array_key_exists('server_id', $_GET) || array_key_exists('domain_id', $_GET)
 }
 $addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 
-$sort_direction = null;
+$sort_direction = $comment = null;
 $sort_field = 'cfg_name';
-if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
-	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+
+if ($option_type == 'rpz') {
+	include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_rpz.php');
+	$working_class = $fm_module_rpz;
+	$comment = getMinimumFeatureVersion('options', 'policy', 'message', "AND def_option_type='rpz'");
+
+	/** Get rpz for all zones */
+	basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no' AND cfg_name='!config_name!' AND domain_id='0' AND cfg_isparent='yes'", null, false, $sort_direction);
+	$global_result = $fmdb->last_result;
+	$global_num_rows = $fmdb->num_rows;
+
+	/** Get rpz for defined zones */
+	$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_order_id'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no' AND cfg_name='!config_name!' AND domain_id!='0' AND cfg_isparent='yes'", null, false, $sort_direction);
+
+	/** Merge arrays for future parsing */
+	$tmp_last_result = array_merge((array) $global_result, (array) $fmdb->last_result);
+	$tmp_num_rows = $fmdb->num_rows;
+
+	/** RPZ is limited to 32 defined zones */
+	if ($tmp_num_rows >= 32) $perms = false;
+
+	$tmp_num_rows += $global_num_rows;
+} else {
+	$working_class = $fm_module_options;
+
+	if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+		extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+	}
+
+	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', $sort_field, 'cfg_name'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
+	$tmp_last_result = $fmdb->last_result;
+	$tmp_num_rows = $fmdb->num_rows;
 }
 
-echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), $perms, $name, $rel, null, $addl_title_blocks);
-	
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'config', array('domain_id', $sort_field, 'cfg_name'), 'cfg_', "AND cfg_type='$display_option_type_sql' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
+echo printPageHeader(array('message' => (string) $response, 'comment' => $comment), $display_option_type . ' ' . getPageTitle() . $display_option_sub, $perms, $name, $rel, null, $addl_title_blocks);
+
+$fmdb->last_result = $tmp_last_result;
+$fmdb->num_rows = $tmp_num_rows;
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
-$fm_module_options->rows($result, $page, $total_pages);
+
+$working_class->rows($fmdb->num_rows, $page, $total_pages);
 
 printFooter();

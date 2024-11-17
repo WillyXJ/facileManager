@@ -536,6 +536,7 @@ h4 {
 #page_title_container {
 	border-bottom: 1px solid var(--page-title-line);
 	margin-bottom: 4px;
+	white-space: nowrap;
 }
 #page_title_container > div {
 	display: flex;
@@ -544,7 +545,7 @@ h4 {
 #page_title_container > div.flex-left > div {
 	padding-right: 1em;
 }
-#page_title_container > div.flex-right > div {
+#page_title_container > div.flex-right > div:not(:first-child) {
 	padding-left: 1em;
 }
 

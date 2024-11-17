@@ -35,7 +35,10 @@ if (is_array($_POST) && count($_POST)) {
 		echo buildPopup('header', __('Zone Reload Results'));
 		
 		if (isset($domain_id) && !empty($domain_id)) {
-			$response = sprintf('<pre>%s</pre>', makePlainText($fm_dns_zones->buildZoneConfig($domain_id)));
+			/** Check the zone file for loadable syntax */
+			$response = $fm_dns_zones->singleZoneReloadSyntaxCheck($domain_id);
+
+			if (!isset($response) || !$response) $response = sprintf('<pre>%s</pre>', makePlainText($fm_dns_zones->buildZoneConfig($domain_id)));
 		}
 		
 		// Graphic highlighting

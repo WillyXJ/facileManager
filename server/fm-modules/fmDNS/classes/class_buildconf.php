@@ -1657,10 +1657,13 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 	 * @package fmDNS
 	 *
 	 * @param array $raw_data Array containing named files and contents
+	 * @param string|array $checks_to_run String or array of what checks to run
 	 * @return string|void
 	 */
-	function processConfigsChecks($files_array) {
+	function processConfigsChecks($files_array, $checks_to_run = array('checkconf', 'checkzone')) {
 		global $__FM_CONFIG;
+
+		if (!is_array($checks_to_run)) $checks_to_run = array($checks_to_run);
 		
 		if (!array_key_exists('server_serial_no', $files_array)) return;
 		if (getOption('enable_config_checks', $_SESSION['user']['account_id'], 'fmDNS') != 'yes') return;
@@ -1721,57 +1724,66 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 			@mkdir($tmp_dir . $files_array['server_root_dir'], 0777, true);
 		}
 		
+		$retval = false;
 		if (!$die) {
 			/** Run named-checkconf */
-			$named_checkconf_cmd = findProgram('sudo') . ' -n ' . $named_checkconf . ' -t ' . $tmp_dir . ' ' . $files_array['server_config_file'] . ' 2>&1';
-			exec($named_checkconf_cmd, $named_checkconf_results, $retval);
-			/** Remove key-directory statements for config checks */
-			foreach ($named_checkconf_results as $key => $val) {
-				if (strpos($val, 'key-directory') !== false) {
-					unset($named_checkconf_results[$key]);
+			if (in_array('checkconf', $checks_to_run)) {
+				$named_checkconf_cmd = findProgram('sudo') . ' -n ' . $named_checkconf . ' -t ' . $tmp_dir . ' ' . $files_array['server_config_file'] . ' 2>&1';
+				exec($named_checkconf_cmd, $named_checkconf_results, $retval);
+				/** Remove key-directory statements for config checks */
+				foreach ($named_checkconf_results as $key => $val) {
+					if (strpos($val, 'key-directory') !== false) {
+						unset($named_checkconf_results[$key]);
+					}
 				}
-			}
 
-			if ($retval || $named_checkconf_results) {
-				$class = ($retval) ? 'class="error"' : 'class="info"';
-				$named_checkconf_results = implode("\n", $named_checkconf_results);
-				if (strpos($named_checkconf_results, 'sudo') !== false) {
-					$class = 'class="info"';
-					$message = $this->getSyntaxCheckMessage('sudo', array('checkconf_cmd' => $named_checkconf_cmd, 'checkconf_results' => $named_checkconf_results));
-				} else {
-					$message_type = (strpos($class, 'errors') !== false) ? 'errors' : 'warning';
-					$message = $this->getSyntaxCheckMessage($message_type, array('checkconf_results' => $named_checkconf_results));
+				if ($retval || $named_checkconf_results) {
+					$class = ($retval) ? 'class="error"' : 'class="info"';
+					$named_checkconf_results = implode("\n", $named_checkconf_results);
+					if (strpos($named_checkconf_results, 'sudo') !== false) {
+						$class = 'class="info"';
+						$message = $this->getSyntaxCheckMessage('sudo', array('checkconf_cmd' => $named_checkconf_cmd, 'checkconf_results' => $named_checkconf_results));
+					} else {
+						$message_type = (strpos($class, 'errors') !== false) ? 'errors' : 'warning';
+						$message = $this->getSyntaxCheckMessage($message_type, array('checkconf_results' => $named_checkconf_results));
+					}
+					
 				}
-				
 			}
 
 			/** Run named-checkzone */
-			if (!$retval) {
-				$named_checkzone_results = '';
-				if (array($zone_files)) {
-					foreach ($zone_files as $view => $zones) {
-						foreach ($zones as $zone_name => $zone_file) {
-							$named_checkzone_cmd = findProgram('sudo') . ' -n ' . $named_checkzone . ' -t ' . $tmp_dir . ' ' . $zone_name . ' ' . $zone_file . ' 2>&1';
-							exec($named_checkzone_cmd, $results, $retval);
-							if ($retval) {
-								$class = 'class="error"';
-								$named_checkzone_results .= implode("\n", $results);
-								if (strpos($named_checkzone_results, 'sudo') !== false) {
-									$class = 'class="info"';
-									$message = $this->getSyntaxCheckMessage('sudo', array('checkconf_cmd' => $named_checkzone_cmd, 'checkconf_results' => $named_checkzone_results));
-									break 2;
+			if (in_array('checkzone', $checks_to_run)) {
+				if (!$retval) {
+					if (count($files_array['files']) == 1) {
+						$tmp_zone_file_array = array_keys($files_array['files']);
+						$zone_files['all'] = array(rtrim($tmp_zone_file_array[0], '.conf') => $tmp_zone_file_array[0]);
+					}
+					$named_checkzone_results = '';
+					if (array($zone_files)) {
+						foreach ($zone_files as $view => $zones) {
+							foreach ($zones as $zone_name => $zone_file) {
+								$named_checkzone_cmd = findProgram('sudo') . ' -n ' . $named_checkzone . ' -t ' . $tmp_dir . ' ' . $zone_name . ' ' . $zone_file . ' 2>&1';
+								exec($named_checkzone_cmd, $results, $retval);
+								if ($retval) {
+									$class = 'class="error"';
+									$named_checkzone_results .= implode("\n", $results);
+									if (strpos($named_checkzone_results, 'sudo') !== false) {
+										$class = 'class="info"';
+										$message = $this->getSyntaxCheckMessage('sudo', array('checkconf_cmd' => $named_checkzone_cmd, 'checkconf_results' => $named_checkzone_results));
+										break 2;
+									}
 								}
 							}
 						}
 					}
-				}
-				
-				if ($named_checkzone_results) {
-					if (empty($message)) $message = $this->getSyntaxCheckMessage('errors', array('checkconf_results' => $named_checkzone_results));
-				} else {
-					if (empty($message)) {
-						$class = null;
-						$message = $this->getSyntaxCheckMessage('loadable');
+					
+					if ($named_checkzone_results) {
+						if (empty($message)) $message = $this->getSyntaxCheckMessage('errors', array('checkconf_results' => $named_checkzone_results));
+					} else {
+						if (empty($message)) {
+							$class = null;
+							$message = $this->getSyntaxCheckMessage('loadable');
+						}
 					}
 				}
 			}

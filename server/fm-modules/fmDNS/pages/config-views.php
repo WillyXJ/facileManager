@@ -32,10 +32,6 @@ printHeader();
 $addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 
 echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']), null, null, null, $addl_title_blocks);
-	
-if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
-	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
-}
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'views', array('view_order_id', 'view_name'), 'view_', "AND server_serial_no='$server_serial_no'");
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);

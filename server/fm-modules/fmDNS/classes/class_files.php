@@ -48,7 +48,7 @@ class fm_dns_files {
 		echo displayPagination($page, $total_pages, buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'files'
 					);
@@ -63,7 +63,11 @@ class fm_dns_files {
 				'class' => 'header-tiny header-nosort'
 			);
 		}
-		$title_array = array_merge((array) $title_array, array(array('title' => __('File Name')), array('title' => __('File Location')), array('title' => _('Comment'), 'class' => 'header-nosort')));
+		$title_array = array_merge((array) $title_array, array(
+			array('title' => __('File Name'), 'rel' => 'file_name'),
+			array('title' => __('File Location'), 'rel' => 'file_location'),
+			array('title' => _('Comment'), 'class' => 'header-nosort')
+		));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 			if ($num_rows > 1) $table_info['class'] .= ' grab1';
