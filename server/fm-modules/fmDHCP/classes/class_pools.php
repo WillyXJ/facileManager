@@ -80,7 +80,7 @@ class fm_dhcp_pools extends fm_dhcp_objects {
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
-			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
+			$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" />';
 		}
 		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
 		
@@ -91,7 +91,7 @@ class fm_dhcp_pools extends fm_dhcp_objects {
 		
 		echo <<<HTML
 		<tr id="$row->config_id" name="$row->config_data" $class>
-			$checkbox
+			<td>$checkbox</td>
 			<td>$row->config_data $icons</td>
 			<td>$row->config_comment</td>
 			$edit_status
@@ -228,7 +228,9 @@ HTML;
 	 * @return array
 	 */
 	function getTableHeader() {
-		return array(__('Name'), _('Comment'));
+		return array(
+			array('title' => __('Name'), 'rel' => 'config_data')
+		);
 	}
 	
 	/**

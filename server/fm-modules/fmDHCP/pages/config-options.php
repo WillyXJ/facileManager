@@ -66,7 +66,7 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 
 echo printPageHeader((string) $response, $display_option_type . ' ' . getPageTitle(), currentUserCan('manage_servers', $_SESSION['module']), $name, $rel, null, $addl_title_blocks);
 
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('config_id', $sort_field, 'config_name'), 'config_', "AND config_type='$display_option_type_sql' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array($sort_field, 'config_name'), 'config_', "AND config_type='$display_option_type_sql' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 $fm_module_options->rows($result, $page, $total_pages);

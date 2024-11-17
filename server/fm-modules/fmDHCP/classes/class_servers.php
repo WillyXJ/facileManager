@@ -40,7 +40,6 @@ class fm_module_servers extends fm_shared_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 		
-		$bulk_actions_list = array();
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
@@ -50,8 +49,12 @@ class fm_module_servers extends fm_shared_module_servers {
 		if (is_array($bulk_actions_list)) {
 			$title_array[] = array(
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
-								'class' => 'header-tiny'
+								'class' => 'header-tiny header-nosort'
 							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
 		}
 		
 		$fmdb->num_rows = $num_rows;
@@ -60,16 +63,21 @@ class fm_module_servers extends fm_shared_module_servers {
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list, 'server_id_list'));
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'servers'
 					);
 
-		$title_array[] = array('class' => 'header-tiny');
-		$title_array = array_merge($title_array, array(__('Hostname'), __('Method'), __('Version'), __('Config File')));
+		$title_array[] = array('class' => 'header-tiny header-nosort');
+		$title_array = array_merge($title_array, array(
+			array('title' => __('Hostname'), 'rel' => 'server_name'),
+			array('title' => __('Method'), 'rel' => 'server_update_method'),
+			array('title' => __('Version'), 'rel' => 'server_version'),
+			array('title' => __('Config File'), 'rel' => 'server_config_file')
+		));
 		$title_array[] = array(
 							'title' => __('Actions'),
-							'class' => 'header-actions'
+							'class' => 'header-actions header-nosort'
 						);
 
 		echo displayTableHeader($table_info, $title_array);
@@ -249,7 +257,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$edit_status = $edit_actions = '';
 		$edit_actions = $preview = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 		
-		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
+		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" />' : null;
 		
 		if ($row->server_update_method != 'cron' && currentUserCan('manage_leases', $_SESSION['module'])) $icons[] = sprintf('<a href="leases.php?server_serial_no=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-database" aria-hidden="true"></i></a>', $row->server_serial_no, __('Manage Leases'));
 		if (currentUserCan('build_server_configs', $_SESSION['module']) && $row->server_installed == 'yes') {
@@ -289,7 +297,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 		echo <<<HTML
 		<tr id="$row->server_id" $class>
-			$checkbox
+			<td>$checkbox</td>
 			<td>$os_image</td>
 			<td title="$row->server_serial_no">$row->server_name $icons</td>
 			<td>$row->server_update_method $port</td>

@@ -40,6 +40,10 @@ echo printPageHeader((string) $response, $display_type, currentUserCan($required
 /** Get server listing */
 $sort_direction = null;
 $sort_field = 'config_data';
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
+
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array($sort_field, 'config_data'), 'config_', 'AND config_type="' . rtrim($type, 's') . '" AND config_name="' . rtrim($type, 's') . '" AND server_serial_no="' . $server_serial_no. '"', null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
