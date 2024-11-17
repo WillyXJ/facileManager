@@ -29,7 +29,13 @@ printHeader();
 
 echo printPageHeader((string) $response, null, currentUserCan('manage_time', $_SESSION['module']), null, null, 'noscroll');
 
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', 'time_name', 'time_');
+$sort_direction = null;
+$sort_field = 'time_name';
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'time', array($sort_field, 'time_name'), 'time_', null, null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 $fm_module_time->rows($result, $page, $total_pages);

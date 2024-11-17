@@ -40,7 +40,7 @@ class fm_module_time {
 		echo '<div class="overflow-container">';
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'time'
 					);
@@ -50,13 +50,15 @@ class fm_module_time {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
-		} else {
-			$title_array[] = array(
-				'class' => 'header-tiny header-nosort'
-			);
 		}
-		$title_array = array_merge((array) $title_array, array(__('Restriction Name'), __('Date Range'), __('Time'), __('Weekdays'), array('title' => _('Comment'), 'style' => 'width: 30%;')));
-		$title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		$title_array = array_merge((array) $title_array, array(
+			array('title' => __('Restriction Name'), 'rel' => 'time_name'),
+			array('title' => __('Date Range'), 'class' => 'header-nosort'),
+			array('title' => __('Time'), 'class' => 'header-nosort'),
+			array('title' => __('Weekdays'), 'class' => 'header-nosort'),
+			array('title' => _('Comment'), 'style' => 'width: 30%;', 'class' => 'header-nosort'),
+			array('title' => _('Actions'), 'class' => 'header-actions header-nosort')
+		));
 
 		echo '<div class="existing-container" style="bottom: 10em;">';
 		echo displayTableHeader($table_info, $title_array);
@@ -205,10 +207,12 @@ class fm_module_time {
 			$edit_status .= '</a>';
 			if (!isItemInPolicy($row->time_id, 'time')) {
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->time_id .'" />';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->time_id .'" /></td>';
+			} else {
+				$checkbox = '<td></td>';
 			}
+			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
-		$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		
 		/** Format date range */
 		$date_range = $this->formatDates($row->time_start_date, $row->time_end_date);
@@ -220,7 +224,7 @@ class fm_module_time {
 		
 		echo <<<HTML
 			<tr id="$row->time_id" name="$row->time_name"$disabled_class>
-				<td>$checkbox</td>
+				$checkbox
 				<td>$row->time_name</td>
 				<td>$date_range</td>
 				<td>$row->time_start_time &rarr; $row->time_end_time</td>

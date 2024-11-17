@@ -33,6 +33,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
+		$bulk_actions_list = array();
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
@@ -44,10 +45,6 @@ class fm_module_servers extends fm_shared_module_servers {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
-		} else {
-			$title_array[] = array(
-				'class' => 'header-tiny header-nosort'
-			);
 		}
 
 		$start = $_SESSION['user']['record_count'] * ($page - 1);
@@ -56,16 +53,22 @@ class fm_module_servers extends fm_shared_module_servers {
 		echo '<div class="overflow-container">';
 			
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'servers'
 					);
 
-		$title_array[] = array('class' => 'header-tiny');
-		$title_array = array_merge($title_array, array(__('Hostname'), __('Method'), __('Firewall Type'), __('Version'), __('Config File')));
+		$title_array[] = array('class' => 'header-tiny header-nosort');
+		$title_array = array_merge($title_array, array(
+			array('title' => __('Hostname'), 'rel' => 'server_name'),
+			array('title' => __('Method'), 'rel' => 'server_update_method'),
+			array('title' => __('Firewall Type'), 'rel' => 'server_type'),
+			array('title' => __('Version'), 'rel' => 'server_version'),
+			array('title' => __('Config File'), 'rel' => 'server_config_file')
+		));
 		$title_array[] = array(
 							'title' => __('Actions'),
-							'class' => 'header-actions'
+							'class' => 'header-actions header-nosort'
 						);
 
 		echo '<div class="existing-container" style="bottom: 10em;">';
@@ -259,7 +262,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$edit_status = $edit_actions = '';
 		$edit_actions = $preview = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 		
-		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" />' : null;
+		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
 		
 		if (currentUserCan('build_server_configs', $_SESSION['module']) && $row->server_installed == 'yes') {
 			if ($row->server_build_config == 'yes' && $row->server_status == 'active' && $row->server_installed == 'yes') {
@@ -296,7 +299,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		
 		echo <<<HTML
 		<tr id="$row->server_id" name="$row->server_name" $class>
-			<td>$checkbox</td>
+			$checkbox
 			<td>$os_image</td>
 			<td title="$row->server_serial_no">$edit_name</td>
 			<td>$row->server_update_method $port</td>

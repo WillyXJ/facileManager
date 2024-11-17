@@ -40,7 +40,7 @@ class fm_module_services {
 		echo '<div class="overflow-container">';
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'services'
 					);
@@ -50,12 +50,16 @@ class fm_module_services {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
-		} else {
-			$title_array[] = array(
-				'class' => 'header-tiny header-nosort'
-			);
 		}
-		$title_array = array_merge((array) $title_array, array(__('Service Name'), __('Type'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment'), array('title' => _('Actions'), 'class' => 'header-actions')));
+		$title_array = array_merge((array) $title_array, array(
+			array('title' => __('Service Name'), 'rel' => 'service_name'),
+			array('title' => __('Type'), 'rel' => 'service_type'),
+			array('title' => __('Source Ports'), 'class' => 'header-nosort'),
+			array('title' => __('Dest Ports'), 'class' => 'header-nosort'),
+			array('title' => __('Flags'), 'class' => 'header-nosort'),
+			array('title' => _('Comment'), 'class' => 'header-nosort'),
+			array('title' => _('Actions'), 'class' => 'header-actions header-nosort')
+		));
 
 		echo '<div class="existing-container" style="bottom: 10em;">';
 		echo displayTableHeader($table_info, $title_array);
@@ -206,10 +210,12 @@ class fm_module_services {
 			$edit_status .= '<a class="edit_form_link" name="' . $row->service_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!isItemInPolicy($row->service_id, 'service')) {
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->service_id .'" />';
+				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->service_id .'" /></td>';
+			} else {
+				$checkbox = '<td></td>';
 			}
+			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
-		$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		
 		/** Process TCP Flags */
 		if ($row->service_type == 'tcp') {
@@ -222,7 +228,7 @@ class fm_module_services {
 		
 		echo <<<HTML
 			<tr id="$row->service_id" name="$row->service_name"$disabled_class>
-				<td>$checkbox</td>
+				$checkbox
 				<td>$row->service_name</td>
 
 HTML;
