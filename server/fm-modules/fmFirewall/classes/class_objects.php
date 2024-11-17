@@ -40,7 +40,7 @@ class fm_module_objects {
 		echo '<div class="overflow-container">';
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'objects'
 					);
@@ -51,8 +51,13 @@ class fm_module_objects {
 								'class' => 'header-tiny header-nosort'
 							);
 		}
-		$title_array = array_merge((array) $title_array, array(__('Object Name'), __('Address'), __('Netmask'), array('title' => _('Comment'), 'style' => 'width: 40%;')));
-		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		$title_array = array_merge((array) $title_array, array(
+			array('title' => __('Object Name'), 'rel' => 'object_name'),
+			array('title' => __('Address'), 'rel' => 'object_address'),
+			array('title' => __('Netmask'), 'rel' => 'object_mask'),
+			array('title' => _('Comment'), 'style' => 'width: 40%;', 'class' => 'header-nosort'),
+			array('title' => _('Actions'), 'class' => 'header-actions header-nosort')
+		));
 
 		echo '<div class="existing-container" style="bottom: 10em;">';
 		echo displayTableHeader($table_info, $title_array);

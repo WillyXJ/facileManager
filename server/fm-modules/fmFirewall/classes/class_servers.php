@@ -53,16 +53,22 @@ class fm_module_servers extends fm_shared_module_servers {
 		echo '<div class="overflow-container">';
 			
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'servers'
 					);
 
-		$title_array[] = array('class' => 'header-tiny');
-		$title_array = array_merge($title_array, array(__('Hostname'), __('Method'), __('Firewall Type'), __('Version'), __('Config File')));
+		$title_array[] = array('class' => 'header-tiny header-nosort');
+		$title_array = array_merge($title_array, array(
+			array('title' => __('Hostname'), 'rel' => 'server_name'),
+			array('title' => __('Method'), 'rel' => 'server_update_method'),
+			array('title' => __('Firewall Type'), 'rel' => 'server_type'),
+			array('title' => __('Version'), 'rel' => 'server_version'),
+			array('title' => __('Config File'), 'rel' => 'server_config_file')
+		));
 		$title_array[] = array(
 							'title' => __('Actions'),
-							'class' => 'header-actions'
+							'class' => 'header-actions header-nosort'
 						);
 
 		echo '<div class="existing-container" style="bottom: 10em;">';
