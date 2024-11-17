@@ -39,7 +39,7 @@ class fm_dns_controls {
 		echo displayPagination($page, $total_pages, buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'controls'
 					);
@@ -54,10 +54,14 @@ class fm_dns_controls {
 				'class' => 'header-tiny header-nosort'
 			);
 		}
-		$title_array = array_merge((array) $title_array, array(__('IP Address'), __('Port'), __('Address List')));
-		if ($type == 'controls') $title_array[] = __('Keys');
-		$title_array[] = _('Comment');
-		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
+		$title_array = array_merge((array) $title_array, array(
+			array('title' => __('IP Address'), 'rel' => 'control_ip'),
+			array('title' => __('Port'), 'rel' => 'control_port'),
+			array('title' => __('Address List'), 'class' => 'header-nosort')
+		));
+		if ($type == 'controls') $title_array[] = array('title' => __('Keys'), 'class' => 'header-nosort');
+		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
+		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
 		echo displayTableHeader($table_info, $title_array);
 		

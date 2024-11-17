@@ -37,7 +37,12 @@ $addl_title_blocks[] = buildServerSubMenu($server_serial_no);
 
 echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
 
-$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', "AND control_type='$type' AND server_serial_no='$server_serial_no'");
+$sort_field = 'file_name';
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'controls', 'control_id', 'control_', "AND control_type='$type' AND server_serial_no='$server_serial_no'", null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 $fm_dns_controls->rows($result, $type, $page, $total_pages);

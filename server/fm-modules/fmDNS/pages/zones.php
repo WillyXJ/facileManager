@@ -50,6 +50,9 @@ echo printPageHeader((string) $response, null, currentUserCan('manage_zones', $_
 $sort_direction = null;
 if ($map == 'groups') {
 	$sort_field = 'group_name';
+	if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+		extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+	}
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domain_groups', 'group_name', 'group_', null, null, false, $sort_direction);
 } else {
 	$sort_field = 'domain_name';

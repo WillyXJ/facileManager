@@ -70,9 +70,9 @@ class fm_dns_zones {
 				);
 			}
 			$title_array = array_merge((array) $title_array, array(array('title' => __('Group Name'), 'rel' => 'group_name'),
-				array('title' => __('Associated Domains')),
-				array('title' => _('Comment'))
-				));
+				array('title' => __('Associated Domains'), 'class' => 'header-nosort'),
+				array('title' => _('Comment'), 'class' => 'header-nosort')
+			));
 		} else {
 			$title_array = array(array('title' => __('ID'), 'class' => 'header-small header-nosort'), 
 				array('title' => __('Domain'), 'rel' => 'domain_name'), 
