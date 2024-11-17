@@ -2041,14 +2041,6 @@ a.subelement_edit img {
 #tab span.menu-badge p {
 	margin-top: 0px;
 }
-#tab [type=radio] ~ label:hover span.menu-badge,
-#tab [type=radio]:checked ~ label span.menu-badge {
-	background-color: var(--menu-expanded-badge-bg);
-}
-#tab [type=radio] ~ label:hover span.menu-badge p,
-#tab [type=radio]:checked ~ label span.menu-badge p {
-	color: var(--tab-selected-bg);
-}
 
 #tab-content {
 	position: absolute;
