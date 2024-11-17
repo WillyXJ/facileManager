@@ -40,7 +40,6 @@ class fm_module_servers extends fm_shared_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 		
-		$bulk_actions_list = array();
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
@@ -52,6 +51,10 @@ class fm_module_servers extends fm_shared_module_servers {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'' . rtrim($type, 's') . '_list[]\')" />',
 								'class' => 'header-tiny'
 							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
 		}
 		
 		$fmdb->num_rows = $num_rows;
@@ -77,6 +80,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		} elseif ($type == 'groups') {
 			$title_array = array_merge((array)$title_array, array(array('title' => __('Group Name'), 'rel' => 'group_name'),
 				array('title' => __('Members'), 'class' => 'header-nosort'),
+				array('title' => __('Comment'), 'class' => 'header-nosort'),
 				));
 		}
 		$title_array[] = array(
@@ -332,7 +336,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$edit_status = $edit_actions = '';
 		$edit_actions = $row->server_status == 'active' ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
 		
-		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
+		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" />' : null;
 		
 		if ($type == 'servers') {
 			if (currentUserCan('build_server_configs', $_SESSION['module']) && $row->server_installed == 'yes') {
@@ -375,7 +379,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 			echo <<<HTML
 		<tr id="$row->server_id" name="$row->server_name" $class>
-			$checkbox
+			<td>$checkbox</td>
 			<td>$os_image</td>
 			<td title="$row->server_serial_no">$row->server_name</td>
 			<td>$row->server_update_method $port</td>
@@ -388,7 +392,7 @@ class fm_module_servers extends fm_shared_module_servers {
 
 HTML;
 		} elseif ($type == 'groups') {
-			$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="group_list[]" value="g' . $row->group_id .'" /></td>' : null;
+			$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<input type="checkbox" name="group_list[]" value="g' . $row->group_id .'" />' : null;
 
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -416,9 +420,10 @@ HTML;
 
 			echo <<<HTML
 		<tr id="$row->group_id" name="$row->group_name" $class>
-			$checkbox
+			<td>$checkbox</td>
 			<td>$row->group_name</td>
 			<td>$group_members</td>
+			<td>$row->group_comment</td>
 			<td id="row_actions">$edit_status</td>
 		</tr>
 

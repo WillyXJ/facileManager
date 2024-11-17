@@ -49,6 +49,10 @@ class fm_module_options {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
 		}
 		$title_array[] = array('title' => __('Option'), 'rel' => 'config_name');
 		$title_array[] = array('title' => __('Value'), 'rel' => 'config_data');
@@ -221,7 +225,7 @@ class fm_module_options {
 				$edit_status .= '</a>';
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				$edit_status .= '</td>';
-				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
+				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" />';
 			} else {
 				$edit_status = $checkbox = '<td></td>';
 			}
@@ -238,7 +242,7 @@ class fm_module_options {
 
 		echo <<<HTML
 		<tr id="$row->config_id" name="$row->config_name"$disabled_class>
-			$checkbox
+			<td>$checkbox</td>
 			<td>$row->config_name</td>
 			<td>$config_data</td>
 			<td>$comments</td>

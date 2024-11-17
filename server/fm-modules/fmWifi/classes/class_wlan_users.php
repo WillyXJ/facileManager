@@ -58,6 +58,10 @@ class fm_wifi_wlan_users {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
 		}
 		$title_array = array_merge((array) $title_array, array(_('Login'), __('MAC Address'), __('Associated WLANs'), _('Comment')));
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
@@ -212,7 +216,7 @@ class fm_wifi_wlan_users {
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
-			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->wlan_user_id .'" /></td>';
+			$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->wlan_user_id .'" />';
 		}
 		
 		$associated_wlans = __('All WLANs');
@@ -228,7 +232,7 @@ class fm_wifi_wlan_users {
 				
 		echo <<<HTML
 		<tr id="$row->wlan_user_id" name="$row->wlan_user_login" $class>
-			$checkbox
+			<td>$checkbox</td>
 			<td>$row->wlan_user_login</td>
 			<td>$row->wlan_user_mac</td>
 			<td>$associated_wlans</td>
