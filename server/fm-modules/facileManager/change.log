@@ -1,5 +1,6 @@
 5.0.0-beta2 (2024-??-??)
 ========================
+* Server - [improvement] Logs can be sorted by timestamp.
 * Server - [bug] Changing sort direction for the first time no longer requires two clicks.
 
 5.0.0-beta1 (2024-11-13)

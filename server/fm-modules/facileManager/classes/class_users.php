@@ -47,8 +47,8 @@ class fm_users {
 			$title_array[] = array('title' => _('Login'), 'rel' => 'user_login');
 			array_push($title_array,
 					array('title' => _('Last Session Date'), 'rel' => 'user_last_login'),
-					array('title' => _('Last Session Host'), 'class' => 'header-nosort'),
-					array('title' => _('Authenticate With'), 'class' => 'header-nosort'),
+					array('title' => _('Last Session Host'), 'rel' => 'user_ipaddr'),
+					array('title' => _('Authenticate With'), 'rel' => 'user_auth_type'),
 					array('title' => _('Comment'), 'class' => 'header-nosort'));
 		} elseif ($type == 'groups') {
 			array_push($title_array,
