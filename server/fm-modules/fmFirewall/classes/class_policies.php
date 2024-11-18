@@ -301,9 +301,12 @@ class fm_module_policies {
 		$destination_translated = ($row->policy_destination_translated) ? $this->formatPolicyIDs($row->policy_destination_translated) : 'any';
 		// $services_translated = ($row->policy_services_translated) ? $this->formatPolicyIDs($row->policy_services_translated) : 'any';
 
-		$source = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_source_not) . ' ' . $source;
-		$destination = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_destination_not) . ' ' . $destination;
-		$services = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_services_not) . ' ' . $services;
+		$source = sprintf('<div class="flex-row-center policy-negate"><div>%s%s</div></div>', $row->policy_source_not, $source);
+		$source = str_replace('!', sprintf('%s</div><div>', $__FM_CONFIG['module']['icons']['negated']), $source);
+		$destination = sprintf('<div class="flex-row-center policy-negate"><div>%s%s</div></div>', $row->policy_destination_not, $destination);
+		$destination = str_replace('!', sprintf('%s</div><div>', $__FM_CONFIG['module']['icons']['negated']), $destination);
+		$services = sprintf('<div class="flex-row-center policy-negate"><div>%s%s</div></div>', $row->policy_services_not, $services);
+		$services = str_replace('!', sprintf('%s</div><div>', $__FM_CONFIG['module']['icons']['negated']), $services);
 		
 		if ($row->policy_targets) $options[] = sprintf('<span class="tooltip-right mini-icon" data-tooltip="%s"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></span>', __('Policy targets defined'));
 		if ($row->policy_packet_state) $options[] = sprintf('<span class="tooltip-right mini-icon" data-tooltip="%s"><i class="fa fa-exchange" aria-hidden="true"></i></span>', str_replace(',', ', ', $row->policy_packet_state));
@@ -379,7 +382,7 @@ HTML;
 		
 		$policy_id = $policy_order_id = $policy_targets = $policy_template_id = 0;
 		$policy_name = $policy_interface = $policy_direction = $policy_time = $policy_comment = $policy_options = null;
-		$policy_services = $policy_source = $policy_destination = $policy_action = null;
+		$policy_services = $policy_source = $policy_destination = $policy_action = '';
 		$source_items = $destination_items = $services_items = null;
 		$policy_source_not = $policy_destination_not = $policy_services_not = null;
 		$policy_packet_state_form = $policy_time_form = null;
@@ -421,11 +424,47 @@ FORM;
 
 		$available_objects = availableGroupItems('object', 'available');
 
+		$source_elements = $destination_elements = $this->getObjectList('all-addresses');
+		/** Build source address elements */
 		$source_items_assigned = getGroupItems($policy_source);
-		$source_items = buildSelect('source_items', 'source_items', $available_objects, $source_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
+		$policy_source = str_replace(';', ',', $policy_source);
+		if ($source_items_assigned) {
+			$tmp_source_element_ids = array();
+			foreach ($source_elements as $source_group => $item_array) {
+				foreach ($item_array['children'] as $item) {
+					$tmp_source_element_ids[] = $item['id'];
+				}
+			}
+			foreach ($source_items_assigned as $element) {
+				if (!in_array($element, $tmp_source_element_ids)) {
+					$manual_entry_array[] = array('id' => $element, 'text' => $element);
+				}
+			}
+		}
+		if (isset($manual_entry_array) && $source_items_assigned) $source_elements = array_merge(array(array('text' => __('Other'), 'children' => $manual_entry_array)), $source_elements);
+		$source_elements = json_encode($source_elements, JSON_UNESCAPED_SLASHES);
+		unset($manual_entry_array);
 
-		$destination_items_assigned = getGroupItems($policy_destination);
-		$destination_items = buildSelect('destination_items', 'destination_items', $available_objects, $destination_items_assigned, 1, null, true, null, null, __('Select one or more objects'));
+		/** Build destination address elements */
+		$desination_items_assigned = getGroupItems($policy_destination);
+		$policy_destination = str_replace(';', ',', $policy_destination);
+		if ($desination_items_assigned) {
+			$tmp_source_element_ids = array();
+			foreach ($destination_elements as $source_group => $item_array) {
+				foreach ($item_array['children'] as $item) {
+					$tmp_source_element_ids[] = $item['id'];
+				}
+			}
+			foreach ($desination_items_assigned as $element) {
+				if (!in_array($element, $tmp_source_element_ids)) {
+					$manual_entry_array[] = array('id' => $element, 'text' => $element);
+				}
+			}
+		}
+		if (isset($manual_entry_array) && $desination_items_assigned) $destination_elements = array_merge(array(array('text' => __('Other'), 'children' => $manual_entry_array)), $destination_elements);
+		$destination_elements = json_encode($destination_elements, JSON_UNESCAPED_SLASHES);
+		unset($manual_entry_array);
+
 
 		$services_items_assigned = getGroupItems($policy_services);
 		$services_items = buildSelect('services_items', 'services_items', availableGroupItems('service', 'available'), $services_items_assigned, 1, null, true, null, null, __('Select one or more services'));
@@ -466,13 +505,13 @@ FORM;
 					<tr>
 						<th width="33&#37;" scope="row">%s</th>
 						<td width="67&#37;">
-							<input name="policy_source_not" id="policy_source_not" value="!" type="checkbox" %s />%s %s
+							<input name="policy_source_not" id="policy_source_not" value="!" type="checkbox" %s />%s <input type="hidden" name="policy_source" class="source_address_match_element" value="%s" />
 						</td>
 					</tr>
 					<tr>
 						<th width="33&#37;" scope="row">%s</th>
 						<td width="67&#37;">
-							<input name="policy_destination_not" id="policy_destination_not" value="!" type="checkbox" %s />%s %s
+							<input name="policy_destination_not" id="policy_destination_not" value="!" type="checkbox" %s />%s <input type="hidden" name="policy_destination" class="destination_address_match_element" value="%s" />
 						</td>
 					</tr>
 					<tr>
@@ -486,8 +525,8 @@ FORM;
 				__('Policy Name'), $policy_name,
 				_('Comment'), $policy_comment,
 				$tab_two_label,
-				__('Source'), $source_not_check, $__FM_CONFIG['module']['icons']['negated'], $source_items,
-				__('Destination'), $destination_not_check, $__FM_CONFIG['module']['icons']['negated'], $destination_items,
+				__('Source'), $source_not_check, $__FM_CONFIG['module']['icons']['negated'], $policy_source,
+				__('Destination'), $destination_not_check, $__FM_CONFIG['module']['icons']['negated'], $policy_destination,
 				__('Services'), $service_not_check, $__FM_CONFIG['module']['icons']['negated'], $services_items
 		);
 	
@@ -701,7 +740,7 @@ FORM;
 				</tr>
 				<tr class="static_snat" %s>
 					<th width="33&#37;" scope="row"><label for="policy_source_translated">%s</label></th>
-					<td width="67&#37;"><input type="hidden" name="policy_source_translated" class="source_address_match_element" value="%s" /></td>
+					<td width="67&#37;"><input type="hidden" name="policy_source_translated" class="source_translated_address_match_element" value="%s" /></td>
 				</tr>
 			</table>
 			<br />
@@ -800,6 +839,30 @@ FORM;
 					{return {id:term, text:term};} 
 				},
 				multiple: true,
+				width: "200px",
+				tokenSeparators: [",", " ", ";"],
+				data: $source_elements
+			});
+			$(".destination_address_match_element").select2({
+				createSearchChoice:function(term, data) { 
+					if ($(data).filter(function() { 
+						return this.text.localeCompare(term)===0; 
+					}).length===0) 
+					{return {id:term, text:term};} 
+				},
+				multiple: true,
+				width: "200px",
+				tokenSeparators: [",", " ", ";"],
+				data: $destination_elements
+			});
+			$(".source_translated_address_match_element").select2({
+				createSearchChoice:function(term, data) { 
+					if ($(data).filter(function() { 
+						return this.text.localeCompare(term)===0; 
+					}).length===0) 
+					{return {id:term, text:term};} 
+				},
+				multiple: true,
 				maximumSelectionSize: 1,
 				width: "200px",
 				tokenSeparators: [",", " ", ";"],
@@ -880,8 +943,37 @@ FORM;
 			$post['policy_template_id'] = preg_replace('/\D/', '', $post['server_serial_no']);
 			$post['server_serial_no'] = 0;
 		}
-		$post['policy_source'] = isset($post['source_items']) ? implode(';', (array) $post['source_items']) : '';
-		$post['policy_destination'] = isset($post['destination_items']) ? implode(';', (array) $post['destination_items']) : '';
+
+		/** Check for valid source addresses */
+		$address_elements = $this->getObjectList('all-addresses');
+		$tmp_source_element_ids = array();
+		foreach ($address_elements as $source_group => $item_array) {
+			foreach ($item_array['children'] as $item) {
+				$tmp_source_element_ids[] = $item['id'];
+			}
+		}
+		if (isset($post['policy_source']) && $post['policy_source']) {
+			foreach (explode(getDelimiter($post['policy_source']), $post['policy_source']) as $element) {
+				if (!in_array($element, $tmp_source_element_ids)) {
+					if (!verifyCIDR($element)) return "$element is not a valid source address.";
+				}
+			}
+		} else {
+			$post['policy_source'] = '';
+		}
+
+		/** Check for valid destination addresses */
+		if (isset($post['policy_destination']) && $post['policy_destination']) {
+			foreach (explode(getDelimiter($post['policy_destination']), $post['policy_destination']) as $element) {
+				if (!in_array($element, $tmp_source_element_ids)) {
+					if (!verifyCIDR($element)) return "$element is not a valid destination address.";
+				}
+			}
+		} else {
+			$post['policy_destination'] = '';
+		}
+
+
 		$post['policy_services'] = isset($post['services_items']) ? implode(';', (array) $post['services_items']) : '';
 		$post['policy_packet_state'] = isset($post['policy_packet_state']) ? implode(',', (array) $post['policy_packet_state']) : '';
 		$post['policy_targets'] = isset($post['policy_targets']) ? implode(';', (array) $post['policy_targets']) : '';
@@ -902,6 +994,24 @@ FORM;
 			$post['policy_services_translated'] = null;
 		}
 		unset($post['policy_dnat']);
+
+		/** Check for valid source translated addresses */
+		if (isset($post['policy_source_translated']) && $post['policy_source_translated']) {
+			foreach (explode(getDelimiter($post['policy_source_translated']), $post['policy_source_translated']) as $element) {
+				if (!in_array($element, $tmp_source_element_ids)) {
+					if (!verifyCIDR($element)) return "$element is not a valid source translated address.";
+				}
+			}
+		}
+
+		/** Check for valid destination translated addresses */
+		if (isset($post['policy_destination_translated']) && $post['policy_destination_translated']) {
+			foreach (explode(getDelimiter($post['policy_destination_translated']), $post['policy_destination_translated']) as $element) {
+				if (!in_array($element, $tmp_source_element_ids)) {
+					if (!verifyCIDR($element)) return "$element is not a valid destination translated address.";
+				}
+			}
+		}
 
 		if (!isset($post['policy_type'])) $post['policy_type'] = 'filter';
 		
@@ -941,7 +1051,8 @@ FORM;
 		global $__FM_CONFIG;
 		
 		$names = array();
-		foreach (explode(';', trim($ids, ';')) as $temp_id) {
+		$delimiter = getDelimiter($ids);
+		foreach (explode($delimiter, trim($ids, $delimiter)) as $temp_id) {
 			$tooltip_objects = $addl_search_terms = array();
 			$temp_id = strval($temp_id);
 
@@ -1063,7 +1174,27 @@ FORM;
 		$list = array();
 		$i = 0;
 		
-		if (in_array($include, array('all', 'hosts'))) {
+		if (in_array($include, array('all', 'address-groups', 'all-addresses'))) {
+			$tmp_list = array();
+			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'groups', 'group_id', 'group_', "AND group_type='object' AND group_status='active'");
+			if ($fmdb->num_rows) {
+				$last_result = $fmdb->last_result;
+				$k = 0;
+				for ($j=0; $j<$fmdb->num_rows; $j++) {
+					$tmp_list[__('Group')][$k]['id'] = 'g' . $last_result[$j]->group_id;
+					$tmp_list[__('Group')][$k]['text'] = $last_result[$j]->group_name;
+					$k++;
+				}
+				foreach ($tmp_list as $group => $children) {
+					$list[$i]['text'] = $group;
+					$list[$i]['children'] = $children;
+					$i++;
+				}
+			}
+		}
+
+		if (in_array($include, array('all', 'hosts', 'all-addresses'))) {
+			$tmp_list = array();
 			basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'objects', 'object_id', 'object_', 'active');
 			if ($fmdb->num_rows) {
 				$last_result = $fmdb->last_result;
@@ -1071,23 +1202,21 @@ FORM;
 				for ($j=0; $j<$fmdb->num_rows; $j++) {
 					if ($last_result[$j]->object_type == 'network') {
 						$list_group_name = __('Networks');
-						$i = $list_network_count;
+						$k = $list_network_count;
 						$list_network_count++;
 					} else {
 						$list_group_name = __('Hosts');
-						$i = $list_host_count;
+						$k = $list_host_count;
 						$list_host_count++;
 					}
-					$list[$list_group_name][$i]['id'] = 'o' . $last_result[$j]->object_id;
-					$list[$list_group_name][$i]['text'] = $last_result[$j]->object_name;
+					$tmp_list[$list_group_name][$k]['id'] = 'o' . $last_result[$j]->object_id;
+					$tmp_list[$list_group_name][$k]['text'] = $last_result[$j]->object_name;
 				}
-				$i = 0;
-				foreach ($list as $group => $children) {
-					$tmp_list[$i]['text'] = $group;
-					$tmp_list[$i]['children'] = $children;
+				foreach ($tmp_list as $group => $children) {
+					$list[$i]['text'] = $group;
+					$list[$i]['children'] = $children;
 					$i++;
 				}
-				$list = $tmp_list;
 			}
 		}
 		
@@ -1152,7 +1281,7 @@ FORM;
 				if ($child_id[0] == 'g') {
 					$nested_results = $this->getObjectChildren($child_id, $results);
 				}
-				if (count((array) $nested_results)) {
+				if (isset($nested_results) && ((array) $nested_results)) {
 					$results = array_merge($results, $nested_results);
 				}
 			}

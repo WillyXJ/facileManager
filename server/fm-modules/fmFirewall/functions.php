@@ -244,7 +244,8 @@ function getGroupItems($group_items) {
 	$group_items_assigned = null;
 	
 	if ($group_items) {
-		$group_items_assigned = explode(';', trim($group_items, ';'));
+		$delimiter = getDelimiter($group_items);
+		$group_items_assigned = explode($delimiter, trim($group_items, $delimiter));
 //			foreach ($item_array as $item) {
 //				$group_items_assigned[] = substr($item, 1);
 //				$group_items_assigned[] = $item;
@@ -696,4 +697,53 @@ function mask2cidr($mask) {
 	$long = ip2long($mask);
 	$base = ip2long('255.255.255.255');
 	return 32 - log(($long ^ $base) +1, 2);
+}
+
+
+/**
+ * Gets a delimiter based on value
+ *
+ * @since 3.2
+ * @package facileManager
+ * @subpackage fmFirewall
+ * 
+ * @param string|array $values String or array to search
+ * 
+ * @return string
+ */
+function getDelimiter($values) {
+	$delimiter_opts = array(';', ',');
+
+	foreach ($delimiter_opts as $delimiter) {
+		if (is_array($values)) {
+			if (in_array($delimiter, $values)) break;
+		} else {
+			if (strpos($values, $delimiter) !== false) break;
+		}
+	}
+
+	return $delimiter;
+}
+
+
+/**
+ * Verifies if an address/CIDR is valid
+ *
+ * @since 3.2
+ * @package facileManager
+ * @subpackage fmFirewall
+ * 
+ * @param string $ipCIDR Address with CIDR
+ * 
+ * @return bool
+ */
+function verifyCIDR($ipCIDR) {
+	@list($address, $cidr) = explode('/', $ipCIDR);
+	if (!$cidr) $cidr = 32;
+
+	if (!verifyNumber($cidr, 0, 32)) return false;
+
+	if (!verifyIPAddress($address)) return false;
+
+	return true;
 }

@@ -114,3 +114,7 @@ table.global-search-results thead th:first-child {
 div .global-search-results {
 	width: 700px;
 }
+
+.policy-negate div:first-child {
+	padding-right: 8px;
+}
