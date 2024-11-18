@@ -380,8 +380,8 @@ HTML;
 					<td width="67&#37;"><input name="server_name" id="server_name" type="text" value="%s" size="40" placeholder="placeholder" maxlength="%d" class="required" /></td>
 				</tr>
 				<tr>
-					<th width="33&#37;" scope="row"><label for="server_address">%s</label></th>
-					<td width="67&#37;"><input name="server_address" id="server_address" type="text" value="%s" size="40" placeholder="192.168.1.100" /> <a href="#" class="tooltip-left" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></td>
+					<th width="33&#37;" scope="row"><label for="server_address">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+					<td width="67&#37;"><input name="server_address" id="server_address" type="text" value="%s" size="40" placeholder="192.168.1.100" /></td>
 				</tr>
 				<tr>
 					<th width="33&#37;" scope="row"><label for="server_update_method">%s</label></th>
@@ -404,7 +404,7 @@ HTML;
 		</script>',
 				$popup_header, $action, $server_id, $alternative_help,
 				__('Server Name'), $server_name, $server_name_length,
-				__('IP Address'), $server_address, __('Enter the IP address of the server if the name is not resolvable. This is used when configuring failover peers.'),
+				__('IP Address'), __('Enter the IP address of the server if the name is not resolvable. This is used when configuring failover peers.'), $server_address,
 				__('Update Method'), $server_update_method, $server_update_port_style, $server_update_port,
 				__('Config File'), $server_config_file,
 				$popup_footer
