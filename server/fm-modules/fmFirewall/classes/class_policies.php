@@ -64,7 +64,7 @@ class fm_module_policies {
 		$title_array[] = array('title' => _('Comment'), 'style' => 'width: 20%;');
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
-		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo '<div class="existing-container" style="margin-bottom: 3em;">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($total_pages) {
@@ -305,13 +305,13 @@ class fm_module_policies {
 		$destination = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_destination_not) . ' ' . $destination;
 		$services = str_replace('!', $__FM_CONFIG['module']['icons']['negated'], $row->policy_services_not) . ' ' . $services;
 		
-		if ($row->policy_targets) $options[] = sprintf('<span class="tooltip-right mini-icon" data-tooltip="%s"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></span>', __('Policy targets defined'));
-		if ($row->policy_packet_state) $options[] = sprintf('<span class="tooltip-right mini-icon" data-tooltip="%s"><i class="fa fa-exchange" aria-hidden="true"></i></span>', str_replace(',', ', ', $row->policy_packet_state));
-		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) $options[] = sprintf('<span class="tooltip-right mini-icon" data-tooltip="%s"><i class="fa fa-chain-broken" aria-hidden="true"></i></span>', __('Matching fragment packets'));
-		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['quick']['bit']) $options[] = sprintf('<span class="tooltip-right mini-icon" data-tooltip="%s"><i class="fa fa-bolt" aria-hidden="true"></i></span>', __('Quick processing cancels further rule processing upon match'));
-		if ($row->policy_uid) $options[] = sprintf('<span class="tooltip-right mini-icon" data-tooltip="%s"><i class="fa fa-user" aria-hidden="true"></i></span>', __('User ID defined'));
-		if ($row->policy_tcp_flags) $options[] = sprintf('<span class="tooltip-right mini-icon" data-tooltip="%s"><i class="fa fa-flag" aria-hidden="true"></i></span>', __('TCP flags defined'));
-		if ($row->policy_nat_bidirectional == 'yes' && $row->policy_snat_type == 'static') $options[] = sprintf('<span class="tooltip-right mini-icon" data-tooltip="%s"><i class="fa fa-arrows-h" aria-hidden="true"></i></span>', __('1:1 NAT'));
+		if ($row->policy_targets) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></span>', __('Policy targets defined'));
+		if ($row->policy_packet_state) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-exchange" aria-hidden="true"></i></span>', str_replace(',', ', ', $row->policy_packet_state));
+		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['frag']['bit']) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-chain-broken" aria-hidden="true"></i></span>', __('Matching fragment packets'));
+		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['quick']['bit']) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-bolt" aria-hidden="true"></i></span>', __('Quick processing cancels further rule processing upon match'));
+		if ($row->policy_uid) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-user" aria-hidden="true"></i></span>', __('User ID defined'));
+		if ($row->policy_tcp_flags) $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-flag" aria-hidden="true"></i></span>', __('TCP flags defined'));
+		if ($row->policy_nat_bidirectional == 'yes' && $row->policy_snat_type == 'static') $options[] = sprintf('<span class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-arrows-h" aria-hidden="true"></i></span>', __('1:1 NAT'));
 		
 		if ($row->policy_options & $__FM_CONFIG['fw']['policy_options']['log']['bit']) $options[] = str_replace(array('__action__', '__Action__'), array('log', 'Log'), $__FM_CONFIG['icons']['action']['log']);
 		if ($row->policy_type == 'filter') $options[] = str_replace(array('__action__', '__Action__'), array($row->policy_action, ucfirst($row->policy_action)), $__FM_CONFIG['icons']['action'][$row->policy_action]);
@@ -563,7 +563,7 @@ FORM;
 			foreach ($__FM_CONFIG['fw']['policy_options'] as $opt => $opt_array) {
 				if (in_array($server_firewall_type, $opt_array['firewalls']) || $_POST['server_serial_no'][0] == 't') {
 					$checked = ($policy_options & $opt_array['bit']) ? 'checked' : null;
-					$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<span class="tooltip-right" style="color: unset;" data-tooltip="%s %s">%s</span>',
+					$supported_firewalls = ($_POST['server_serial_no'][0] == 't') ? sprintf('<span class="tooltip-bottom" style="color: unset;" data-tooltip="%s %s">%s</span>',
 							__('Supported firewalls:'), join(', ', $opt_array['firewalls']), $opt_array['desc']
 						) : $opt_array['desc'];
 					$options .= sprintf('<input name="policy_options[]" id="policy_options[%s]" value="%s" type="checkbox" %s /><label for="policy_options[%s]" style="white-space: unset">%s</label><br />' . "\n",
@@ -988,7 +988,7 @@ FORM;
 					}
 				}
 			}
-			if (count($tooltip_objects)) $tmp_name = sprintf('<span class="tooltip-right" data-tooltip="%s">%s</span>', implode("\n", $tooltip_objects), $tmp_name);
+			if (count($tooltip_objects)) $tmp_name = sprintf('<span class="tooltip-bottom" data-tooltip="%s">%s</span>', implode("\n", $tooltip_objects), $tmp_name);
 
 			$names[] = ($display == 'global-search') ? sprintf('<span rel="%s">%s %s</span>', $temp_id, $tmp_name, $__FM_CONFIG['module']['icons']['search']) : $not . $tmp_name;
 		}
