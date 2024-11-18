@@ -151,6 +151,7 @@ input[type="checkbox"].modules {
 ::placeholder {
 	color: var(--placeholder);
 }
+.flex-row-center,
 div.header-container {
 	display: flex;
     align-items: center;

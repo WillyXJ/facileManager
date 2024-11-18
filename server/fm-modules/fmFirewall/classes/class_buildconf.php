@@ -1256,17 +1256,17 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		$address_list = array();
 		
-		$address_ids = explode(';', $addresses);
+		$address_ids = explode(getDelimiter($addresses), $addresses);
 		foreach ($address_ids as $temp_id) {
 			$temp = array();
-			if (verifyIPAddress($temp_id)) {
+			if (verifyCIDR($temp_id)) {
 				$address_list[] = $temp_id;
 				continue;
 			}
 			if (strpos($temp_id, '-') !== false) {
 				$ip_range = false;
 				foreach (explode('-', $temp_id) as $ip_address) {
-					$ip_range = (verifyIPAddress($ip_address)) ? true : false;
+					$ip_range = (verifyCIDR($ip_address)) ? true : false;
 				}
 				if ($ip_range) $address_list[] = $temp_id;
 			}
