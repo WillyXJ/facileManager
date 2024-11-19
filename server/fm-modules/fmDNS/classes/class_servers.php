@@ -620,7 +620,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$server_id = $group_id = 0;
-		$server_name = $server_root_dir = $server_zones_dir = $server_type = $server_update_port = null;
+		$server_name = $server_address = $server_root_dir = $server_zones_dir = $server_type = $server_update_port = null;
 		$server_update_method = $server_key_with_rndc = $server_run_as = $server_config_file = $server_run_as_predefined = null;
 		$server_chroot_dir = $group_name = $server_type_disabled = $group_auto_also_notify = null;
 		$server_installed = $server_slave_zones_dir = false;
@@ -713,6 +713,10 @@ FORM;
 					<th width="33&#37;" scope="row"><label for="server_type">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
 					<td width="67&#37;">%s</td>
 				</tr>
+				<tr class="local_server_options url_only_options">
+					<th width="33&#37;" scope="row"><label for="server_address">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+					<td width="67&#37;"><input name="server_address" id="server_address" type="text" value="%s" size="40" placeholder="192.168.1.100" /></td>
+				</tr>
 				<tr class="local_server_options">
 					<th width="33&#37;" scope="row"><label for="server_key_with_rndc">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
 					<td width="67&#37;">%s</td>
@@ -803,6 +807,7 @@ FORM;
 				__('Basic'), $alternative_help,
 				__('Server Name'), $server_name, $server_name_length,
 				__('Server Type'), sprintf(__('A remote server is not managed by %s.'), $_SESSION['module']), $server_type,
+				__('IP Address'), __('Enter the IP address of the server if the name is not resolvable. This is used for server communication and when configuring secondaries.'), $server_address,
 				__('Use Defined Keys with rndc'), __('Override the setting for this server.'), $server_key_with_rndc,
 				__('Run-as Account'), $server_run_as_predefined, $runashow, __('Other run-as account'), $server_run_as,
 				__('Update Method'), $server_update_method, $server_update_port_style, $server_update_port,
@@ -1111,6 +1116,9 @@ FORM;
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
 		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', $field_length), $field_length);
 		
+		/** Check address */
+		if (!empty($post['server_address']) && !verifyIPAddress($post['server_address'])) return __('Server address must be a valid IP address.');
+
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $post['server_name'], 'server_', 'server_name');
 		if ($fmdb->num_rows) {
@@ -1163,7 +1171,7 @@ FORM;
 		
 		/** Clean up arrays */
 		foreach ($post as $key => $val) {
-			if (is_array($val)) {
+			if (is_array($val) && $key != 'uri_params') {
 				$post[$key] = $val[0];
 			}
 		}

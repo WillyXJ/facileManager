@@ -57,6 +57,9 @@ class fm_shared_module_servers {
 
 		$server_details = $fmdb->last_result;
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
+
+		/** Use server_address if available */
+		if (!isset($server_address) || !$server_address) $server_address = $server_name;
 		
 		$response[] = $server_name;
 		
@@ -75,13 +78,13 @@ class fm_shared_module_servers {
 				case 'http':
 				case 'https':
 					/** Test the port first */
-					if (!socketTest($server_name, $server_update_port, 10)) {
+					if (!socketTest($server_address, $server_update_port, 10)) {
 						$response[] = ' --> ' . sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port);
 						break;
 					}
 					
 					/** Remote URL to use */
-					$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/fM/reload.php';
+					$url = $server_update_method . '://' . $server_address . ':' . $server_update_port . '/fM/reload.php';
 					
 					/** Data to post to $url */
 					$post_data = array('action' => 'upgrade',
@@ -109,7 +112,7 @@ class fm_shared_module_servers {
 					}
 					break;
 				case 'ssh':
-					$server_remote = runRemoteCommand($server_name, "sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php upgrade", 'return', $server_update_port);
+					$server_remote = runRemoteCommand($server_address, "sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php upgrade", 'return', $server_update_port);
 
 					if (is_array($server_remote)) {
 						if (array_key_exists('output', $server_remote) && !count($server_remote['output'])) {
@@ -121,7 +124,7 @@ class fm_shared_module_servers {
 					}
 					
 					/** Test the port first */
-					if (!socketTest($server_name, $server_update_port, 10)) {
+					if (!socketTest($server_address, $server_update_port, 10)) {
 						$response[] = ' --> ' . sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port);
 						break;
 					}
@@ -300,6 +303,9 @@ class fm_shared_module_servers {
 		extract(get_object_vars($server_details[0]), EXTR_SKIP);
 		$options[] = null;
 		$response = '';
+
+		/** Use server_address if available */
+		if (!isset($server_address) || !$server_address) $server_address = $server_name;
 		
 		if (!$server_config_file) return displayResponseClose(_('Failed: This server does not have a configuration file defined.'));
 
@@ -346,12 +352,12 @@ class fm_shared_module_servers {
 			case 'http':
 			case 'https':
 				/** Test the port first */
-				if (!socketTest($server_name, $server_update_port, 10)) {
+				if (!socketTest($server_address, $server_update_port, 10)) {
 					return displayResponseClose(sprintf(_('Failed: could not access %s using %s (tcp/%d).'), $server_name, $server_update_method, $server_update_port));
 				}
 				
 				/** Remote URL to use */
-				$url = $server_update_method . '://' . $server_name . ':' . $server_update_port . '/fM/reload.php';
+				$url = $server_update_method . '://' . $server_address . ':' . $server_update_port . '/fM/reload.php';
 				
 				/** Data to post to $url */
 				$post_data = array('action' => $action,
@@ -383,7 +389,7 @@ class fm_shared_module_servers {
 				}
 				break;
 			case 'ssh':
-				$server_remote = runRemoteCommand($server_name, "sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php $action " . implode(' ', $options), 'return', $server_update_port);
+				$server_remote = runRemoteCommand($server_address, "sudo php /usr/local/$fm_name/{$_SESSION['module']}/client.php $action " . implode(' ', $options), 'return', $server_update_port);
 
 				if (is_array($server_remote)) {
 					if (array_key_exists('output', $server_remote) && (!count($server_remote['output'])) || strpos($server_remote['output'][0], 'successful') !== false) {

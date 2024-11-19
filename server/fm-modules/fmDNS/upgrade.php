@@ -32,7 +32,7 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '7.0.0-beta1', '<') ? upgradefmDNS_700b1($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '7.0.0-beta2', '<') ? upgradefmDNS_700b2($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
@@ -2822,10 +2822,12 @@ function upgradefmDNS_700b2($__FM_CONFIG, $running_version) {
 	$success = version_compare($running_version, '7.0.0-beta1', '<') ? upgradefmDNS_700b1($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
 	
-	$queries[] = "";
+	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_address')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD `server_address` varchar(255) DEFAULT NULL AFTER `server_name`";
+	}
 
 	/** Run queries */
-	if (count($queries) && $queries[0]) {
+	if (isset($queries) && count($queries) && $queries[0]) {
 		foreach ($queries as $schema) {
 			$fmdb->query($schema);
 		}

@@ -1818,10 +1818,13 @@ HTML;
 		$server_status = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_status');
 		if ($server_status == 'active') {
 			$server_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-			$server_root_dir = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_root_dir');
 			
 			$extra_tab = ($view == true) ? "\t" : null;
 			$server_ip = gethostbyname($server_name);
+			/** Use server_address if the name does not resolve */
+			if ($server_ip == $server_name) {
+				$server_ip = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_address');
+			}
 			$server = ($server_ip) ? $extra_tab . 'server ' . $server_ip . " {\n" : "server [cannot resolve " . $server_name . "] {\n";
 			$config = ($key_name) ? "$extra_tab\tkeys { \"$key_name\"; };\n" : null;
 			
@@ -2252,7 +2255,7 @@ HTML;
 	 *
 	 * @param array $servers The array of group members
 	 * @param integer $key_id The zone transfer key id
-	 * @return array
+	 * @return array|null
 	 */
 	function resolveServerGroupMembers($servers, $key_id = null) {
 		global $__FM_CONFIG, $fmdb;
@@ -2266,7 +2269,12 @@ HTML;
 			if ($key_id) {
 				$key = sprintf(' key %s', getNameFromID($key_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_', 'key_id', 'key_name'));
 			}
-			$server_ips[] = ($server_ip != $server_name) ? $server_ip . $key : sprintf(__('Cannot resolve %s'), $server_name) . $key;
+
+			/** Use server_address if the name does not resolve */
+			if ($server_ip == $server_name) {
+				$server_ip = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_address');
+			}
+			$server_ips[] = ($server_ip && $server_ip != $server_name) ? $server_ip . $key : sprintf(__('Cannot resolve %s'), $server_name) . $key;
 		}
 		
 		return array(implode(',', (array) $server_ips), '');

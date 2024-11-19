@@ -246,6 +246,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}serv
   `account_id` int(11) NOT NULL DEFAULT '1',
   `server_serial_no` int(10) NOT NULL,
   `server_name` varchar(255) NOT NULL,
+  `server_address` varchar(255) DEFAULT NULL,
   `server_os` varchar(50) DEFAULT NULL,
   `server_os_distro` varchar(50) DEFAULT NULL,
   `server_type` enum('bind9','remote','url-only') NOT NULL DEFAULT 'bind9',
