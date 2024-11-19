@@ -4,6 +4,7 @@
 * Server - [improvement] Individual zones now get checked for loadable syntax prior to reloading.
 * Server - [improvement] All configuration pages are sortable.
 * Server - [improvement] An IP address can now be specified for servers to ensure communication availability.
+* Server - [improvement] Comments can be added to zones.
 
 7.0.0-beta1 (2024-11-13)
 ========================

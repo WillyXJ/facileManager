@@ -2825,6 +2825,9 @@ function upgradefmDNS_700b2($__FM_CONFIG, $running_version) {
 	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}servers", 'server_address')) {
 		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}servers` ADD `server_address` varchar(255) DEFAULT NULL AFTER `server_name`";
 	}
+	if (!columnExists("fm_{$__FM_CONFIG['fmDNS']['prefix']}domains", 'domain_comment')) {
+		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}domains` ADD `domain_comment` TEXT NULL DEFAULT NULL AFTER `domain_dnssec_sign_inline`";
+	}
 
 	/** Run queries */
 	if (isset($queries) && count($queries) && $queries[0]) {
