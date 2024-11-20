@@ -980,6 +980,7 @@ i.text_icon {
 #tab [type=radio]:checked ~ label {
 	border-bottom-color: var(--menu-select-highlight);
 	color: var(--tab-selected-text);
+	font-weight: bold;
 }
 .tab-strip li a:hover,
 #tab [type=radio] ~ label:hover {
