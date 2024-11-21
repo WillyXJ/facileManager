@@ -735,6 +735,7 @@ HTML;
 		}
 		
 		if (in_array('user_theme', $form_bits)) {
+			if (!$user_theme) $user_theme = $__FM_CONFIG['default']['theme'];
 			$user_module_options = buildSelect('user_theme', 'user_theme', getThemes(), $user_theme);
 			unset($available_themes);
 			$return_form_rows .= '<tr>

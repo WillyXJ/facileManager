@@ -252,7 +252,6 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 	}
 
 	$theme = (isset($_SESSION['user']['theme'])) ? $_SESSION['user']['theme'] : getOption('theme');
-	if (!$theme) $theme = getThemes()[0];
 	
 	$head = $logo = null;
 	
