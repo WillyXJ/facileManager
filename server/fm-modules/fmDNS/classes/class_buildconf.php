@@ -2207,6 +2207,7 @@ HTML;
 					}
 					
 					if (in_array($server_id, $group_slaves)) {
+						$tmp_key_id = "";
 						if ($domain_key_id) {
 							$tmp_key_id = $domain_key_id;
 						}
