@@ -77,7 +77,8 @@ $title_array = array(
 	array('title' => _('Timestamp'), 'rel' => 'log_timestamp'),
 	array('title' => _('Module'), 'class' => 'header-nosort'),
 	array('title' => _('User'), 'class' => 'header-nosort'),
-	array('title' => _('Message'), 'style' => 'width: 50%;', 'class' => 'header-nosort')
+	array('title' => _('Message'), 'style' => 'width: 50%;', 'class' => 'header-nosort'),
+	array('class' => 'header-tiny header-nosort')
 );
 
 $search_form = sprintf('<form class="log_search_form" id="date-range" method="get">
@@ -129,6 +130,7 @@ function displayLogData($page, $search_sql = null, $sort_direction = 'DESC') {
 					<td>$log_module</td>
 					<td>$user_name</td>
 					<td>$log_data</td>
+					<td></td>
 				</tr>
 
 ROW;
