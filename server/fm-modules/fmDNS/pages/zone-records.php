@@ -25,7 +25,7 @@ $map = (isset($_GET['map'])) ? strtolower($_GET['map']) : 'forward';
 /** Include module variables */
 if (isset($_SESSION['module'])) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/variables.inc.php');
 
-$default_record_type = $map == 'reverse' ? 'PTR' : 'A';
+$default_record_type = $map == 'reverse' ? 'PTR' : 'ALL';
 if (isset($_GET['record_type'])) {
 	$record_type = strtoupper($_GET['record_type']);
 } else {
@@ -95,11 +95,13 @@ if (!getSOACount($domain_id)) {
 	$response_class = 'attention';
 }
 
-echo printPageHeader(array('message' => $response, 'class' => $response_class), null, false, $type, null, null, $addl_title_blocks);
+$save_all_button = sprintf('<input type="button" value="%s" class="button save-record-submit primary" style="display: none;"/>' . "\n", __('Save All'));
+
+echo printPageHeader(array('message' => $response, 'class' => $response_class), null, currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed, 'zone-records', null, 'noscroll', $addl_title_blocks);
 
 
 if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-	$form = '<form method="POST" action="zone-records-validate.php">
+	$form = '<form method="POST" action="zone-records-validate.php" id="zone-records-form">
 <input type="hidden" name="domain_id" value="' . $domain_id . '" />
 <input type="hidden" name="record_type" value="' . $record_type . '" />
 <input type="hidden" name="map" value="' . $map . '" />
@@ -154,7 +156,8 @@ if ($record_type == 'SOA') {
 			$ip_sort = false;
 			break;
 	}
-	$record_sql = "AND domain_id IN (" . join(',', $parent_domain_ids) . ") AND record_type='$record_type'";
+	$record_sql = "AND domain_id IN (" . join(',', $parent_domain_ids) . ")";
+	if ($record_type != 'ALL') $record_sql .= " AND record_type='$record_type'";
 	$sort_direction = null;
 
 	if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
@@ -168,13 +171,13 @@ if ($record_type == 'SOA') {
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', array($sort_field, 'record_name'), 'record_', $record_sql, null, $ip_sort, $sort_direction);
 	$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 	if ($page > $total_pages) $page = $total_pages;
-	$pagination = displayPagination($page, $total_pages);
-	$body .= $pagination . '<div class="overflow-container">' . $form;
+	$pagination = displayPagination($page, $total_pages, $save_all_button);
+	$body .= $pagination . '<div class="overflow-container">' . $form; //. sprintf('<input type="submit" name="submit" value="%s" class="button" style="display: none;" />' . "\n", __('Validate'));
 	
 	$record_rows = $fm_dns_records->rows($result, $record_type, $domain_id, $page);
 
-	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-		$body .= '<div class="existing-container">' . $record_rows;
+	if (!currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
+		$body .= '<div class="table-results-container">' . $record_rows;
 		$body .= sprintf('</div><div class="new-container">
 	<a name="#manage"></a>
 	<h2>%s</h2>
@@ -182,7 +185,7 @@ if ($record_type == 'SOA') {
 	<p><input type="submit" name="submit" value="%s" class="button" /></p>
 </form></div>' . "\n", __('Add Record'), $fm_dns_records->printRecordsForm($record_type, $domain_id), __('Validate'));
 	} else {
-		$body .= '<div class="existing-container no-bottom-margin">' . $record_rows;
+		$body .= '<div class="table-results-container">' . $record_rows;
 	}
 }
 
@@ -210,6 +213,7 @@ function buildRecordTypes($record_type = null, $all_domain_ids = null, $map = 'f
 			}
 		}
 		@sort($used_record_types);
+		array_unshift($used_record_types, strtoupper(__('All')));
 		
 		$used_record_types[] = 'SOA';
 		if (array_search('CUSTOM', $used_record_types) !== false) {

@@ -59,7 +59,12 @@ p.soa_import span {
 #recordmenu > ul > li.has-sub > a:before{ content:''; position:absolute; top:10px; right:-.5em; border:4px solid transparent; border-top:4px solid #000; }
 #recordmenu > ul > li.has-sub:hover > a:before{top:10px; border-top: 4px solid #fff;}
 #recordmenu ul li.has-sub:hover > a:after{top:0; bottom:0;}
-#recordmenu ul li.has-sub:hover > ul, #recordmenu ul li.has-sub:hover > div{display:block;}
+#recordmenu ul li.has-sub:hover > ul, #recordmenu ul li.has-sub:hover > div {
+	display:block;
+	position: fixed;
+    top: 7.1em;
+    right: 2em;
+}
 #recordmenu ul li > ul {
 	display:none; width:auto; position:absolute; top:2.5em; right: 0; padding:2px 0; background-color:rgba(70,70,70,0.95);
 	border-radius:5px 0 5px 5px;
@@ -111,6 +116,10 @@ p.soa_import span {
 .display_results > tbody > tr > td > span {
 	font-style: italic;
 }
+.display_results > tbody > tr > tr:last-child,
+.display_results > tbody > tr > td:last-child {
+	text-align: center;
+}
 
 #define_forwarders,
 #define_masters {
@@ -137,4 +146,37 @@ table.form-table > tbody > tr.dnssec-key-addl-options {
 }
 .add_records {
 	padding: 5px 6px 5px 2em;
+}
+.inline-record-actions,
+.inline-record-actions {
+	display: flex;
+    align-items: center;
+    justify-content: end;
+	text-transform: uppercase;
+	padding: 6px 8px;
+}
+.inline-record-actions a {
+	padding: 0 8px;
+	opacity: .7;
+}
+.inline-record-actions a:hover {
+	opacity: unset;
+}
+.inline-record-save {
+	font-weight: bold;
+}
+.inline-record-cancel {
+	color: var(--tab-unselected-text);
+}
+
+div.record-value-group p.record-sub-value {
+	margin: 5px 0 0;
+	font-size: 11px;
+    white-space: nowrap;
+}
+div.record-value-group > div:first-of-type > p.record-sub-value {
+	margin: 0;
+}
+.display_results > tbody > tr > td input.input-long-wide {
+	width: 17em;
 }
