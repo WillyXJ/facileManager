@@ -61,7 +61,7 @@ class fm_module_services {
 			array('title' => _('Actions'), 'class' => 'header-actions header-nosort')
 		));
 
-		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo '<div class="table-results-container">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($result) {

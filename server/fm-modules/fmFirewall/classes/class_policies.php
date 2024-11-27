@@ -64,7 +64,7 @@ class fm_module_policies {
 		$title_array[] = array('title' => _('Comment'), 'style' => 'width: 20%;');
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
-		echo '<div class="existing-container" style="margin-bottom: 3em;">';
+		echo '<div class="table-results-container" style="margin-bottom: 3em;">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($total_pages) {
