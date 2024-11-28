@@ -49,6 +49,8 @@ if (!isset($_POST['uri_params']['record_type']) || (in_array($_POST['uri_params'
 /* RR types that allow record append */
 $append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
 
+if (!isset($global_form_field_excludes)) $global_form_field_excludes = array();
+
 if ($_POST['action'] == 'validate-record-updates') {
 	echo validateRecordUpdates();
 }
@@ -196,14 +198,13 @@ function validateEntry($action, $id, $data, $record_type, $append, $data_array, 
 						$messages['errors'][$key] = __('Invalid IP');
 					}
 				}
-				if ($key == 'PTR') {
-					global $domain_id;
-					$retval = checkPTRZone($data['record_value'], $domain_id);
+				if ($key == 'PTR' && !isset($messages['errors']['record_value'])) {
+					$retval = checkPTRZone($data['record_value'], $domain_info['id']);
 					list($val, $error_msg) = $retval;
 					if ($val == null) {
 						$messages['errors']['record_value'] = $error_msg;
 					} else {
-						$messages['info']['record_value'] = $error_msg;
+						$data[$key] = $val;
 					}
 				}
 			}

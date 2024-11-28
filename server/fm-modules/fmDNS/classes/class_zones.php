@@ -308,7 +308,7 @@ class fm_dns_zones {
 		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` 
 			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $insert_id, ";
 		if (!$post['domain_template_id']) {
-			$required_servers = $post['domain_required_servers'];
+			if (isset($post['domain_required_servers'])) $required_servers = $post['domain_required_servers'];
 			if ($post['domain_type'] == 'forward') {
 				$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
 				$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
@@ -2055,7 +2055,7 @@ HTML;
 		/** Cleans up acl_addresses for future parsing **/
 		$clean_fields = array('forwarders', 'primaries');
 		foreach ($clean_fields as $val) {
-			if (strpos($post['domain_required_servers'][$val], 'master_') === false) {
+			if (isset($post['domain_required_servers']) && strpos($post['domain_required_servers'][$val], 'master_') === false) {
 				$post['domain_required_servers'][$val] = verifyAndCleanAddresses($post['domain_required_servers'][$val], 'no-subnets-allowed');
 				if (strpos($post['domain_required_servers'][$val], 'not valid') !== false) return $post['domain_required_servers'][$val];
 			}

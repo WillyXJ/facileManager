@@ -566,6 +566,9 @@ $(document).ready(function() {
 		$(this).parents("tr").removeClass("ok").addClass("notice");
 		$(this).parents("tr").find(".inline-record-save").show();
 		$(this).parents("tr").find(".inline-record-actions").show();
+
+		/* Automatically select to update PTR */
+		$(this).parents("td").find("input[name*=\'\[PTR\]\']").prop("checked", true);
 	});
 
 	/* Record delete checkbox */

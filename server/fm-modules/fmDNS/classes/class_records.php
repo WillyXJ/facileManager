@@ -395,11 +395,11 @@ class fm_dns_records {
 				$input_box .= ($domain_map == 'forward') ? 'size="40"' : 'style="width: 40px;" size="4"';
 				$input_box .= ' type="text" name="' . $action . '[_NUM_][record_name]" value="' . $record_name . '" />';
 				if (strpos($domain, 'arpa')) {
-					$field_values['data']['Record'] = '>' . $input_box . ' .' . $domain;
+					$field_values['data']['Record'] = $input_box . ' .' . $domain;
 				} elseif ($domain_map == 'forward') {
-					$field_values['data']['Record'] = '>' . $input_box;
+					$field_values['data']['Record'] = $input_box;
 				} else {
-					$field_values['data']['Record'] = '>' . $domain . '. ' . $input_box;
+					$field_values['data']['Record'] = $domain . '. ' . $input_box;
 				}
 			} else {
 				$field_values['data']['Record'] = '<input type="text" name="' . $action . '[_NUM_][record_name]" value="' . $record_name . '" />';
