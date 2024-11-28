@@ -3,7 +3,7 @@
 * Server - [improvement] All resource records can be displayed and edited on a single page. (Issue #406)
 * Server - [improvement] When A record values are changed, the checkbox to automatically create/update the PTR
            is checked by default.
-* Server - [bug] Fixed PHP errors. (Issue #642)
+* Server - [bug] Fixed PHP errors. (Issues #641 #642)
 
 7.0.0-beta2 (2024-11-20)
 ========================

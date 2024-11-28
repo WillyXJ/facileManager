@@ -227,7 +227,7 @@ class fm_module_dnssec {
 				$clean_data = ($key == 'cfg_data') ? sanitize($data, '-') : $data;
 				$sql_values .= "$key='$clean_data', ";
 				if ($key == 'cfg_comment') {
-					$logging_comment = formatLogKeyData('', 'Comment', data: $data);
+					$logging_comment = formatLogKeyData('', 'Comment', $data);
 				}
 			}
 		}
