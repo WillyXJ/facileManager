@@ -61,6 +61,7 @@ class fm_module_options {
 		$perms = ($results[0]->domain_id) ? zoneAccessIsAllowed(array($results[0]->domain_id), 'manage_zones') : currentUserCan('manage_servers', $_SESSION['module']);
 		if ($perms) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -234,7 +235,7 @@ class fm_module_options {
 		
 		if ($perms) {
 			$edit_uri = (strpos($_SERVER['REQUEST_URI'], '?')) ? $_SERVER['REQUEST_URI'] . '&' : $_SERVER['REQUEST_URI'] . '?';
-			$edit_status = '<td id="row_actions">';
+			$edit_status = '<td class="column-actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$edit_status .= '<a class="status_form_link" href="#" rel="';
 			$edit_status .= ($row->cfg_status == 'active') ? 'disabled' : 'active';

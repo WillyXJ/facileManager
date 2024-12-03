@@ -40,7 +40,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
 			$bulk_actions_list[] = __('Build Config');
 		}
-		if (is_array($bulk_actions_list)) {
+		if (count($bulk_actions_list)) {
 			$title_array[] = array(
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
@@ -53,19 +53,25 @@ class fm_module_servers extends fm_shared_module_servers {
 		echo '<div class="overflow-container">';
 			
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'servers'
 					);
 
-		$title_array[] = array('class' => 'header-tiny');
-		$title_array = array_merge($title_array, array(__('Hostname'), __('Method'), __('Firewall Type'), __('Version'), __('Config File')));
+		$title_array[] = array('class' => 'header-tiny header-nosort');
+		$title_array = array_merge($title_array, array(
+			array('title' => __('Hostname'), 'rel' => 'server_name'),
+			array('title' => __('Method'), 'rel' => 'server_update_method'),
+			array('title' => __('Firewall Type'), 'rel' => 'server_type'),
+			array('title' => __('Version'), 'rel' => 'server_version'),
+			array('title' => __('Config File'), 'rel' => 'server_config_file')
+		));
 		$title_array[] = array(
 							'title' => __('Actions'),
-							'class' => 'header-actions'
+							'class' => 'header-actions header-nosort'
 						);
 
-		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo '<div class="table-results-container">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($result) {
@@ -254,7 +260,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$os_image = setOSIcon($row->server_os_distro);
 		
 		$edit_status = $edit_actions = '';
-		$edit_actions = $preview = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
+		$edit_actions = $preview = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'' . $__FM_CONFIG['default']['popup']['dimensions'] . ',toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 		
 		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<td><input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" /></td>' : null;
 		
@@ -300,7 +306,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			<td>$row->server_type</td>
 			<td>$row->server_version</td>
 			<td>$row->server_config_file</td>
-			<td id="row_actions">$edit_status</td>
+			<td class="column-actions">$edit_status</td>
 		</tr>
 
 HTML;

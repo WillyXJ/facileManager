@@ -47,18 +47,20 @@ $checks_array = @array('servers' => 'manage_servers',
 				);
 $allowed_capabilities = array_unique($checks_array);
 
+if (array_key_exists('global_find', $_POST)) {
+	if (array_key_exists('item_id', $_POST)) {
+		echo getGlobalSearchResults($_POST['item_id']);
+		exit;
+	} else returnError();
+}
+
 if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $_SESSION['module'])) {
 	if (!checkUserPostPerms($checks_array, $_POST['item_type'])) {
 		returnUnAuth();
 		exit;
 	}
 	
-	if (array_key_exists('global_find', $_POST)) {
-		if (array_key_exists('item_id', $_POST)) {
-			echo getGlobalSearchResults($_POST['item_id']);
-			exit;
-		} else returnError();
-	} elseif (array_key_exists('add_form', $_POST)) {
+	if (array_key_exists('add_form', $_POST)) {
 		$id = isset($_POST['item_id']) ? $_POST['item_id'] : null;
 		$add_new = true;
 	} elseif (array_key_exists('item_id', $_POST)) {

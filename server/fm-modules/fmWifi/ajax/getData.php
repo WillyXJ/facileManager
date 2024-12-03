@@ -93,7 +93,7 @@ if (is_array($_POST) && array_key_exists('get_option_placeholder', $_POST) && cu
 $checks_array = @array('servers' => 'manage_servers',
 					'wlans' => 'manage_wlans',
 					'wlan_users' => 'manage_wlan_users',
-					'acls' => 'manage_wlan_wlan_users',
+					'acls' => 'manage_wlan_users',
 					'options' => 'manage_wlans'
 				);
 

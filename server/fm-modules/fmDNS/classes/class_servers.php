@@ -33,7 +33,8 @@ class fm_module_servers extends fm_shared_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+		$perm_manage_servers = currentUserCan('manage_servers', $_SESSION['module']);
+		if ($perm_manage_servers) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
 		if (currentUserCan('build_server_configs', $_SESSION['module']) && $type == 'servers') {
@@ -78,11 +79,14 @@ class fm_module_servers extends fm_shared_module_servers {
 				array('title' => __('Secondary Servers'), 'class' => 'header-nosort'),
 				));
 		}
-		$title_array[] = array(
+		if ($type == 'servers' || $perm_manage_servers) {
+			$title_array[] = array(
 							'title' => __('Actions'),
 							'class' => 'header-actions header-nosort'
 						);
+		}
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -484,7 +488,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if ($type == 'servers') {
 			$os_image = ($row->server_type == 'remote') ? '<i class="fa fa-globe fa-2x grey" style="font-size: 1.5em" title="' . __('Remote server') . '" aria-hidden="true"></i>' : setOSIcon($row->server_os_distro);
 
-			$edit_actions = $preview = ($row->server_type != 'remote') ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
+			$edit_actions = $preview = ($row->server_type != 'remote') ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'' . $__FM_CONFIG['default']['popup']['dimensions'] . ',toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
 			if ($row->server_type != 'url-only') $icons[] = sprintf('<a href="config-options.php?server_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $row->server_id, __('Configure Additional Options'));
 			if ($row->server_url_server_type) $icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-globe" aria-hidden="true"></i></a>', sprintf(__('This server hosts URL redirects with %s for the URL RR'), $row->server_url_server_type));
 			$checkbox = null;
@@ -561,21 +565,23 @@ class fm_module_servers extends fm_shared_module_servers {
 			<td>$row->server_config_file</td>
 			<td>$row->server_root_dir</td>
 			<td>$server_zones_dir</td>
-			<td id="row_actions">$edit_status</td>
+			<td class="column-actions">$edit_status</td>
 		</tr>
 
 HTML;
 		} elseif ($type == 'groups') {
-			$checkbox = (currentUserCan('manage_servers', $_SESSION['module'])) ? '<input type="checkbox" name="group_list[]" value="g' . $row->group_id .'" />' : null;
+			$checkbox = null;
 
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
-				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				$checkbox = '<input type="checkbox" name="group_list[]" value="g' . $row->group_id .'" />';
+				$edit_status = '<td class="column-actions"><a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$query = "SELECT domain_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' AND 
 					(domain_name_servers='g_{$row->group_id}' OR domain_name_servers LIKE 'g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id}')";
 				$result = $fmdb->get_results($query);
 				if (!$fmdb->num_rows) {
 					$edit_status .= '<a href="#" class="delete" name="' . $type . '">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				}
+				$edit_status .= '</td>';
 			}
 			
 			/** Process group masters */
@@ -606,7 +612,7 @@ HTML;
 			<td>$row->group_name</td>
 			<td>$group_masters</td>
 			<td>$group_slaves</td>
-			<td id="row_actions">$edit_status</td>
+			$edit_status
 		</tr>
 
 HTML;
@@ -620,7 +626,7 @@ HTML;
 		global $__FM_CONFIG;
 		
 		$server_id = $group_id = 0;
-		$server_name = $server_root_dir = $server_zones_dir = $server_type = $server_update_port = null;
+		$server_name = $server_address = $server_root_dir = $server_zones_dir = $server_type = $server_update_port = null;
 		$server_update_method = $server_key_with_rndc = $server_run_as = $server_config_file = $server_run_as_predefined = null;
 		$server_chroot_dir = $group_name = $server_type_disabled = $group_auto_also_notify = null;
 		$server_installed = $server_slave_zones_dir = false;
@@ -713,6 +719,10 @@ FORM;
 					<th width="33&#37;" scope="row"><label for="server_type">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
 					<td width="67&#37;">%s</td>
 				</tr>
+				<tr class="local_server_options url_only_options">
+					<th width="33&#37;" scope="row"><label for="server_address">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
+					<td width="67&#37;"><input name="server_address" id="server_address" type="text" value="%s" size="40" placeholder="192.168.1.100" /></td>
+				</tr>
 				<tr class="local_server_options">
 					<th width="33&#37;" scope="row"><label for="server_key_with_rndc">%s</label> <a href="#" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle"></i></a></th>
 					<td width="67&#37;">%s</td>
@@ -803,6 +813,7 @@ FORM;
 				__('Basic'), $alternative_help,
 				__('Server Name'), $server_name, $server_name_length,
 				__('Server Type'), sprintf(__('A remote server is not managed by %s.'), $_SESSION['module']), $server_type,
+				__('IP Address'), __('Enter the IP address of the server if the name is not resolvable. This is used for server communication and when configuring secondaries.'), $server_address,
 				__('Use Defined Keys with rndc'), __('Override the setting for this server.'), $server_key_with_rndc,
 				__('Run-as Account'), $server_run_as_predefined, $runashow, __('Other run-as account'), $server_run_as,
 				__('Update Method'), $server_update_method, $server_update_port_style, $server_update_port,
@@ -1111,6 +1122,9 @@ FORM;
 		$field_length = getColumnLength('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_name');
 		if ($field_length !== false && strlen($post['server_name']) > $field_length) return sprintf(dngettext($_SESSION['module'], 'Server name is too long (maximum %d character).', 'Server name is too long (maximum %d characters).', $field_length), $field_length);
 		
+		/** Check address */
+		if (!empty($post['server_address']) && !verifyIPAddress($post['server_address'])) return __('Server address must be a valid IP address.');
+
 		/** Does the record already exist for this account? */
 		basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', $post['server_name'], 'server_', 'server_name');
 		if ($fmdb->num_rows) {
@@ -1163,7 +1177,7 @@ FORM;
 		
 		/** Clean up arrays */
 		foreach ($post as $key => $val) {
-			if (is_array($val)) {
+			if (is_array($val) && $key != 'uri_params') {
 				$post[$key] = $val[0];
 			}
 		}

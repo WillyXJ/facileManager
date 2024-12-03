@@ -47,8 +47,8 @@ class fm_users {
 			$title_array[] = array('title' => _('Login'), 'rel' => 'user_login');
 			array_push($title_array,
 					array('title' => _('Last Session Date'), 'rel' => 'user_last_login'),
-					array('title' => _('Last Session Host'), 'class' => 'header-nosort'),
-					array('title' => _('Authenticate With'), 'class' => 'header-nosort'),
+					array('title' => _('Last Session Host'), 'rel' => 'user_ipaddr'),
+					array('title' => _('Authenticate With'), 'rel' => 'user_auth_type'),
 					array('title' => _('Comment'), 'class' => 'header-nosort'));
 		} elseif ($type == 'groups') {
 			array_push($title_array,
@@ -65,6 +65,7 @@ class fm_users {
 		}
 		$title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -600,7 +601,7 @@ class fm_users {
 		echo <<<HTML
 		<tr id="$id" name="$name"$disabled_class>
 			$column
-			<td id="row_actions">$edit_status</td>
+			<td class="column-actions">$edit_status</td>
 		</tr>
 
 HTML;
@@ -735,6 +736,7 @@ HTML;
 		}
 		
 		if (in_array('user_theme', $form_bits)) {
+			if (!$user_theme) $user_theme = $__FM_CONFIG['default']['theme'];
 			$user_module_options = buildSelect('user_theme', 'user_theme', getThemes(), $user_theme);
 			unset($available_themes);
 			$return_form_rows .= '<tr>

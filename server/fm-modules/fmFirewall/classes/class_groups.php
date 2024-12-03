@@ -39,7 +39,7 @@ class fm_module_groups {
 		echo displayPagination($page, $total_pages, @buildBulkActionMenu($bulk_actions_list));
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'groups'
 					);
@@ -50,9 +50,14 @@ class fm_module_groups {
 								'class' => 'header-tiny header-nosort'
 							);
 		}
-		$title_array = array_merge((array) $title_array, array(_('Group Name'), $type . 's', array('title' => _('Comment'), 'style' => 'width: 40%;')));
-		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		$title_array = array_merge((array) $title_array, array(
+			array('title' => _('Group Name'), 'rel' => 'group_name'),
+			array('title' => $type . 's', 'class' => 'header-nosort'),
+			array('title' => _('Comment'), 'style' => 'width: 40%;', 'class' => 'header-nosort'),
+			array('title' => _('Actions'), 'class' => 'header-actions header-nosort')
+		));
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -211,8 +216,8 @@ class fm_module_groups {
 			} else {
 				$checkbox = '<td></td>';
 			}
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
+		$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 		
 		/** Process group items */
 		$group_items = nl2br($this->getGroupItemNames($row->group_items));

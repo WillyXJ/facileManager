@@ -79,6 +79,7 @@ class fm_dhcp_leases {
 		$title_array = @array_merge((array) $title_array, $this->getTableHeader());
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if (is_array($result)) {
@@ -136,7 +137,7 @@ class fm_dhcp_leases {
 			}
 
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
+			$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $ip .'" /></td>';
 		}
 		

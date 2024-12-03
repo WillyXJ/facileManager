@@ -53,7 +53,12 @@ if (isset($log_search_query) && !empty($log_search_query)) {
 	$search_sql .= "AND log_data LIKE '%" . sanitize($log_search_query) . "%' ";
 }
 
-$query = "SELECT * FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']}) $search_sql ORDER BY log_timestamp DESC";
+$sort_direction = 'DESC';
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
+
+$query = "SELECT * FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']}) $search_sql ORDER BY log_timestamp $sort_direction";
 $fmdb->query($query);
 $log_count = $fmdb->num_rows;
 
@@ -67,8 +72,14 @@ $log_search_user = isset($log_search_user) ? $log_search_user : 0;
 $module_list = buildSelect('log_search_module', 'log_search_module', buildModuleList(), $log_search_module, 1, null, true, null, null, _('Filter Modules'));
 $user_list = buildSelect('log_search_user', 'log_search_user', buildUserList(), $log_search_user, 1, null, true, null, null, _('Filter Users'));
 
-$table_info = array('class' => 'display_results');
-$title_array = array(_('Timestamp'), _('Module'), _('User'), array('title' => _('Message'), 'style' => 'width: 50%;'));
+$table_info = array('class' => 'display_results sortable');
+$title_array = array(
+	array('title' => _('Timestamp'), 'rel' => 'log_timestamp'),
+	array('title' => _('Module'), 'class' => 'header-nosort'),
+	array('title' => _('User'), 'class' => 'header-nosort'),
+	array('title' => _('Message'), 'style' => 'width: 50%;', 'class' => 'header-nosort'),
+	array('class' => 'header-tiny header-nosort')
+);
 
 $search_form = sprintf('<form class="log_search_form" id="date-range" method="get">
 					<input name="log_search_date_b" value="%s" type="text" class="datepicker" placeholder="%s" />
@@ -88,21 +99,22 @@ $search_form = sprintf('<form class="log_search_form" id="date-range" method="ge
 $fmdb->num_rows = $log_count;
 echo printPageHeader($response);
 echo displayPagination($page, $total_pages, array($search_form, null));
+echo '<div class="overflow-container">';
 echo displayTableHeader($table_info, $title_array);
 
-displayLogData($page, $search_sql);
+displayLogData($page, $search_sql, $sort_direction);
 
 printFooter(null, $output);
 
 
-function displayLogData($page, $search_sql = null) {
+function displayLogData($page, $search_sql = null, $sort_direction = 'DESC') {
 	global $fmdb, $fm_name, $__FM_CONFIG;
 	
 	/** Get datetime formatting */
 	$date_format = getOption('date_format', $_SESSION['user']['account_id']);
 	$time_format = getOption('time_format', $_SESSION['user']['account_id']);
 	
-	$query = "SELECT * FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']}) $search_sql ORDER BY log_timestamp DESC LIMIT " . (($page - 1) * $_SESSION['user']['record_count']) . ", {$_SESSION['user']['record_count']}";
+	$query = "SELECT * FROM fm_logs WHERE account_id IN (0,{$_SESSION['user']['account_id']}) $search_sql ORDER BY log_timestamp $sort_direction LIMIT " . (($page - 1) * $_SESSION['user']['record_count']) . ", {$_SESSION['user']['record_count']}";
 	$fmdb->query($query);
 	$result = $fmdb->last_result;
 	$log_count = $fmdb->num_rows;
@@ -119,6 +131,7 @@ function displayLogData($page, $search_sql = null) {
 					<td>$log_module</td>
 					<td>$user_name</td>
 					<td>$log_data</td>
+					<td></td>
 				</tr>
 
 ROW;

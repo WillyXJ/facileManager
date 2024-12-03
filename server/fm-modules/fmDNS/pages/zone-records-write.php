@@ -22,9 +22,9 @@
  +-------------------------------------------------------------------------+
 */
 
-require_once('fm-init.php');
+if (!defined('AJAX')) require_once('fm-init.php');
 
-include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
+include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
 if (empty($_POST)) {
 	header('Location: ' . $GLOBALS['RELPATH']);
@@ -35,14 +35,51 @@ if (empty($_POST)) {
 checkMaxInputVars();
 
 extract($_POST);
+if (isset($_POST['uri_params'])) extract($_POST['uri_params'], EXTR_OVERWRITE);
+
+/* RR types that allow record append */
+$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'RP', 'NAPTR');
 
 /** Should the user be here? */
-if (!currentUserCan('manage_records', $_SESSION['module'])) unAuth();
-if (!zoneAccessIsAllowed(array($domain_id))) unAuth();
-if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) unAuth();
+if (!currentUserCan('manage_records', $_SESSION['module'])) {
+	if (!defined('AJAX')) returnUnAuth();
+	unAuth();
+}
+if (!zoneAccessIsAllowed(array($domain_id))) {
+	if (!defined('AJAX')) returnUnAuth();
+	unAuth();
+}
+if (in_array($record_type, $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module'])) {
+	if (!defined('AJAX')) returnUnAuth();
+	unAuth();
+}
 
 if (isset($update) && is_array($update)) {
+	if (defined('AJAX')) {
+		// $update = buildUpdateArray($domain_id, $record_type, $update, $append);
+	}
+
 	foreach ($update as $id => $data) {
+		if (isset($tmp_record_type)) {
+			$record_type = $tmp_record_type;
+		}
+		if (defined('AJAX') && $record_type == 'ALL') {
+			$tmp_record_type = $record_type;
+			$record_type = isset($data['record_type']) ? $data['record_type'] : getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'record_type');
+		}
+		if (!isset($data['record_append']) && in_array($record_type, $append)) {
+			$data['record_append'] = 'no';
+		}
+		if (isset($data['Delete'])) {
+			$data['record_status'] = 'deleted';
+			unset($data['Delete']);
+		}
+		if (isset($data['record_skipped'])) {
+			$data['record_status'] = ($data['record_skipped'] == 'on') ? 'active' : 'deleted';
+			unset($data['record_skipped']);
+			$skip[$id] = $data;
+			continue;
+		}
 		$old_record = null;
 		
 		if (isset($data['soa_serial_no'])) {
@@ -87,7 +124,10 @@ if (isset($create) && is_array($create)) {
 	$record_count = 0;
 	foreach ($create as $new_id => $data) {
 		if (!isset($data['record_skip'])) {
-			if (isset($import_records)) $record_type = $data['record_type'];
+			if (isset($tmp_record_type)) {
+				$record_type = $tmp_record_type;
+			}
+			if (isset($import_records) || (defined('AJAX') && $record_type == 'ALL')) $record_type = $data['record_type'];
 			
 			/** Auto-detect IPv4 vs IPv6 A records */
 			if ($record_type == 'A' && strrpos($data['record_value'], ':')) $record_type = 'AAAA';
@@ -101,7 +141,7 @@ if (isset($create) && is_array($create)) {
 			if (isset($data['record_value'])) $data['record_value'] = str_replace('"', '', $data['record_value']);
 			
 			// Handle bulk import
-			if ($submit == 'Import' && isset($data['PTR'])) {
+			if (isset($submit) && $submit == 'Import' && isset($data['PTR'])) {
 				list($data['PTR'], $error_msg) = checkPTRZone($data['record_value'], $domain_id);
 			}
 			
@@ -121,7 +161,9 @@ if (isset($create) && is_array($create)) {
 }
 
 if (isset($record_type) && $domain_id && !isset($import_records)) {
-	if (isset($_POST['uri'])) {
+	if (defined('AJAX')) {
+		exit('Success');
+	} elseif (isset($_POST['uri'])) {
 		header('Location: ' . $_POST['uri']);
 	} else {
 		header('Location: zone-records.php?map=' . $map . '&domain_id=' . $domain_id . '&record_type=' . $record_type);

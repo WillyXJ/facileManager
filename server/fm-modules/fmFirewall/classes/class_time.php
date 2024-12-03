@@ -40,7 +40,7 @@ class fm_module_time {
 		echo '<div class="overflow-container">';
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'time'
 					);
@@ -51,10 +51,16 @@ class fm_module_time {
 								'class' => 'header-tiny header-nosort'
 							);
 		}
-		$title_array = array_merge((array) $title_array, array(__('Restriction Name'), __('Date Range'), __('Time'), __('Weekdays'), array('title' => _('Comment'), 'style' => 'width: 30%;')));
-		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		$title_array = array_merge((array) $title_array, array(
+			array('title' => __('Restriction Name'), 'rel' => 'time_name'),
+			array('title' => __('Date Range'), 'class' => 'header-nosort'),
+			array('title' => __('Time'), 'class' => 'header-nosort'),
+			array('title' => __('Weekdays'), 'class' => 'header-nosort'),
+			array('title' => _('Comment'), 'style' => 'width: 30%;', 'class' => 'header-nosort'),
+			array('title' => _('Actions'), 'class' => 'header-actions header-nosort')
+		));
 
-		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo '<div class="table-results-container">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($result) {
@@ -205,8 +211,8 @@ class fm_module_time {
 			} else {
 				$checkbox = '<td></td>';
 			}
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
+		$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 		
 		/** Format date range */
 		$date_range = $this->formatDates($row->time_start_date, $row->time_end_date);

@@ -81,11 +81,11 @@ printHeader();
 
 $can_add = currentUserCan('manage_users');
 if ($type == 'users') {
-	$sort_field = 'user_login';
+	$default_sort_field = $sort_field = 'user_login';
 } elseif ($type == 'groups') {
-	$sort_field = 'group_name';
+	$default_sort_field = $sort_field = 'group_name';
 } elseif ($type == 'keys') {
-	$sort_field = 'key_id';
+	$default_sort_field = $sort_field = 'key_id';
 	$can_add = true;
 }
 $sort_direction = null;
@@ -99,12 +99,12 @@ if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
 
 if ($type == 'users') {
 	$sql = (!currentUserCan('manage_users')) ? 'AND user_id=' . $_SESSION['user']['id'] : null;
-	$result = basicGetList('fm_users', $sort_field, 'user_', $sql, null, false, $sort_direction);
+	$result = basicGetList('fm_users', array($sort_field, $default_sort_field), 'user_', $sql, null, false, $sort_direction);
 } elseif ($type == 'groups') {
-	$result = basicGetList('fm_groups', $sort_field, 'group_', null, null, false, $sort_direction);
+	$result = basicGetList('fm_groups', array($sort_field, $default_sort_field), 'group_', null, null, false, $sort_direction);
 } elseif ($type == 'keys') {
 	$sql = (!currentUserCan('manage_users')) ? 'AND user_id=' . $_SESSION['user']['id'] : null;
-	$result = basicGetList('fm_keys', $sort_field, 'key_', $sql, null, false, $sort_direction);
+	$result = basicGetList('fm_keys', array($sort_field, $default_sort_field), 'key_', $sql, null, false, $sort_direction);
 }
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;

@@ -252,7 +252,6 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 	}
 
 	$theme = (isset($_SESSION['user']['theme'])) ? $_SESSION['user']['theme'] : getOption('theme');
-	if (!$theme) $theme = getThemes()[0];
 	
 	$head = $logo = null;
 	
@@ -315,6 +314,7 @@ HTML;
  */
 function printFooter($classes = null, $text = null, $block_style = null) {
 	echo <<<FOOT
+		</div>
 	</div>
 </div>
 <div class="manage_form_container" id="manage_item" $block_style>
@@ -856,7 +856,8 @@ function buildSelect($select_name, $select_id, $options, $option_select = null, 
 			$type_options.="<option$selected>$options[$i]</option>\n";
 		}
 	}
-	$build_select = "<select class=\"$classes\" data-placeholder=\"$placeholder\" ";
+	$class = ($classes) ? sprintf('class="%s"', $classes) : null;
+	$build_select = "<select $class data-placeholder=\"$placeholder\" ";
 	$build_select .= "size=\"$size\" name=\"{$select_name}";
 	if ($multiple) $build_select .= '[]';
 	$build_select .= "\" id=\"$select_id\"";
@@ -2197,7 +2198,7 @@ function setOSIcon($server_os) {
  *
  * @param string|array $message Page form response
  * @param string $title The page title
- * @param bool $allowed_to_add Whether the user can add new
+ * @param bool|array $allowed_to_add Whether the user can add new
  * @param string $name Name value of plus sign
  * @param string $rel Rel value of plus sign
  * @param string $scroll Scroll or noscroll
@@ -2207,7 +2208,7 @@ function setOSIcon($server_os) {
 function printPageHeader($message = null, $title = null, $allowed_to_add = false, $name = null, $rel = null, $scroll = null, $addl_title_blocks = array()) {
 	global $__FM_CONFIG;
 	
-	$class = null;
+	$class = $addl_buttons = null;
 
 	if (is_array($message)) {
 		if (array_key_exists('message', $message)) {
@@ -2215,6 +2216,10 @@ function printPageHeader($message = null, $title = null, $allowed_to_add = false
 		} else {
 			list($message, $comment) = $message;
 		}
+	}
+
+	if (is_array($allowed_to_add)) {
+		list($allowed_to_add, $addl_buttons) = $allowed_to_add;
 	}
 
 	if (empty($title)) $title = getPageTitle();
@@ -2233,6 +2238,7 @@ function printPageHeader($message = null, $title = null, $allowed_to_add = false
 		<div class="flex-left">
 			<div><h2>%s</h2></div>
 			%s
+			%s
 			<div>%s</div>
 		</div>
 		<div class="flex-right">
@@ -2242,6 +2248,7 @@ function printPageHeader($message = null, $title = null, $allowed_to_add = false
 	',
 		$class, $style, $message, $title,
 		($allowed_to_add) ? sprintf('<div>%s</div>', displayAddNew($name, $rel)) : null,
+		($allowed_to_add && $addl_buttons) ? sprintf('<div>%s</div>', $addl_buttons) : null,
 		(isset($comment)) ? sprintf('<a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-exclamation-triangle fa-lg notice grey" aria-hidden="true"></i></a>', $comment) : null,
 		implode("\n", $addl_title_blocks)
 	);

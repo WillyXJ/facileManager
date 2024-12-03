@@ -40,7 +40,7 @@ class fm_module_services {
 		echo '<div class="overflow-container">';
 
 		$table_info = array(
-						'class' => 'display_results',
+						'class' => 'display_results sortable',
 						'id' => 'table_edits',
 						'name' => 'services'
 					);
@@ -51,11 +51,17 @@ class fm_module_services {
 								'class' => 'header-tiny header-nosort'
 							);
 		}
-		// $title_array = ($type == 'icmp') ? array_merge((array) $title_array, array(__('Service Name'), __('ICMP Type'), __('ICMP Code'), _('Comment'))) : array_merge((array) $title_array, array(__('Service Name'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment')));
-		$title_array = array_merge((array) $title_array, array(__('Service Name'), __('Type'), __('Source Ports'), __('Dest Ports'), __('Flags'), _('Comment')));
-		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions');
+		$title_array = array_merge((array) $title_array, array(
+			array('title' => __('Service Name'), 'rel' => 'service_name'),
+			array('title' => __('Type'), 'rel' => 'service_type'),
+			array('title' => __('Source Ports'), 'class' => 'header-nosort'),
+			array('title' => __('Dest Ports'), 'class' => 'header-nosort'),
+			array('title' => __('Flags'), 'class' => 'header-nosort'),
+			array('title' => _('Comment'), 'class' => 'header-nosort'),
+			array('title' => _('Actions'), 'class' => 'header-actions header-nosort')
+		));
 
-		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo '<div class="table-results-container">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($result) {
@@ -208,8 +214,8 @@ class fm_module_services {
 			} else {
 				$checkbox = '<td></td>';
 			}
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
 		}
+		$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 		
 		/** Process TCP Flags */
 		if ($row->service_type == 'tcp') {

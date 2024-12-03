@@ -27,7 +27,7 @@ if (!isset($fm_wifi_acls)) {
 }
 
 /** Ensure user can use this page */
-$required_permission[] = 'manage_wlan_wlan_users';
+$required_permission[] = 'manage_wlan_users';
 
 $include_submenus = false;
 
@@ -71,7 +71,11 @@ if (isset($_GET['wlan_ids']) && !in_array(0, $_GET['wlan_ids'])) {
 /** Get server listing */
 $sort_direction = null;
 $sort_field = 'acl_mac';
-$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'acls', array('acl_id', $sort_field), 'acl_', 'AND server_serial_no="' . $server_serial_no . '"' . (string) $domain_view_sql, null, false, $sort_direction);
+if (isset($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']])) {
+	extract($_SESSION[$_SESSION['module']][$GLOBALS['path_parts']['filename']], EXTR_OVERWRITE);
+}
+
+$result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'acls', array('acl_id', $sort_field, 'acl_mac'), 'acl_', 'AND server_serial_no="' . $server_serial_no . '"' . (string) $domain_view_sql, null, false, $sort_direction);
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 if ($page > $total_pages) $page = $total_pages;
 $fm_wifi_acls->rows($result, $page, $total_pages);

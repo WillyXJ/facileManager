@@ -78,9 +78,14 @@ class fm_dns_zones {
 				array('title' => __('Domain'), 'rel' => 'domain_name'), 
 				array('title' => __('Type'), 'rel' => 'domain_type'),
 				array('title' => __('Views'), 'class' => 'header-nosort'),
-				array('title' => __('Records'), 'class' => 'header-small  header-nosort'));
+				array('title' => __('Servers'), 'class' => 'header-nosort'),
+				array('title' => _('Comment'), 'class' => 'header-nosort'),
+				array('title' => __('Records'), 'class' => 'header-small  header-nosort')
+			);
 		}
-		$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		if ($map != 'groups' || currentUserCan('manage_zones', $_SESSION['module'])) {
+			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		}
 		
 		if (is_array($checkbox)) {
 			$title_array = array_merge($checkbox, $title_array);
@@ -94,7 +99,7 @@ class fm_dns_zones {
 		echo displayPagination($page, $total_pages, $addl_blocks);
 		echo '<div class="overflow-container">';
 
-		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo '<div class="table-results-container">';
 		echo displayTableHeader($table_info, $title_array, 'zones');
 		
 		if ($result) {
@@ -253,6 +258,9 @@ class fm_dns_zones {
 				} elseif ($field == 'domain_clone_dname') {
 					$log_message .= "Use DNAME RRs: {$post['domain_clone_dname']}\n";
 					$sql_values .= $post['domain_clone_dname'] ? "'" . $post['domain_clone_dname'] . "', " : 'NULL, ';
+				} elseif ($field == 'domain_comment') {
+					$log_message .= $post['domain_comment'] ? formatLogKeyData('domain_', 'domain_comment', $post['domain_comment']) : null;
+					$sql_values .= $post['domain_comment'] ? "'" . $post['domain_comment'] . "', " : 'NULL, ';
 				} else {
 					$sql_values .= (isset($value) && strlen($value)) ? "'" . $value . "', " : 'NULL, ';
 				}
@@ -267,7 +275,7 @@ class fm_dns_zones {
 				if (!in_array($key, $exclude)) {
 					$sql_fields .= $key . ',';
 					if (is_array($data)) $data = implode(';', $data);
-					$sql_values .= strlen($data) ? "'" . $data . "'," : 'NULL,';
+					$sql_values .= (isset($data) && strlen($data)) ? "'" . $data . "'," : 'NULL,';
 					if ($key == 'domain_view') $data = rtrim($log_message_views, '; ');
 					if ($key == 'domain_name_servers') $data = rtrim($log_message_name_servers, '; ');
 					if ($key == 'soa_id') {
@@ -302,7 +310,7 @@ class fm_dns_zones {
 		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` 
 			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $insert_id, ";
 		if (!$post['domain_template_id']) {
-			$required_servers = $post['domain_required_servers'];
+			if (isset($post['domain_required_servers'])) $required_servers = $post['domain_required_servers'];
 			if ($post['domain_type'] == 'forward') {
 				$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
 				$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
@@ -786,12 +794,14 @@ class fm_dns_zones {
 			}
 
 			$clones = $this->cloneDomainsList($row->domain_id);
-			$clone_names = $clone_types = $clone_views = $clone_counts = '';
+			$clone_names = $clone_types = $clone_views = $clone_counts = $clone_servers = $clone_comment = '';
 			foreach ($clones as $clone_id => $clone_array) {
 				$clone_names .= '<p class="subelement' . $clone_id . '"><span><a href="' . $clone_array['clone_link'] . '" title="' . __('Edit zone records') . '">' . $clone_array['clone_name'] . 
 						'</a></span>' . $clone_array['clone_options'] . $clone_array['dnssec'] . $clone_array['dynamic'] . $clone_array['clone_edit'] . $clone_array['clone_delete'] . "</p>\n";
 				$clone_types .= '<p class="subelement' . $clone_id . '">' . __('clone') . '</p>' . "\n";
 				$clone_views .= '<p class="subelement' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_views'], 'view') . "</p>\n";
+				$clone_servers .= '<p class="subelement' . $clone_id . '">' . $this->IDs2Name($clone_array['clone_servers'], 'server') . "</p>\n";
+				$clone_comment .= '<p class="subelement' . $clone_id . '">' . $clone_array['clone_comment'] . "</p>\n";
 				$clone_counts_array = explode('|', $clone_array['clone_count']);
 				$clone_counts .= '<p class="subelement' . $clone_id . '" title="' . __('Differences from parent zone') . '">';
 				if ($clone_counts_array[0]) $clone_counts .= '<span class="record-additions">' . $clone_counts_array[0] . '</span>&nbsp;';
@@ -816,10 +826,10 @@ class fm_dns_zones {
 			if (!$soa_count && $row->domain_type == 'primary' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'SOA';
 			elseif (!$ns_count && $row->domain_type == 'primary' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'NS';
 			else {
-				$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
+				$type = ($row->domain_mapping == 'forward') ? 'ALL' : 'PTR';
 			}
 			if ($soa_count && $ns_count && $row->domain_type == 'primary') {
-				$edit_status = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=-1&config=zone&domain_id=' . $row->domain_id . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
+				$edit_status = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=-1&config=zone&domain_id=' . $row->domain_id . '\',\'1356124444538\',\'' . $__FM_CONFIG['default']['popup']['dimensions'] . ',toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 			}
 			if (currentUserCan('manage_zones', $_SESSION['module']) && $zone_access_allowed) {
 				$edit_status .= '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -881,6 +891,8 @@ class fm_dns_zones {
 			if (is_array($icons)) {
 				$icons = implode(' ', $icons);
 			}
+			$comments = ($row->domain_comment) ? nl2br($row->domain_comment) : '&nbsp;';
+			$domain_servers = $this->IDs2Name($row->domain_name_servers, 'server');
 
 			echo <<<HTML
 		<tr id="$row->domain_id" name="$row->domain_name" $class>
@@ -891,9 +903,13 @@ class fm_dns_zones {
 				$clone_types</td>
 			<td>$domain_view
 				$clone_views</td>
+			<td>$domain_servers
+				$clone_servers</td>
+			<td>$comments
+				$clone_comment</td>
 			<td align="center">$record_count
 				$clone_counts</td>
-			<td id="row_actions">
+			<td class="column-actions">
 				$reload_zone
 				$edit_status
 			</td>
@@ -913,13 +929,15 @@ HTML;
 			}
 			
 			if (currentUserCan('manage_zones', $_SESSION['module'])) {
-				$edit_status = '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				$edit_status = '<td class="column-actions">';
+				$edit_status .= '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$edit_status .= '<a class="status_form_link" href="#" rel="';
 				$edit_status .= ($row->group_status == 'active') ? 'disabled' : 'active';
 				$edit_status .= '">';
 				$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 				$edit_status .= '</a>';
 				$edit_status .= '<a href="#" name="' . $map . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$edit_status .= '</td>';
 				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->group_id .'" />';
 			} else {
 				$edit_status = null;
@@ -931,7 +949,7 @@ HTML;
 			<td>$row->group_name</td>
 			<td>$domain_names</td>
 			<td>$row->group_comment</td>
-			<td id="row_actions">$edit_status</td>
+			$edit_status
 		</tr>
 
 HTML;
@@ -951,7 +969,7 @@ HTML;
 		
 		$domain_id = $domain_name_servers = $domain_key_id = 0;
 		$domain_view = -1;
-		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = $domain_ttl = null;
+		$domain_type = $domain_clone_domain_id = $domain_name = $template_name = $domain_ttl = $domain_comment = null;
 		$addl_zone_options = $domain_dynamic = $domain_template = $domain_dnssec = null;
 		$domain_dnssec_sig_expire = $domain_dnssec_sign_inline = $domain_dnssec_generate_ds = $domain_dnssec_parent_domain_id = null;
 		$disabled = ($action == 'create') ? null : 'disabled';
@@ -1218,6 +1236,11 @@ HTML;
 					<td width="67&#37;">%s</td>
 				</tr>
 				%s
+				<tr class="include-with-template">
+					<th width="33&#37;" scope="row"><label for="domain_comment">%s</label></th>
+					<td width="67&#37;"><textarea id="domain_comment" name="domain_comment" rows="4" cols="40">%s</textarea></td>
+				</tr>
+				%s
 			</table>',
 				$action, $domain_id, $classes,
 				__('Domain Name'), $domain_name, $domain_name_length,
@@ -1234,7 +1257,9 @@ HTML;
 				__('DNS Servers'), $name_servers,
 				__('Domain TTL'), __('Leave blank to use the $TTL from the SOA.'), $domain_ttl, $domain_ttl_length,
 				__('Zone Transfer Key'), __('Optionally specify a key for transferring this zone (overrides this setting in views).'), $keys,
-				$soa_templates . $addl_zone_options . $additional_config_link . $create_template . $template_name
+				$soa_templates,
+				_('Comment'), $domain_comment,
+				$addl_zone_options . $additional_config_link . $create_template . $template_name
 				);
 
 		$return_form .= (array_search('popup', $show) !== false) ? $popup_footer . '</form>' : null;
@@ -1343,11 +1368,17 @@ HTML;
 				/** Clone views */
 				$return[$clone_id]['clone_views'] = $clone_results[$i]->domain_view;
 				
+				/** Clone servers */
+				$return[$clone_id]['clone_servers'] = $clone_results[$i]->domain_name_servers;
+
 				/** Dynamic updates support */
 				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a>', __('Zone supports dynamic updates')) : null;
 				
 				/** DNSSEC support */
 				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-lock secure" aria-hidden="true"></i></a>', __('Zone is secured with DNSSEC')) : null;
+
+				/** Clone comment */
+				$return[$clone_id]['clone_comment'] = ($clone_results[$i]->domain_comment) ? $clone_results[$i]->domain_comment : '&nbsp;';
 			}
 		}
 		return $return;
@@ -1990,7 +2021,7 @@ HTML;
 			$include = array('action', 'domain_template_id' , 'domain_name', 'domain_template', 'domain_mapping', 
 				'domain_dynamic', 'domain_dnssec', 'domain_dnssec_sig_expire', 'domain_dnssec_generate_ds',
 				'domain_dnssec_sign_inline', 'domain_dnssec_signed', 'domain_dnssec_parent_domain_id', 'domain_view',
-				'domain_ttl');
+				'domain_ttl', 'domain_comment');
 			foreach ($include as $key) {
 				if (isset($post[$key])) {
 					$new_post[$key] = $post[$key];
@@ -2028,7 +2059,7 @@ HTML;
 		/** Cleans up acl_addresses for future parsing **/
 		$clean_fields = array('forwarders', 'primaries');
 		foreach ($clean_fields as $val) {
-			if (strpos($post['domain_required_servers'][$val], 'master_') === false) {
+			if (isset($post['domain_required_servers']) && strpos($post['domain_required_servers'][$val], 'master_') === false) {
 				$post['domain_required_servers'][$val] = verifyAndCleanAddresses($post['domain_required_servers'][$val], 'no-subnets-allowed');
 				if (strpos($post['domain_required_servers'][$val], 'not valid') !== false) return $post['domain_required_servers'][$val];
 			}

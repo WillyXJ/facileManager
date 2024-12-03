@@ -31,11 +31,11 @@ if (!@is_array($__FM_CONFIG)) $__FM_CONFIG = array();
 
 /** Module Version */
 $__FM_CONFIG['fmFirewall'] = array(
-		'version'							=> '3.2.0-beta1',
+		'version'							=> '3.2.0-beta2',
 		'client_version'					=> '3.1.0',
 		'description'						=> __('Managing software firewalls should not be difficult. Manage one or more software firewall servers (iptables, ipfw, ipf, pf) through a web interface rather than configuration files individually.', 'fmFirewall'),
 		'prefix'							=> 'fw_',
-		'required_fm_version'				=> '5.0.0-beta1',
+		'required_fm_version'				=> '5.0.0-beta2',
 		'min_client_auto_upgrade_version'	=> '1.3'
 	);
 
@@ -49,7 +49,7 @@ if (isset($__FM_CONFIG['module']['path'])) {
 	$__FM_CONFIG['module']['icons']['action']['reject']		= sprintf('<span class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-times __action__" aria-hidden="true"></i></span>', __('Reject the packet'));
 	$__FM_CONFIG['module']['icons']['action']['log']		= sprintf('<span class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-file-text-o __action__" aria-hidden="true"></i></span>', __('Log the packet'));
 	$__FM_CONFIG['module']['icons']['negated']				= sprintf('<span class="tooltip-bottom" data-tooltip="%s"><i class="fa fa-exclamation-circle block" aria-hidden="true"></i></span>', __('Negated'));
-	$__FM_CONFIG['module']['icons']['search']				= sprintf('<a href="#" class="global-search tooltip-bottom"><i class="fa fa-search preview" alt="%1$s" title="%1$s" aria-hidden="true"></i></a>', __('Global Search'));
+	$__FM_CONFIG['module']['icons']['search']				= sprintf('<a href="#" class="global-search"><i class="fa fa-search preview" alt="%1$s" title="%1$s" aria-hidden="true"></i></a>', __('Global Search'));
 }
 
 $__FM_CONFIG['icons'] = @array_merge((array) $__FM_CONFIG['module']['icons'], (array) $__FM_CONFIG['icons']);
@@ -115,10 +115,10 @@ $__FM_CONFIG['fw']['config_file'] 		= array(
 
 /** Firewall notes */
 $__FM_CONFIG['fw']['notes'] 			= array(
-												'iptables' => __('Rules are evaluated on a first-match basis and everything that isn\'t explicitly blocked will be passed by default. So make sure you take care with your rule order.'),
-												'pf' => __('Rules are evaluated on a last-match basis and everything that isn\'t explicitly blocked will be allowed by default. So make sure you take care with your rule order.'),
-												'ipfw' => __('Rules are evaluated on a first-match basis and everything that isn\'t explicitly passed will be blocked by default. So make sure you take care with your rule order.'),
-												'ipfilter' => __('Rules are evaluated on a first-match basis and everything that isn\'t explicitly blocked will be passed by default. So make sure you take care with your rule order.')
+												'iptables' => __('Rules in this policy are evaluated on a first-match basis and everything that is not explicitly blocked will be passed by default.'),
+												'pf' => __('Rules in this policy are evaluated on a last-match basis and everything that is not explicitly blocked will be allowed by default.'),
+												'ipfw' => __('Rules in this policy are evaluated on a first-match basis and everything that is not explicitly passed will be blocked by default.'),
+												'ipfilter' => __('Rules in this policy are evaluated on a first-match basis and everything that is not explicitly blocked will be passed by default.')
 											);
 
 $__FM_CONFIG['policy']['avail_types'] = array('filter' => 'Filter', 'nat' => 'NAT');

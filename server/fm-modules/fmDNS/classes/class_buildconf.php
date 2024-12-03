@@ -181,7 +181,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				for ($i=0; $i < $count; $i++) {
 					$global_acl_array[$acl_result[$i]->acl_name] = null;
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=' . $acl_result[$i]->acl_id . ' AND acl_status="active" AND server_serial_no="0"');
-					$acl_child_result = $fmdb->last_result;
+					if ($fmdb->num_rows) $acl_child_result = $fmdb->last_result;
 					for ($j=0; $j < $fmdb->num_rows; $j++) {
 						foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
 							if(trim($address)) $global_acl_array[$acl_result[$i]->acl_name][] = trim($address);
@@ -202,7 +202,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					for ($i=0; $i < $acl_config_count; $i++) {
 						$server_acl_addresses = array();
 						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=' . $server_acl_result[$i]->acl_id . ' AND acl_status="active" AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '")');
-						$acl_child_result = $fmdb->last_result;
+						if ($fmdb->num_rows) $acl_child_result = $fmdb->last_result;
 						for ($j=0; $j < $fmdb->num_rows; $j++) {
 							foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
 								if(trim($address)) $server_acl_addresses[] = trim($address);
@@ -222,7 +222,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				for ($i=0; $i < $acl_config_count; $i++) {
 					$server_acl_addresses = array();
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'acls', 'acl_id', 'acl_', 'AND acl_parent_id=' . $server_acl_result[$i]->acl_id . ' AND acl_status="active"');
-					$acl_child_result = $fmdb->last_result;
+					if ($fmdb->num_rows) $acl_child_result = $fmdb->last_result;
 					for ($j=0; $j < $fmdb->num_rows; $j++) {
 						foreach(explode(',', $acl_child_result[$j]->acl_addresses) as $address) {
 							if(trim($address)) $server_acl_addresses[] = trim($address);
@@ -306,7 +306,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 					for ($i=0; $i < $master_config_count; $i++) {
 						$server_master_addresses = $server_master_ports = '';
 						basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=' . $server_master_result[$i]->master_id . ' AND master_status="active" AND server_serial_no IN ("g_' . implode('","g_', $server_group_ids) . '")');
-						$master_child_result = $fmdb->last_result;
+						if ($fmdb->num_rows) $master_child_result = $fmdb->last_result;
 						for ($j=0; $j < $fmdb->num_rows; $j++) {
 							foreach(explode(',', $master_child_result[$j]->master_addresses) as $address) {
 								if ($master_child_result[$i]->master_comment) $server_master_addresses .= "\t// " . $master_child_result[$i]->master_comment . "\n";
@@ -337,7 +337,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				for ($i=0; $i < $master_config_count; $i++) {
 					$server_master_addresses = $server_master_ports = '';
 					basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'masters', 'master_id', 'master_', 'AND master_parent_id=' . $server_master_result[$i]->master_id . ' AND master_status="active"');
-					$master_child_result = $fmdb->last_result;
+					if ($fmdb->num_rows) $master_child_result = $fmdb->last_result;
 					for ($j=0; $j < $fmdb->num_rows; $j++) {
 						foreach(explode(',', $master_child_result[$j]->master_addresses) as $address) {
 							if ($master_child_result[$i]->master_comment) $server_master_addresses .= "\t// " . $master_child_result[$i]->master_comment . "\n";
@@ -1421,7 +1421,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						break;
 					case 'MX':
 						$record_array[2 . $record_result[$i]->record_type]['Description'] = 'Mail Exchange records';
-						$record_array[2 . $record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_priority . $separator . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
+						$record_array[2 . $record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_priority . $separator . $record_value . $record_comment . "\n";
 						break;
 					case 'NAPTR':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Name Authority Pointer records';
@@ -1818,10 +1819,13 @@ HTML;
 		$server_status = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_status');
 		if ($server_status == 'active') {
 			$server_name = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_name');
-			$server_root_dir = getNameFromID($server_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_id', 'server_root_dir');
 			
 			$extra_tab = ($view == true) ? "\t" : null;
 			$server_ip = gethostbyname($server_name);
+			/** Use server_address if the name does not resolve */
+			if ($server_ip == $server_name) {
+				$server_ip = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_address');
+			}
 			$server = ($server_ip) ? $extra_tab . 'server ' . $server_ip . " {\n" : "server [cannot resolve " . $server_name . "] {\n";
 			$config = ($key_name) ? "$extra_tab\tkeys { \"$key_name\"; };\n" : null;
 			
@@ -2253,7 +2257,7 @@ HTML;
 	 *
 	 * @param array $servers The array of group members
 	 * @param integer $key_id The zone transfer key id
-	 * @return array
+	 * @return array|null
 	 */
 	function resolveServerGroupMembers($servers, $key_id = null) {
 		global $__FM_CONFIG, $fmdb;
@@ -2267,7 +2271,12 @@ HTML;
 			if ($key_id) {
 				$key = sprintf(' key %s', getNameFromID($key_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_', 'key_id', 'key_name'));
 			}
-			$server_ips[] = ($server_ip != $server_name) ? $server_ip . $key : sprintf(__('Cannot resolve %s'), $server_name) . $key;
+
+			/** Use server_address if the name does not resolve */
+			if ($server_ip == $server_name) {
+				$server_ip = getNameFromID($server_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'servers', 'server_', 'server_id', 'server_address');
+			}
+			$server_ips[] = ($server_ip && $server_ip != $server_name) ? $server_ip . $key : sprintf(__('Cannot resolve %s'), $server_name) . $key;
 		}
 		
 		return array(implode(',', (array) $server_ips), '');

@@ -37,7 +37,7 @@ if ($server_serial_no === 0) {
 $original_server_serial_no = $server_serial_no;
 
 /** Validate serial_no */
-$valid = false;
+$valid = $allowed_to_add = false;
 if (getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_id')) {
 	$valid = true;
 } elseif ($server_serial_no[0] == 't' && getNameFromID(preg_replace('/\D/', '', $server_serial_no), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'policies', 'policy_', 'policy_id', 'policy_status')) {
@@ -68,8 +68,18 @@ if ($fmdb->num_rows && !$fmdb->sql_errors) {
 $addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['policy']['avail_types']);
 $addl_title_blocks[] = buildServerSubMenu($server_serial_no, $avail_servers, null, 'Select a policy');
 
-$allowed_to_add = ($server_serial_no) ? currentUserCan('manage_policies', $_SESSION['module']) : false;
-echo printPageHeader((string) $response, null, $allowed_to_add, $type, null, 'noscroll', $addl_title_blocks);
+$comment = null;
+
+if ($server_serial_no) {
+	$allowed_to_add = currentUserCan('manage_policies', $_SESSION['module']);
+
+	$server_firewall_type = getNameFromID($server_serial_no, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_type');
+	if (array_key_exists($server_firewall_type, $__FM_CONFIG['fw']['notes'])) {
+		$comment = $__FM_CONFIG['fw']['notes'][$server_firewall_type];
+	}
+}
+
+echo printPageHeader(array('message' => (string) $response, 'comment' => $comment), null, $allowed_to_add, $type, null, 'noscroll', $addl_title_blocks);
 if ($server_serial_no) {
 	/** Get template ID if appropriate */
 	$template_id = 0;

@@ -59,6 +59,7 @@ class fm_module_templates {
 		$title_array = array_merge((array) $title_array, array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($type)));
 		if (currentUserCan('manage_zones', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -83,7 +84,7 @@ class fm_module_templates {
 		$checkbox = null;
 
 		if (currentUserCan('manage_zones', $_SESSION['module'])) {
-			$edit_status = '<td id="row_actions">';
+			$edit_status = '<td class="column-actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$show_delete = true;
 			
@@ -112,7 +113,7 @@ class fm_module_templates {
 			if (!getSOACount($row->domain_id) && $row->domain_type == 'primary' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'SOA';
 			elseif (!getNSCount($row->domain_id) && $row->domain_type == 'primary' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'NS';
 			else {
-				$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
+				$type = ($row->domain_mapping == 'forward') ? 'ALL' : 'PTR';
 			}
 			$edit_name = ($row->domain_type == 'primary') ? "<a href=\"zone-records.php?map={$row->domain_mapping}&domain_id={$row->domain_id}&record_type=$type\" title=\"" . __('Edit zone records') . '">' . displayFriendlyDomainName($row->$field_name) . "</a>" : displayFriendlyDomainName($row->$field_name);
 		} else {

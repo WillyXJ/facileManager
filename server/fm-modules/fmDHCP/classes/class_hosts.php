@@ -79,8 +79,8 @@ class fm_dhcp_hosts extends fm_dhcp_objects {
 			$edit_status .= ($row->config_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
-			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
+			$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
+			$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" />';
 		}
 		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
 		
@@ -102,7 +102,7 @@ class fm_dhcp_hosts extends fm_dhcp_objects {
 		
 		echo <<<HTML
 		<tr id="$row->config_id" name="$row->config_data" $class>
-			$checkbox
+			<td>$checkbox</td>
 			<td>$row->config_data $icons</td>
 			<td>$fixed_address</td>
 			<td>$row->config_comment</td>
@@ -219,7 +219,10 @@ HTML;
 	 * @return array
 	 */
 	function getTableHeader() {
-		return array(__('Hostname'), __('Fixed Address'), _('Comment'));
+		return array(
+			array('title' => __('Hostname'), 'rel' => 'config_data'),
+			array('title' => __('Fixed Address'), 'class' => 'header-nosort')
+		);
 	}
 	
 	/**

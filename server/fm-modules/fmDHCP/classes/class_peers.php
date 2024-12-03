@@ -78,8 +78,8 @@ class fm_dhcp_peers extends fm_dhcp_objects {
 			$edit_status .= ($row->config_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
-			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
+			$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
+			$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" />';
 		}
 		
 		$primary = getNameFromID($this->getConfig($row->config_id, 'address'), 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'servers', 'server_', 'server_serial_no', 'server_name') . ':' . $this->getConfig($row->config_id, 'port');
@@ -89,7 +89,7 @@ class fm_dhcp_peers extends fm_dhcp_objects {
 		
 		echo <<<HTML
 		<tr id="$row->config_id" name="$row->config_data" $class>
-			$checkbox
+			<td>$checkbox</td>
 			<td>$row->config_data</td>
 			<td>$primary</td>
 			<td>$secondary</td>
@@ -290,7 +290,11 @@ HTML;
 	 * @return array
 	 */
 	function getTableHeader() {
-		return array(__('Name'), __('Primary'), __('Secondary'), _('Comment'));
+		return array(
+			array('title' => __('Name'), 'rel' => 'config_data'),
+			array('title' => __('Primary'), 'class' => 'header-nosort'),
+			array('title' => __('Secondary'), 'class' => 'header-nosort')
+		);
 	}
 	
 	/**

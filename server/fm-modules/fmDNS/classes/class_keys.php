@@ -73,6 +73,7 @@ class fm_dns_keys {
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
 		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -215,7 +216,7 @@ class fm_dns_keys {
 		if ($row->key_status == 'revoked') $classes[] = 'attention';
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_status = '<td id="row_actions">';
+			$edit_status = '<td class="column-actions">';
 			$edit_status .= '<a class="edit_form_link" name="' . $row->key_type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!getConfigAssoc($row->key_id, 'key')) {
 				if ($row->key_status != 'revoked') {

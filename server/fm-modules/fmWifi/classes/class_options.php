@@ -49,12 +49,17 @@ class fm_module_options {
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'bulk_list[]\')" />',
 								'class' => 'header-tiny header-nosort'
 							);
+		} else {
+			$title_array[] = array(
+				'class' => 'header-tiny header-nosort'
+			);
 		}
 		$title_array[] = array('title' => __('Option'), 'rel' => 'config_name');
 		$title_array[] = array('title' => __('Value'), 'rel' => 'config_data');
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
 		if (currentUserCan($required_permission, $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($result) {
@@ -212,7 +217,7 @@ class fm_module_options {
 		
 		if (currentUserCan($required_permission, $_SESSION['module'])) {
 			if (!in_array($row->config_name, $uneditable_options)) {
-				$edit_status = '<td id="row_actions">';
+				$edit_status = '<td class="column-actions">';
 				$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$edit_status .= '<a class="status_form_link" href="#" rel="';
 				$edit_status .= ($row->config_status == 'active') ? 'disabled' : 'active';
@@ -221,7 +226,7 @@ class fm_module_options {
 				$edit_status .= '</a>';
 				$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				$edit_status .= '</td>';
-				$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" /></td>';
+				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" />';
 			} else {
 				$edit_status = $checkbox = '<td></td>';
 			}
@@ -238,7 +243,7 @@ class fm_module_options {
 
 		echo <<<HTML
 		<tr id="$row->config_id" name="$row->config_name"$disabled_class>
-			$checkbox
+			<td>$checkbox</td>
 			<td>$row->config_name</td>
 			<td>$config_data</td>
 			<td>$comments</td>

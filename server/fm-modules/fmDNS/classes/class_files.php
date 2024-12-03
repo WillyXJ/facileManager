@@ -73,6 +73,7 @@ class fm_dns_files {
 			if ($num_rows > 1) $table_info['class'] .= ' grab1';
 		}
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -236,7 +237,7 @@ class fm_dns_files {
 		$checkbox = null;
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_status = '<td id="row_actions">';
+			$edit_status = '<td class="column-actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!getConfigAssoc($row->file_id, 'file')) {
 				$edit_status .= '<a class="status_form_link" href="#" rel="';
