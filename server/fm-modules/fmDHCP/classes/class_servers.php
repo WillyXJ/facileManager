@@ -80,6 +80,7 @@ class fm_module_servers extends fm_shared_module_servers {
 							'class' => 'header-actions header-nosort'
 						);
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($result) {

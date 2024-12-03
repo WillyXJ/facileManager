@@ -75,7 +75,6 @@ class fm_module_templates {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $type, __('There are no templates.'));
 		}
-		echo "</div>\n";
 	}
 	
 	function displayRow($row, $prefix) {

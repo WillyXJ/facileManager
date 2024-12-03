@@ -189,7 +189,7 @@ if ($record_type == 'SOA') {
 	}
 }
 
-echo $body . '</div>' . "\n";
+echo $body . "\n";
 
 printFooter();
 

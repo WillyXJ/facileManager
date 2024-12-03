@@ -57,6 +57,7 @@ class fm_module_options {
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
 		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($result) {

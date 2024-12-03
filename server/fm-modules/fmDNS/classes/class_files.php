@@ -89,7 +89,6 @@ class fm_dns_files {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="files">%s</p>', __('There are no files.'));
 		}
-		echo "</div>\n";
 	}
 
 	/**

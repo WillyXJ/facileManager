@@ -74,7 +74,6 @@ class fm_dns_masters {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="masters">%s</p>', __('There are no primaries.'));
 		}
-		echo "</div>\n";
 	}
 
 	/**

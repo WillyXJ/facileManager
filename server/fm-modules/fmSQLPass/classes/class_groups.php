@@ -46,6 +46,7 @@ class fm_sqlpass_groups {
 			$title_array = array(__('Group Name'), __('Associated Servers'));
 			if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions');
 
+			echo '<div class="overflow-container">';
 			echo displayTableHeader($table_info, $title_array);
 			
 			$y = 0;

@@ -80,7 +80,6 @@ class fm_dns_controls {
 			$message = $type == 'controls' ? __('There are no controls.') : __('There are no statistics channels.');
 			printf('<p id="table_edits" class="noresult" name="controls">%s</p>', $message);
 		}
-		echo "</div>\n";
 	}
 
 	/**

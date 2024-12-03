@@ -74,7 +74,6 @@ class fm_dns_acls {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="acls">%s</p>', __('There are no ACLs.'));
 		}
-		echo "</div>\n";
 	}
 
 	/**

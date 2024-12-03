@@ -89,7 +89,6 @@ class fm_dns_keys {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="keys">%s</p>', __('There are no keys.'));
 		}
-		echo "</div>\n";
 	}
 
 	/**

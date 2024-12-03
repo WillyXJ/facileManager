@@ -85,7 +85,6 @@ class fm_module_tls {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="tls">%s</p>', __('There are no TLS connections defined.'));
 		}
-		echo "</div>\n";
 	}
 
 	/**

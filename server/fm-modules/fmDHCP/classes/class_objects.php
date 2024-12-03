@@ -68,6 +68,7 @@ class fm_dhcp_objects {
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($result) {

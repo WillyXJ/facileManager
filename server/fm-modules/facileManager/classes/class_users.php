@@ -88,7 +88,6 @@ class fm_users {
 			}
 			printf('<p id="table_edits" class="noresult" name="users">%s</p>', $message);
 		}
-		echo "</div>\n";
 	}
 
 	/**

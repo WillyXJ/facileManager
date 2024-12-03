@@ -76,7 +76,6 @@ class fm_dns_views {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="views">%s</p>', __('There are no views.'));
 		}
-		echo "</div>\n";
 	}
 
 	/**

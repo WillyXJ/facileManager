@@ -77,7 +77,6 @@ class fm_module_options {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="options">%s</p>', __('There are no options.'));
 		}
-		echo "</div>\n";
 	}
 
 	/**

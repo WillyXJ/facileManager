@@ -103,7 +103,6 @@ echo '<div class="overflow-container">';
 echo displayTableHeader($table_info, $title_array);
 
 displayLogData($page, $search_sql, $sort_direction);
-echo "</div>\n";
 
 printFooter(null, $output);
 

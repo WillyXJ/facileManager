@@ -75,7 +75,6 @@ class fm_module_logging {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="logging">%s</p>', sprintf(__('There are no %s defined.'), strtolower($__FM_CONFIG['logging']['avail_types'][$channel_category])));
 		}
-		echo "</div>\n";
 	}
 
 	/**

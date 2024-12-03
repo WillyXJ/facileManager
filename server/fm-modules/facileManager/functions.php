@@ -314,6 +314,7 @@ HTML;
  */
 function printFooter($classes = null, $text = null, $block_style = null) {
 	echo <<<FOOT
+		</div>
 	</div>
 </div>
 <div class="manage_form_container" id="manage_item" $block_style>
