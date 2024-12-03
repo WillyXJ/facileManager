@@ -874,7 +874,7 @@ if (isset($__FM_CONFIG)) {
 	
 	$("#help_topbar i.popout").click(function() {
 		$("#tophead .help_link").click();
-		window.open("help.php","1356124444538","width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0");
+		window.open("help.php","1356124444538","' . $__FM_CONFIG['default']['popup']['dimensions'] . ',toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0");
 		return false;
 	});
 	

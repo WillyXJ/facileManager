@@ -102,7 +102,8 @@ $__FM_CONFIG['options']['syslog_facilities']			= array(array('auth', 32), array(
 if (function_exists('ldap_connect')) array_push($__FM_CONFIG['options']['auth_method'], array(_('LDAP Authentication'), 2));
 
 /** Defaults */
-$__FM_CONFIG['default']['theme'] = 'Ocean';
+$__FM_CONFIG['default']['theme']				= 'Ocean';
+$__FM_CONFIG['default']['popup']['dimensions'] 	= 'width=700,height=800';
 
 /** Webserver Runas */
 if (function_exists('posix_getpwuid')) {
