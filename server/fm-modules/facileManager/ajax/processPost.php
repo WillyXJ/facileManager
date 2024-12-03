@@ -210,7 +210,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 		if (!currentUserCan('manage_users') && getNameFromID($id, 'fm_keys', 'key_', 'key_id', 'user_id') != $_SESSION['user']['id']) returnUnAuth();
 	}	
 
-	if (!currentUserCan('manage_users') && $_POST['item_sub_type'] != 'keys') returnUnAuth();
+	if (!currentUserCan('manage_users') && (!isset($_POST['item_sub_type']) || $_POST['item_sub_type'] != 'keys')) returnUnAuth();
 	
 	switch ($_POST['action']) {
 		case 'delete':
