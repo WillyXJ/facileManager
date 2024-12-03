@@ -1,9 +1,10 @@
-7.0.0-beta3 (2024-??-??)
+7.0.0-beta3 (2024-12-03)
 ========================
 * Server - [improvement] Managing zone records is revamped and all resource records can be displayed and
            edited on a single page. (Issue #406)
 * Server - [improvement] When A record values are changed, the checkbox to automatically create/update the PTR
            is checked by default.
+* Server - [improvement] fM 5.0.0-beta3 compatibility.
 * Server - [bug] Fixed PHP errors. (Issues #641 #642)
 * Server - [bug] MX records now append the domain to the record value when defined.
 

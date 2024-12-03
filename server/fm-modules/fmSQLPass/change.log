@@ -1,3 +1,7 @@
+1.10.0-beta2 (2024-12-03)
+=========================
+* Server - [improvement] fM 5.0.0-beta3 compatibility.
+
 1.10.0-beta1 (2024-11-13)
 =========================
 * Server - [improvement] Code clean up.

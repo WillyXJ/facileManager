@@ -24,7 +24,7 @@
  *
  * @global string $fm_version
  */
-$fm_version = '5.0.0-beta2';
+$fm_version = '5.0.0-beta3';
 
 /**
  * Holds the facileManager DB revision, increments when changes are made to the facileManager DB schema.
