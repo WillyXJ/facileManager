@@ -175,7 +175,7 @@ $(document).ready(function() {
 	});
 
 	/* Validate the record and flag for saving */
-	$("#zone-records-form").delegate(".inline-record-save", "click tap", function() {
+	$("#zone-records-form").delegate(".inline-record-validate", "click tap", function() {
 		var $this = $(this);
 		var $row_element = $(this).parents("tr");
 
@@ -226,7 +226,7 @@ $(document).ready(function() {
 
 
 	$(".save-record-submit").on("click", function() {
-		var $unsaved_changes = $(".inline-record-save").filter(":visible");
+		var $unsaved_changes = $(".inline-record-validate").filter(":visible");
 		if ($unsaved_changes.length > 0) {
 			$("#manage_item").fadeIn(200);
 			$("#manage_item_contents").html("' . addslashes(str_replace("\n", '', sprintf('%s<p>%s</p>%s',
@@ -566,7 +566,7 @@ $(document).ready(function() {
 	$(".table-results-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change keyup blur", function(e) {
 		$(this).parents("tr").not(".new-record").addClass("build");
 		$(this).parents("tr").removeClass("ok").addClass("notice");
-		$(this).parents("tr").find(".inline-record-save").show();
+		$(this).parents("tr").find(".inline-record-validate").show();
 		$(this).parents("tr").find(".inline-record-actions").show();
 	});
 
@@ -582,7 +582,7 @@ $(document).ready(function() {
 		} else {
 			$(this).parents("tr").removeClass("attention");
 		}
-		$(this).parents("tr").find(".inline-record-save").show();
+		$(this).parents("tr").find(".inline-record-validate").show();
 		$(this).parents("tr").find(".inline-record-actions").show();
 	});
 

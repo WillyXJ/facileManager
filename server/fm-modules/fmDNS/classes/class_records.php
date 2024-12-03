@@ -639,7 +639,7 @@ class fm_dns_records {
 			$field_values['class'] = 'new-record notice';
 			if (!isset($field_values['data']['Actions'])) $field_values['data']['Actions'] = '';
 		}
-		if (isset($field_values['data']['Actions'])) $field_values['data']['Actions'] .= sprintf('<div class="inline-record-actions" style="display: none;"><a href="#" class="inline-record-save">%s</a><a href="#" class="inline-record-cancel">%s</a></div>', _('Save'), _('Cancel'));
+		if (isset($field_values['data']['Actions'])) $field_values['data']['Actions'] .= sprintf('<div class="inline-record-actions" style="display: none;"><a href="#" class="inline-record-validate">%s</a><a href="#" class="inline-record-cancel">%s</a></div>', __('Validate'), _('Cancel'));
 		
 		for ($i=$start; $i<=$end; $i++) {
 			$form .= '<tr class="' . $field_values['class'] . '">' . "\n";
@@ -694,7 +694,7 @@ class fm_dns_records {
 					$val = sprintf('<div class="record-value-group">%s</div>', $val);
 				}
 
-				$form .= "\t<td>$val</td>\n";
+				$form .= ($key == 'Actions') ? "\t<td class=\"column-actions\">$val</td>\n" : "\t<td>$val</td>\n";
 			}
 			$form .= "</tr>\n";
 		}

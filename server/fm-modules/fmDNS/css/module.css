@@ -144,7 +144,7 @@ table.form-table > tbody > tr.dnssec-key-addl-options {
 .inline-record-actions {
 	display: flex;
     align-items: center;
-    justify-content: end;
+    justify-content: center;
 	text-transform: uppercase;
 	padding: 6px 8px;
 }
@@ -155,7 +155,7 @@ table.form-table > tbody > tr.dnssec-key-addl-options {
 .inline-record-actions a:hover {
 	opacity: unset;
 }
-.inline-record-save {
+.inline-record-validate {
 	font-weight: bold;
 }
 .inline-record-cancel {
