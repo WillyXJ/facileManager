@@ -378,6 +378,9 @@ class fm_dns_records {
 			$results = get_object_vars($results);
 			extract($results);
 		}
+
+		if ($record_type == 'CUSTOM') return null;
+
 		$yeschecked = (isset($record_append) && $record_append == 'yes') ? 'checked' : '';
 		
 		$statusopt[0] = array(__('Active'), 'active');
