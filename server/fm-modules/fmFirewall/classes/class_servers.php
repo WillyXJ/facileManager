@@ -40,7 +40,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if (currentUserCan('build_server_configs', $_SESSION['module'])) {
 			$bulk_actions_list[] = __('Build Config');
 		}
-		if (is_array($bulk_actions_list)) {
+		if (count($bulk_actions_list)) {
 			$title_array[] = array(
 								'title' => '<input type="checkbox" class="tickall" onClick="toggle(this, \'server_list[]\')" />',
 								'class' => 'header-tiny header-nosort'

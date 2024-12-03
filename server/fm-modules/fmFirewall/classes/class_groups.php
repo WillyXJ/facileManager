@@ -216,8 +216,8 @@ class fm_module_groups {
 			} else {
 				$checkbox = '<td></td>';
 			}
-			$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 		}
+		$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 		
 		/** Process group items */
 		$group_items = nl2br($this->getGroupItemNames($row->group_items));
