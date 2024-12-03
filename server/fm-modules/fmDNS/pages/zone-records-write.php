@@ -38,7 +38,7 @@ extract($_POST);
 if (isset($_POST['uri_params'])) extract($_POST['uri_params'], EXTR_OVERWRITE);
 
 /* RR types that allow record append */
-$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
+$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'RP', 'NAPTR');
 
 /** Should the user be here? */
 if (!currentUserCan('manage_records', $_SESSION['module'])) {
@@ -60,8 +60,15 @@ if (isset($update) && is_array($update)) {
 	}
 
 	foreach ($update as $id => $data) {
+		if (isset($tmp_record_type)) {
+			$record_type = $tmp_record_type;
+		}
 		if (defined('AJAX') && $record_type == 'ALL') {
+			$tmp_record_type = $record_type;
 			$record_type = isset($data['record_type']) ? $data['record_type'] : getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'record_type');
+		}
+		if (!isset($data['record_append']) && in_array($record_type, $append)) {
+			$data['record_append'] = 'no';
 		}
 		if (isset($data['Delete'])) {
 			$data['record_status'] = 'deleted';
@@ -117,6 +124,9 @@ if (isset($create) && is_array($create)) {
 	$record_count = 0;
 	foreach ($create as $new_id => $data) {
 		if (!isset($data['record_skip'])) {
+			if (isset($tmp_record_type)) {
+				$record_type = $tmp_record_type;
+			}
 			if (isset($import_records) || (defined('AJAX') && $record_type == 'ALL')) $record_type = $data['record_type'];
 			
 			/** Auto-detect IPv4 vs IPv6 A records */

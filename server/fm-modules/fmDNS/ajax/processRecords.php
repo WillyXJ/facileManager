@@ -37,7 +37,6 @@ if (!in_array($_POST['action'], array('process-record-updates', 'validate-record
 	exit;
 }
 
-
 // extract($_POST);
 
 /** Should the user be here? */
@@ -47,7 +46,7 @@ if (!isset($_POST['uri_params']['domain_id']) || !zoneAccessIsAllowed(array($_PO
 if (!isset($_POST['uri_params']['record_type']) || (in_array($_POST['uri_params']['record_type'], $__FM_CONFIG['records']['require_zone_rights']) && !currentUserCan('manage_zones', $_SESSION['module']))) returnUnAuth();
 
 /* RR types that allow record append */
-$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
+$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'RP', 'NAPTR');
 
 if (!isset($global_form_field_excludes)) $global_form_field_excludes = array();
 
@@ -79,7 +78,7 @@ function validateRecordUpdates() {
 	extract($_POST['uri_params'], EXTR_OVERWRITE);
 
 	/* RR types that allow record append */
-	$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
+	$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'RP', 'NAPTR');
 
 	$create_update = 'update';
 	$GLOBALS['new_cname_rrs'] = array();
@@ -135,7 +134,7 @@ function buildUpdateArray($domain_id, $record_type, $data_array, $append) {
 			$changes[$i] = array_merge((array) $sql_records[$i], (array) $raw_changes[$i]);
 		}
 	} else {
-		return false;
+		return $data_array;
 	}
 	unset($sql_records, $raw_changes);
 	
@@ -144,9 +143,11 @@ function buildUpdateArray($domain_id, $record_type, $data_array, $append) {
 
 
 function validateEntry($action, $id, $data, $record_type, $append, $data_array, $domain_info) {
+	global $map;
+
 	$messages = array();
 	
-	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append) && substr($data['record_value'], -1) != '.') {
+	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append) && isset($data['record_value']) && substr($data['record_value'], -1) != '.') {
 		$data['record_append'] = 'yes';
 	} elseif (!isset($data['record_append']) && in_array($record_type, $append)) {
 		$data['record_append'] = 'no';
@@ -159,13 +160,20 @@ function validateEntry($action, $id, $data, $record_type, $append, $data_array, 
 		$data['record_status'] = 'deleted';
 		unset($data['Delete']);
 	}
-	if (!empty($data['record_value'])) {
-		$data['record_value'] = str_replace(array('"', "'"), '', $data['record_value']);
-		if (strpos($data['record_value'], "\n")) {
-			foreach (explode("\n", $data['record_value']) as $line) {
-				$tmp_value[] = trim($line);
+	if ($record_type != 'SOA') {
+		if (!empty($data['record_value'])) {
+			$data['record_value'] = str_replace(array('"', "'"), '', $data['record_value']);
+			if (strpos($data['record_value'], "\n")) {
+				foreach (explode("\n", $data['record_value']) as $line) {
+					$tmp_value[] = trim($line);
+				}
+				$data['record_value'] = join("\n", $tmp_value);
 			}
-			$data['record_value'] = join("\n", $tmp_value);
+		} elseif ($record_type != 'HINFO' && (!isset($data['record_value']) || empty($data['record_value']))) {
+			$messages['errors']['record_value'] = __('Invalid');
+		}
+		if ($record_type != 'PTR' && (!isset($data['record_name']) || empty($data['record_name']))) {
+			$data['record_name'] = '@';
 		}
 		foreach ($data as $key => $val) {
 			$data[$key] = trim($val, '"\'');
@@ -211,7 +219,7 @@ function validateEntry($action, $id, $data, $record_type, $append, $data_array, 
 			
 			if ($record_type == 'PTR') {
 				if ($key == 'record_name') {
-					if ($domain_map == 'reverse') {
+					if ($map == 'reverse') {
 						if (verifyIPAddress(buildFullIPAddress($data['record_name'], $domain_info['name'])) === false) {
 							$messages['errors'][$key] = __('Invalid record');
 						}
@@ -226,9 +234,9 @@ function validateEntry($action, $id, $data, $record_type, $append, $data_array, 
 			if ((in_array($record_type, array('CNAME', 'DNAME', 'MX', 'NS', 'SRV', 'NAPTR'))) || 
 					$record_type == 'PTR' && $key == 'record_value') {
 				if ($key == 'record_value') {
-					$val = $data['record_append'] == 'yes' || $val == '@' ? trim($val, '.') : trim($val, '.') . '.';
+					$val = ((isset($data['record_append']) && $data['record_append'] == 'yes') || $val == '@') ? trim($val, '.') : trim($val, '.') . '.';
 					$data[$key] = $val;
-					if (!verifyCNAME($data['record_append'], $val) || ($record_type == 'NS' && !validateHostname($val))) {
+					if ((isset($data['record_append']) && !verifyCNAME($data['record_append'], $val)) || ($record_type == 'NS' && !validateHostname($val))) {
 						$messages['errors'][$key] = __('Invalid value');
 					}
 				}

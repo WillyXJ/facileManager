@@ -97,7 +97,7 @@ if (!getSOACount($domain_id)) {
 
 $save_all_button = sprintf('<input type="button" value="%s" class="button save-record-submit primary" style="display: none;"/>' . "\n", __('Save All'));
 
-echo printPageHeader(array('message' => $response, 'class' => $response_class), null, currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed, 'zone-records', null, 'noscroll', $addl_title_blocks);
+echo printPageHeader(array('message' => $response, 'class' => $response_class), null, !in_array($record_type, array('SOA', 'CUSTOM')) && currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed, 'zone-records', null, 'noscroll', $addl_title_blocks);
 
 
 if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {

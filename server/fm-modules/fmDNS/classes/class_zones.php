@@ -83,7 +83,9 @@ class fm_dns_zones {
 				array('title' => __('Records'), 'class' => 'header-small  header-nosort')
 			);
 		}
-		$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		if ($map != 'groups' || currentUserCan('manage_zones', $_SESSION['module'])) {
+			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		}
 		
 		if (is_array($checkbox)) {
 			$title_array = array_merge($checkbox, $title_array);
@@ -927,13 +929,15 @@ HTML;
 			}
 			
 			if (currentUserCan('manage_zones', $_SESSION['module'])) {
-				$edit_status = '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				$edit_status = '<td id="row_actions">';
+				$edit_status .= '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$edit_status .= '<a class="status_form_link" href="#" rel="';
 				$edit_status .= ($row->group_status == 'active') ? 'disabled' : 'active';
 				$edit_status .= '">';
 				$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 				$edit_status .= '</a>';
 				$edit_status .= '<a href="#" name="' . $map . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$edit_status .= '</td>';
 				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->group_id .'" />';
 			} else {
 				$edit_status = null;
@@ -945,7 +949,7 @@ HTML;
 			<td>$row->group_name</td>
 			<td>$domain_names</td>
 			<td>$row->group_comment</td>
-			<td id="row_actions">$edit_status</td>
+			$edit_status
 		</tr>
 
 HTML;

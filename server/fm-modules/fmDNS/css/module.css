@@ -116,10 +116,6 @@ p.soa_import span {
 .display_results > tbody > tr > td > span {
 	font-style: italic;
 }
-.display_results > tbody > tr > tr:last-child,
-.display_results > tbody > tr > td:last-child {
-	text-align: center;
-}
 
 #define_forwarders,
 #define_masters {
@@ -170,13 +166,21 @@ table.form-table > tbody > tr.dnssec-key-addl-options {
 }
 
 div.record-value-group p.record-sub-value {
-	margin: 5px 0 0;
+	margin: 0;
 	font-size: 11px;
     white-space: nowrap;
 }
-div.record-value-group > div:first-of-type > p.record-sub-value {
-	margin: 0;
+div.record-value-group > div:not(:nth-child(1)) {
+	margin-top: 5px;
 }
-.display_results > tbody > tr > td input.input-long-wide {
-	width: 17em;
+.display_results > tbody > tr > td input.input-long-wide,
+.display_results > tbody > tr > td textarea {
+		width: 23em;
+}
+
+div[class^="record-value-subgroup"] {
+	display: flex;
+}
+div[class^="record-value-subgroup"] > div {
+	padding-right: 1em;
 }

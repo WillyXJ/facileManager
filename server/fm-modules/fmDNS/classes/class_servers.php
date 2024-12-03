@@ -33,7 +33,8 @@ class fm_module_servers extends fm_shared_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+		$perm_manage_servers = currentUserCan('manage_servers', $_SESSION['module']);
+		if ($perm_manage_servers) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
 		if (currentUserCan('build_server_configs', $_SESSION['module']) && $type == 'servers') {
@@ -78,10 +79,12 @@ class fm_module_servers extends fm_shared_module_servers {
 				array('title' => __('Secondary Servers'), 'class' => 'header-nosort'),
 				));
 		}
-		$title_array[] = array(
+		if ($type == 'servers' || $perm_manage_servers) {
+			$title_array[] = array(
 							'title' => __('Actions'),
 							'class' => 'header-actions header-nosort'
 						);
+		}
 
 		echo displayTableHeader($table_info, $title_array);
 		
@@ -566,16 +569,18 @@ class fm_module_servers extends fm_shared_module_servers {
 
 HTML;
 		} elseif ($type == 'groups') {
-			$checkbox = (currentUserCan('manage_servers', $_SESSION['module'])) ? '<input type="checkbox" name="group_list[]" value="g' . $row->group_id .'" />' : null;
+			$checkbox = null;
 
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
-				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				$checkbox = '<input type="checkbox" name="group_list[]" value="g' . $row->group_id .'" />';
+				$edit_status = '<td id="row_actions"><a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$query = "SELECT domain_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' AND 
 					(domain_name_servers='g_{$row->group_id}' OR domain_name_servers LIKE 'g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id}')";
 				$result = $fmdb->get_results($query);
 				if (!$fmdb->num_rows) {
 					$edit_status .= '<a href="#" class="delete" name="' . $type . '">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				}
+				$edit_status .= '</td>';
 			}
 			
 			/** Process group masters */
@@ -606,7 +611,7 @@ HTML;
 			<td>$row->group_name</td>
 			<td>$group_masters</td>
 			<td>$group_slaves</td>
-			<td id="row_actions">$edit_status</td>
+			$edit_status
 		</tr>
 
 HTML;

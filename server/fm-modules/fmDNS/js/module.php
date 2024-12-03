@@ -108,6 +108,7 @@ $(document).ready(function() {
 		var form_data = {
 			action: "get-record-value-form",
 			domain_id: getUrlVars()["domain_id"],
+			id_index: $this.attr("name"),
 			record_type: $this.val(),
 			is_ajax: 1
 		};
@@ -184,7 +185,7 @@ $(document).ready(function() {
 			is_ajax: 1
 		};
 		var uri_params = {"uri_params":getUrlVars()};
-		var form_data = $row_element.find("input, select").serialize() + "&" + $.param(uri_params) + "&" + $.param(addl_form_data);
+		var form_data = $row_element.find("input, select, textarea").serialize() + "&" + $.param(uri_params) + "&" + $.param(addl_form_data);
 
 		$.ajax({
 			type: "POST",
@@ -244,7 +245,7 @@ $(document).ready(function() {
 				is_ajax: 1
 			};
 			var uri_params = {"uri_params":getUrlVars()};
-			var form_data = $("#zone-records-form tr.record-changed input, #zone-records-form tr.record-changed select").serialize() + "&" + $.param(uri_params) + "&" + $.param(addl_form_data);
+			var form_data = $("#zone-records-form tr.record-changed input, #zone-records-form tr.record-changed select, #zone-records-form tr.record-changed textarea").serialize() + "&" + $.param(uri_params) + "&" + $.param(addl_form_data);
 	
 			/** Update the database */
 			var $this				= $(this);
@@ -260,15 +261,16 @@ $(document).ready(function() {
 						return false;
 					}
 					if (response != "Success" && !$.isNumeric(response)) {
+						console.log(response);
 						$("#manage_item").fadeOut(200);
 						$("body").removeClass("fm-noscroll");
 
-						$("#popup_response").html("<p>" + response + "</p>");
+						$("#response").html("<p>" + response + "</p>");
 
 						/* Popup response more link */
-						$("#popup_response").delegate("a.more", "click tap", function(e1) {
+						$("#response").delegate("a.more", "click tap", function(e1) {
 							e1.preventDefault();
-							error_div = $("#popup_response div#error")
+							error_div = $("#response div#error")
 							if (error_div.is(":visible")) {
 								error_div.hide();
 								$(this).text("' . _('more') . '");
@@ -277,18 +279,18 @@ $(document).ready(function() {
 								$(this).text("' . _('less') . '");
 							}
 						});
-						$("#popup_response").delegate("#response_close i.close", "click tap", function(e2) {
+						$("#response").delegate("#response_close i.close", "click tap", function(e2) {
 							e2.preventDefault();
-							$("#popup_response").fadeOut(200, function() {
-								$("#popup_response").html();
+							$("#response").fadeOut(200, function() {
+								$("#response").html();
 							});
 						});
 					
-						$("#popup_response").fadeIn(200);
+						$("#response").fadeIn(200);
 
 						if (response.indexOf("a class=\"more\"") <= 0) {
-							$("#popup_response").delay(2000).fadeOut(200, function() {
-								$("#popup_response").html();
+							$("#response").delay(2000).fadeOut(200, function() {
+								$("#response").html();
 							});
 						}
 					} else {
@@ -566,9 +568,11 @@ $(document).ready(function() {
 		$(this).parents("tr").removeClass("ok").addClass("notice");
 		$(this).parents("tr").find(".inline-record-save").show();
 		$(this).parents("tr").find(".inline-record-actions").show();
+	});
 
-		/* Automatically select to update PTR */
-		$(this).parents("td").find("input[name*=\'\[PTR\]\']").prop("checked", true);
+	/* Automatically select to set/update PTR */
+	$(".table-results-container .display_results").delegate("input[name*=\'record_name\'], input[name*=\'record_value\']", "change keyup blur", function(e) {
+		$(this).parents("tr").find("input[name*=\'\[PTR\]\']").prop("checked", true);
 	});
 
 	/* Record delete checkbox */
