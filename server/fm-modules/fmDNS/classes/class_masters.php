@@ -58,6 +58,7 @@ class fm_dns_masters {
 			array('title' => _('Comment'), 'class' => 'header-nosort')));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array, 'masters');
 		
 		if ($result) {
@@ -73,6 +74,7 @@ class fm_dns_masters {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="masters">%s</p>', __('There are no primaries.'));
 		}
+		echo "</div>\n";
 	}
 
 	/**

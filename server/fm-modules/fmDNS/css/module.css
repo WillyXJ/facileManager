@@ -61,9 +61,6 @@ p.soa_import span {
 #recordmenu ul li.has-sub:hover > a:after{top:0; bottom:0;}
 #recordmenu ul li.has-sub:hover > ul, #recordmenu ul li.has-sub:hover > div {
 	display:block;
-	position: fixed;
-    top: 7.1em;
-    right: 2em;
 }
 #recordmenu ul li > ul {
 	display:none; width:auto; position:absolute; top:2.5em; right: 0; padding:2px 0; background-color:rgba(70,70,70,0.95);

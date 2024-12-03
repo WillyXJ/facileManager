@@ -68,6 +68,7 @@ class fm_module_http {
 			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 		}
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -84,6 +85,7 @@ class fm_module_http {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="http">%s</p>', __('There are no HTTP endpoints defined.'));
 		}
+		echo "</div>\n";
 	}
 
 	/**

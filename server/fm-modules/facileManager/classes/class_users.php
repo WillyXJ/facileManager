@@ -65,6 +65,7 @@ class fm_users {
 		}
 		$title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -87,6 +88,7 @@ class fm_users {
 			}
 			printf('<p id="table_edits" class="noresult" name="users">%s</p>', $message);
 		}
+		echo "</div>\n";
 	}
 
 	/**

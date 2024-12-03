@@ -531,8 +531,12 @@ h4 {
 
 
 #body_top_container {
-	display: flex;
-	flex-direction: column;
+	padding: 1em 2em 5em;
+	position: absolute;
+	right: 0em;
+	left: 17em;
+	top: 3.7em;
+	bottom: 8em;
 }
 #page_title_container {
 	border-bottom: 1px solid var(--page-title-line);
@@ -550,6 +554,13 @@ h4 {
 	padding-left: 1em;
 }
 
+.overflow-container {
+	position: absolute;
+	height: 100%;
+	right: 2em;
+	left: 2em;
+	overflow: scroll;
+}
 
 .fm-noscroll {
 	height: 100%;
@@ -881,14 +892,6 @@ i.text_icon {
 	top: 1px;
 }
 
-.table-results-container {
-	position: absolute;
-	top: 10.5em;
-	bottom: 2em;
-	right: 2em;
-	left: 19em;
-	overflow: auto;
-}
 .new-container {
 	position: absolute;
 	bottom: 1em;

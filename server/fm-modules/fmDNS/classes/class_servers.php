@@ -86,6 +86,7 @@ class fm_module_servers extends fm_shared_module_servers {
 						);
 		}
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -102,6 +103,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			$message = $type == 'servers' ? __('There are no servers.') : __('There are no groups.');
 			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', $message);
 		}
+		echo "</div>\n";
 	}
 
 	/**

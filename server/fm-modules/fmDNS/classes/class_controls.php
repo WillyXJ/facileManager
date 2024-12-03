@@ -63,6 +63,7 @@ class fm_dns_controls {
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
 		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -79,6 +80,7 @@ class fm_dns_controls {
 			$message = $type == 'controls' ? __('There are no controls.') : __('There are no statistics channels.');
 			printf('<p id="table_edits" class="noresult" name="controls">%s</p>', $message);
 		}
+		echo "</div>\n";
 	}
 
 	/**

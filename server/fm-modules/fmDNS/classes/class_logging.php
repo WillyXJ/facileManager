@@ -59,6 +59,7 @@ class fm_module_logging {
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
 		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -74,6 +75,7 @@ class fm_module_logging {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="logging">%s</p>', sprintf(__('There are no %s defined.'), strtolower($__FM_CONFIG['logging']['avail_types'][$channel_category])));
 		}
+		echo "</div>\n";
 	}
 
 	/**

@@ -61,6 +61,7 @@ class fm_module_options {
 		$perms = ($results[0]->domain_id) ? zoneAccessIsAllowed(array($results[0]->domain_id), 'manage_zones') : currentUserCan('manage_servers', $_SESSION['module']);
 		if ($perms) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -76,6 +77,7 @@ class fm_module_options {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="options">%s</p>', __('There are no options.'));
 		}
+		echo "</div>\n";
 	}
 
 	/**

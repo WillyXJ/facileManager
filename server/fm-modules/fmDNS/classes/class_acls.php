@@ -58,6 +58,7 @@ class fm_dns_acls {
 			array('title' => _('Comment'), 'class' => 'header-nosort')));
 		if (currentUserCan('manage_servers', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array, 'acls');
 		
 		if ($result) {
@@ -73,6 +74,7 @@ class fm_dns_acls {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="acls">%s</p>', __('There are no ACLs.'));
 		}
+		echo "</div>\n";
 	}
 
 	/**

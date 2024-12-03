@@ -59,6 +59,7 @@ class fm_module_templates {
 		$title_array = array_merge((array) $title_array, array(array('title' => '', 'class' => 'header-nosort')), $fm_dns_records->getHeader(strtoupper($type)));
 		if (currentUserCan('manage_zones', $_SESSION['module'])) $title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -74,6 +75,7 @@ class fm_module_templates {
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="%s">%s</p>', $type, __('There are no templates.'));
 		}
+		echo "</div>\n";
 	}
 	
 	function displayRow($row, $prefix) {
