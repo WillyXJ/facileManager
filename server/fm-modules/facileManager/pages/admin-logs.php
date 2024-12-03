@@ -77,7 +77,8 @@ $title_array = array(
 	array('title' => _('Timestamp'), 'rel' => 'log_timestamp'),
 	array('title' => _('Module'), 'class' => 'header-nosort'),
 	array('title' => _('User'), 'class' => 'header-nosort'),
-	array('title' => _('Message'), 'style' => 'width: 50%;', 'class' => 'header-nosort')
+	array('title' => _('Message'), 'style' => 'width: 50%;', 'class' => 'header-nosort'),
+	array('class' => 'header-tiny header-nosort')
 );
 
 $search_form = sprintf('<form class="log_search_form" id="date-range" method="get">
@@ -98,6 +99,7 @@ $search_form = sprintf('<form class="log_search_form" id="date-range" method="ge
 $fmdb->num_rows = $log_count;
 echo printPageHeader($response);
 echo displayPagination($page, $total_pages, array($search_form, null));
+echo '<div class="overflow-container">';
 echo displayTableHeader($table_info, $title_array);
 
 displayLogData($page, $search_sql, $sort_direction);
@@ -129,6 +131,7 @@ function displayLogData($page, $search_sql = null, $sort_direction = 'DESC') {
 					<td>$log_module</td>
 					<td>$user_name</td>
 					<td>$log_data</td>
+					<td></td>
 				</tr>
 
 ROW;

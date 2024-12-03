@@ -122,6 +122,9 @@ function getfmDNSUsersPermLogging($fm_user_caps, $perm, $value_array) {
 					$type = 'domain';
 					$table = 'domains';
 				}
+				if (!isset($__FM_CONFIG['fmDNS'])) {
+					include(ABSPATH . 'fm-modules/fmDNS/variables.inc.php');
+				}
 				$specific_items[] = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . $table, "{$type}_", "{$type}_id", "{$type}_name");
 			}
 		}

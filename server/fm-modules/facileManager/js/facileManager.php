@@ -16,7 +16,7 @@ if (isset($__FM_CONFIG)) {
 
 	$(function() {
 		$(".datepicker").datepicker();
-		$("select").select2({minimumResultsForSearch: 10});
+		$("select:not([class])").select2({minimumResultsForSearch: 10});
 		$("#bulk_action").select2({minimumResultsForSearch: -1, width: "120px", allowClear: true});
 		$("#server_serial_no").select2({minimumResultsForSearch: 10, containerCss: { "min-width": "130px", "text-align": "left" }});
 		$("#server_serial_no_extended").select2({minimumResultsForSearch: 10, containerCss: { "min-width": "230px", "text-align": "left", allowClear: true }});
@@ -79,8 +79,8 @@ if (isset($__FM_CONFIG)) {
 		else $("#scroll-to-top").removeClass("displayed");
 	} );
 	
-	$(".existing-container").scroll( function(){
-		if($(".existing-container").scrollTop() > 150) $("#scroll-to-top").addClass("displayed");
+	$(".table-results-container").scroll( function(){
+		if($(".table-results-container").scrollTop() > 150) $("#scroll-to-top").addClass("displayed");
 		else $("#scroll-to-top").removeClass("displayed");
 	} );
 	
@@ -90,7 +90,7 @@ if (isset($__FM_CONFIG)) {
 	} );
 	
 	$("#scroll-to-top").click( function(){
-		$(".existing-container").animate( { scrollTop: "0px" } );
+		$(".table-results-container").animate( { scrollTop: "0px" } );
 		return false;
 	} );
 	
@@ -178,7 +178,7 @@ if (isset($__FM_CONFIG)) {
 	});
 	
 	/* Form adds */
-	$("#plus").click(function() {
+	$("#plus:not(.add-inline)").click(function() {
 		var $this 		= $(this);
 		item_type		= $("#table_edits").attr("name");
 		item_sub_type	= $this.attr("name");
@@ -874,7 +874,7 @@ if (isset($__FM_CONFIG)) {
 	
 	$("#help_topbar i.popout").click(function() {
 		$("#tophead .help_link").click();
-		window.open("help.php","1356124444538","width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0");
+		window.open("help.php","1356124444538","' . $__FM_CONFIG['default']['popup']['dimensions'] . ',toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0");
 		return false;
 	});
 	

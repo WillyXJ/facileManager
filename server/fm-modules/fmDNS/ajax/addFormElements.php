@@ -30,10 +30,23 @@ $zone_access_allowed = true;
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
 if (is_array($_POST) && count($_POST)) {
+	if (isset($_POST['action']) && $_POST['action'] == 'get-record-value-form' && isset($_POST['record_type'])) {
+		extract($_POST);
+		$index = 1;
+		if (isset($_POST['id_index'])) {
+			preg_match('/\[\d+\]/', $_POST['id_index'], $matches);
+			if ($matches) {
+				$index = intval(str_replace(array('[', ']'), '', $matches[0]));
+			}
+		}
+		$form = $fm_dns_records->getInputForm($record_type, true, $domain_id, null, 'record-value-group-only', $index);
+		echo $form;
+		exit;
+	}
 	if (currentUserCan('manage_records', $_SESSION['module'])) {
 		if (array_key_exists('domain_id', $_POST) && array_key_exists('record_type', $_POST)) {
 			extract($_POST);
-			$additional_lines = $fm_dns_records->getInputForm($record_type, true, $domain_id, null, 'no-actions', ($clicks * 4) + 5);
+			$additional_lines = $fm_dns_records->getInputForm($record_type, true, $domain_id, null, 'no-actions', ($clicks) + 1);
 			echo $additional_lines;
 		}
 	}

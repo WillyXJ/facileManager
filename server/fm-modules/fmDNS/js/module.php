@@ -13,13 +13,30 @@ $(document).ready(function() {
 
 	if (onPage("zone-records.php")) {
 		/* Add body class */
-		$("body").addClass("fm-noscroll");
+		// $("body").addClass("fm-noscroll");
+		$("#plus").addClass("add-inline add-zone-records");
+
+		$("select.record-type").select2({
+			width: "80px"
+		});
 		
 		/* Dynamic zone compare routine */
 		var loadzone = getUrlVars()["load"];
 		if (loadzone == "zone") {
 			loadDynamicZone();
 		}
+
+		var KEYCODE_ENTER = 13;
+		var KEYCODE_ESC = 27;
+		
+		$(document).keyup(function(e) {
+			if (e.keyCode == KEYCODE_ESC) { 
+				var $row_element = $(":focus").parents("tr");
+				if ($row_element.hasClass("notice")) {
+					$row_element.find(".inline-record-cancel").click();
+				}
+			} 
+		});	
 	}
 
 	if (onPage("zones-forward.php") || onPage("zones-reverse.php")) {
@@ -39,6 +56,254 @@ $(document).ready(function() {
 			});
 		});
 	}
+
+	/* Form adds */
+	$("#plus.add-zone-records").unbind("click").bind("click", function() {
+		var $this 		= $(this);
+		var item_id		= getUrlVars()["domain_id"];
+		var item_type	= getUrlVars()["record_type"];
+
+		var form_data = {
+			domain_id: item_id,
+			record_type: item_type,
+			clicks: more_clicks,
+			is_ajax: 1
+		};
+
+		$.ajax({
+			type: "POST",
+			url: "fm-modules/' . $module_name . '/ajax/addFormElements.php",
+			data: form_data,
+			success: function(response)
+			{
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+					doLogout();
+					return false;
+				}
+				if ($("table.display_results tbody tr").length <= 0) {
+					$("table.display_results tbody").html(response);
+				} else {
+					$("table.display_results tbody tr:first").before(response);
+				}
+				$("table.display_results tbody tr:first div.inline-record-actions").show();
+				$("table.display_results tbody tr:first input:text").first().focus();
+				$("select").select2({
+					minimumResultsForSearch: 10
+				});
+				$("select.record-type").select2({
+					width: "80px"
+				});
+				more_clicks = more_clicks + 1;
+			}
+		});
+
+		return false;
+	});
+
+	/* New record type select change */
+	$("#zone-records-form").delegate("select.record-type", "change", function() {
+		var $this 		 = $(this);
+		var $row_element = $(this).parents("tr");
+
+		var form_data = {
+			action: "get-record-value-form",
+			domain_id: getUrlVars()["domain_id"],
+			id_index: $this.attr("name"),
+			record_type: $this.val(),
+			is_ajax: 1
+		};
+
+		$.ajax({
+			type: "POST",
+			url: "fm-modules/' . $module_name . '/ajax/addFormElements.php",
+			data: form_data,
+			success: function(response)
+			{
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+					doLogout();
+					return false;
+				}
+				$row_element.find("div.record-value-group").html(response);
+
+				$("select").select2({
+					minimumResultsForSearch: 10
+				});
+				$("select.record-type").select2({
+					width: "80px"
+				});
+			}
+		});
+
+		return false;
+	});
+
+	/* Cancel record changes */
+	$("#zone-records-form").delegate(".inline-record-cancel", "click tap", function() {
+		var $row_element = $(this).parents("tr");
+		if ($row_element.hasClass("new-record")) {
+			$row_element.css({"background-color":"#D98085"});
+			$row_element.fadeOut("slow", function() {
+				$row_element.remove();
+			});
+		} else {
+			/* Revert changes */
+			$(this).parent().parent().find("input[type=checkbox]").prop("checked", false);
+
+			var $this_row_inputs = $(this).parents("tr").find("input, select");
+			$this_row_inputs.each(function() {
+				if ($(this).is("select")) {
+					$(this).val($(this).find("option[selected]").val());
+					$(this).trigger("change");
+				} else if ($(this).is("input[type=\"checkbox\"]")) {
+					$(this).prop("checked", this.defaultChecked);
+				} else {
+					$(this).val(this.defaultValue);
+				}
+				$(this).removeClass("validate-error");
+			});
+			$row_element.removeClass("record-changed build attention notice");
+			$(this).parent().hide();
+		}
+
+		/* Remove save all button if nothing is present to save */
+		setTimeout(function(){
+			var $unsaved_changes = $("#zone-records-form tr.record-changed");
+			if ($unsaved_changes.length <= 0) {
+				$(".save-record-submit").fadeOut();
+			}
+		}, 1000);
+	});
+
+	/* Validate the record and flag for saving */
+	$("#zone-records-form").delegate(".inline-record-validate", "click tap", function() {
+		var $this = $(this);
+		var $row_element = $(this).parents("tr");
+
+		/** Get element changes */
+		var addl_form_data = {
+			action: "validate-record-updates",
+			is_ajax: 1
+		};
+		var uri_params = {"uri_params":getUrlVars()};
+		var form_data = $row_element.find("input, select, textarea").serialize() + "&" + $.param(uri_params) + "&" + $.param(addl_form_data);
+
+		$.ajax({
+			type: "POST",
+			url: "fm-modules/' . $module_name . '/ajax/processRecords.php",
+			data: form_data,
+			success: function(response)
+			{
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+					doLogout();
+					return false;
+				}
+				if ($.isArray(response)) {
+					/* Set the auto-corrected value */
+					$.each(response[0], function(key, value) {
+						$row_element.find("input[name*=" + key + "]").val(value);
+					});
+
+					/* Highlight any errors */
+					if ("errors" in response[1]) {
+						$row_element.find(".validate-error").removeClass("validate-error");
+						$.each(response[1]["errors"], function(key, value) {
+							$row_element.find("input[name*=" + key + "]").addClass("validate-error");
+						});
+					} else {
+						$row_element.find(".validate-error").removeClass("validate-error");
+						$row_element.removeClass("notice");
+						$row_element.addClass("record-changed");
+						if ($row_element.hasClass("new-record")) {
+							$row_element.addClass("ok");
+						}
+						$this.hide();
+						$(".save-record-submit").fadeIn();
+					}
+				}
+			}
+		});
+	});
+
+
+	$(".save-record-submit").on("click", function() {
+		var $unsaved_changes = $(".inline-record-validate").filter(":visible");
+		if ($unsaved_changes.length > 0) {
+			$("#manage_item").fadeIn(200);
+			$("#manage_item_contents").html("' . addslashes(str_replace("\n", '', sprintf('%s<p>%s</p>%s',
+				buildPopup('header', _('Error')),
+				__('There are unsaved pending changes.'),
+				buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'))))) . '");
+			$unsaved_changes.first().parents("tr").find("input").first().focus();
+		} else {
+			$("body").addClass("fm-noscroll");
+			$("#manage_item").fadeIn(200);
+			$("#manage_item_contents").html("<p>' . _('Processing...please wait.') . ' <i class=\"fa fa-spinner fa-spin\"></i></p>");
+
+			/** Get element changes */
+			var addl_form_data = {
+				action: "process-record-updates",
+				is_ajax: 1
+			};
+			var uri_params = {"uri_params":getUrlVars()};
+			var form_data = $("#zone-records-form tr.record-changed input, #zone-records-form tr.record-changed select, #zone-records-form tr.record-changed textarea").serialize() + "&" + $.param(uri_params) + "&" + $.param(addl_form_data);
+	
+			/** Update the database */
+			var $this				= $(this);
+	
+			$.ajax({
+				type: "POST",
+				url: "fm-modules/' . $module_name . '/ajax/processRecords.php",
+				data: form_data,
+				success: function(response)
+				{
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+						doLogout();
+						return false;
+					}
+					if (response != "Success" && !$.isNumeric(response)) {
+						console.log(response);
+						$("#manage_item").fadeOut(200);
+						$("body").removeClass("fm-noscroll");
+
+						$("#response").html("<p>" + response + "</p>");
+
+						/* Popup response more link */
+						$("#response").delegate("a.more", "click tap", function(e1) {
+							e1.preventDefault();
+							error_div = $("#response div#error")
+							if (error_div.is(":visible")) {
+								error_div.hide();
+								$(this).text("' . _('more') . '");
+							} else {
+								error_div.show();
+								$(this).text("' . _('less') . '");
+							}
+						});
+						$("#response").delegate("#response_close i.close", "click tap", function(e2) {
+							e2.preventDefault();
+							$("#response").fadeOut(200, function() {
+								$("#response").html();
+							});
+						});
+					
+						$("#response").fadeIn(200);
+
+						if (response.indexOf("a class=\"more\"") <= 0) {
+							$("#response").delay(2000).fadeOut(200, function() {
+								$("#response").html();
+							});
+						}
+					} else {
+						setTimeout(function(){
+							$("#manage_item").fadeOut(200);
+							$("body").removeClass("fm-noscroll");
+							location.reload();
+						}, 1500);
+					}
+				}
+			});
+		}
+	});
 
 	/* Zone reload button */
 	$("#zones").delegate("form", "click tap", function(e) {
@@ -297,31 +562,28 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	/* New records */
-	$(".new-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change", function(e) {
-		if ($(this).attr("type") == "checkbox") {
-			$(this).parent().parent().parent().addClass("ok");
-		} else {
-			$(this).parent().parent().addClass("ok");
-		}
+	/* Changing record values */
+	$(".table-results-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change keyup blur", function(e) {
+		$(this).parents("tr").not(".new-record").addClass("build");
+		$(this).parents("tr").removeClass("ok").addClass("notice");
+		$(this).parents("tr").find(".inline-record-validate").show();
+		$(this).parents("tr").find(".inline-record-actions").show();
 	});
 
-	/* Changing record values */
-	$(".existing-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change", function(e) {
-		if ($(this).attr("type") == "checkbox") {
-			$(this).parent().parent().parent().addClass("build");
-		} else {
-			$(this).parent().parent().addClass("build");
-		}
+	/* Automatically select to set/update PTR */
+	$(".table-results-container .display_results").delegate("input[name*=\'record_name\'], input[name*=\'record_value\']", "change keyup blur", function(e) {
+		$(this).parents("tr").find("input[name*=\'\[PTR\]\']").prop("checked", true);
 	});
 
 	/* Record delete checkbox */
 	$(".display_results").delegate("input[id^=\'record_delete_\']", "click tap", function(e) {
 		if ($(this).is(":checked")) {
-			$(this).parent().parent().parent().addClass("attention");
+			$(this).parents("tr").removeClass("ok").addClass("attention notice");
 		} else {
-			$(this).parent().parent().parent().removeClass("attention");
+			$(this).parents("tr").removeClass("attention");
 		}
+		$(this).parents("tr").find(".inline-record-validate").show();
+		$(this).parents("tr").find(".inline-record-actions").show();
 	});
 
 	$("#manage_item_contents").delegate("#cfg_destination", "change", function(e) {

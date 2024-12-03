@@ -65,6 +65,7 @@ class fm_users {
 		}
 		$title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -600,7 +601,7 @@ class fm_users {
 		echo <<<HTML
 		<tr id="$id" name="$name"$disabled_class>
 			$column
-			<td id="row_actions">$edit_status</td>
+			<td class="column-actions">$edit_status</td>
 		</tr>
 
 HTML;

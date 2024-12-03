@@ -83,7 +83,9 @@ class fm_dns_zones {
 				array('title' => __('Records'), 'class' => 'header-small  header-nosort')
 			);
 		}
-		$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		if ($map != 'groups' || currentUserCan('manage_zones', $_SESSION['module'])) {
+			$title_array[] = array('title' => __('Actions'), 'class' => 'header-actions header-nosort');
+		}
 		
 		if (is_array($checkbox)) {
 			$title_array = array_merge($checkbox, $title_array);
@@ -97,7 +99,7 @@ class fm_dns_zones {
 		echo displayPagination($page, $total_pages, $addl_blocks);
 		echo '<div class="overflow-container">';
 
-		echo '<div class="existing-container" style="bottom: 10em;">';
+		echo '<div class="table-results-container">';
 		echo displayTableHeader($table_info, $title_array, 'zones');
 		
 		if ($result) {
@@ -308,7 +310,7 @@ class fm_dns_zones {
 		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` 
 			(account_id,domain_id,cfg_name,cfg_data) VALUES ({$_SESSION['user']['account_id']}, $insert_id, ";
 		if (!$post['domain_template_id']) {
-			$required_servers = $post['domain_required_servers'];
+			if (isset($post['domain_required_servers'])) $required_servers = $post['domain_required_servers'];
 			if ($post['domain_type'] == 'forward') {
 				$result = $fmdb->query($query . "'forwarders', '" . $required_servers . "')");
 				$log_message .= formatLogKeyData('domain_', 'forwarders', $required_servers);
@@ -824,10 +826,10 @@ class fm_dns_zones {
 			if (!$soa_count && $row->domain_type == 'primary' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'SOA';
 			elseif (!$ns_count && $row->domain_type == 'primary' && currentUserCan('manage_zones', $_SESSION['module'])) $type = 'NS';
 			else {
-				$type = ($row->domain_mapping == 'forward') ? 'A' : 'PTR';
+				$type = ($row->domain_mapping == 'forward') ? 'ALL' : 'PTR';
 			}
 			if ($soa_count && $ns_count && $row->domain_type == 'primary') {
-				$edit_status = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=-1&config=zone&domain_id=' . $row->domain_id . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
+				$edit_status = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=-1&config=zone&domain_id=' . $row->domain_id . '\',\'1356124444538\',\'' . $__FM_CONFIG['default']['popup']['dimensions'] . ',toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 			}
 			if (currentUserCan('manage_zones', $_SESSION['module']) && $zone_access_allowed) {
 				$edit_status .= '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
@@ -907,7 +909,7 @@ class fm_dns_zones {
 				$clone_comment</td>
 			<td align="center">$record_count
 				$clone_counts</td>
-			<td id="row_actions">
+			<td class="column-actions">
 				$reload_zone
 				$edit_status
 			</td>
@@ -927,13 +929,15 @@ HTML;
 			}
 			
 			if (currentUserCan('manage_zones', $_SESSION['module'])) {
-				$edit_status = '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				$edit_status = '<td class="column-actions">';
+				$edit_status .= '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$edit_status .= '<a class="status_form_link" href="#" rel="';
 				$edit_status .= ($row->group_status == 'active') ? 'disabled' : 'active';
 				$edit_status .= '">';
 				$edit_status .= ($row->group_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 				$edit_status .= '</a>';
 				$edit_status .= '<a href="#" name="' . $map . '" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
+				$edit_status .= '</td>';
 				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->group_id .'" />';
 			} else {
 				$edit_status = null;
@@ -945,7 +949,7 @@ HTML;
 			<td>$row->group_name</td>
 			<td>$domain_names</td>
 			<td>$row->group_comment</td>
-			<td id="row_actions">$edit_status</td>
+			$edit_status
 		</tr>
 
 HTML;
@@ -2055,7 +2059,7 @@ HTML;
 		/** Cleans up acl_addresses for future parsing **/
 		$clean_fields = array('forwarders', 'primaries');
 		foreach ($clean_fields as $val) {
-			if (strpos($post['domain_required_servers'][$val], 'master_') === false) {
+			if (isset($post['domain_required_servers']) && strpos($post['domain_required_servers'][$val], 'master_') === false) {
 				$post['domain_required_servers'][$val] = verifyAndCleanAddresses($post['domain_required_servers'][$val], 'no-subnets-allowed');
 				if (strpos($post['domain_required_servers'][$val], 'not valid') !== false) return $post['domain_required_servers'][$val];
 			}

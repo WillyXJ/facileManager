@@ -80,6 +80,7 @@ class fm_module_servers extends fm_shared_module_servers {
 							'class' => 'header-actions header-nosort'
 						);
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($result) {
@@ -255,7 +256,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		$os_image = setOSIcon($row->server_os_distro);
 		
 		$edit_status = $edit_actions = '';
-		$edit_actions = $preview = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
+		$edit_actions = $preview = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'' . $__FM_CONFIG['default']['popup']['dimensions'] . ',toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>';
 		
 		$checkbox = (currentUserCan(array('manage_servers', 'build_server_configs'), $_SESSION['module'])) ? '<input type="checkbox" name="server_list[]" value="' . $row->server_serial_no .'" />' : null;
 		
@@ -303,7 +304,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			<td>$row->server_update_method $port</td>
 			<td>$row->server_version</td>
 			<td>$row->server_config_file</td>
-			<td id="row_actions">$edit_status</td>
+			<td class="column-actions">$edit_status</td>
 		</tr>
 
 HTML;

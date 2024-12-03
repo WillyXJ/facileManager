@@ -201,7 +201,7 @@ class fm_module_objects {
 			} else {
 				$checkbox = '<td></td>';
 			}
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
+			$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 		}
 		
 		$comments = nl2br($row->object_comment);

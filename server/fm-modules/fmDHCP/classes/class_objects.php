@@ -68,6 +68,7 @@ class fm_dhcp_objects {
 		$title_array[] = array('title' => _('Comment'), 'class' => 'header-nosort');
 		if (is_array($bulk_actions_list)) $title_array[] = array('title' => _('Actions'), 'class' => 'header-actions header-nosort');
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 
 		if ($result) {
@@ -399,7 +400,7 @@ class fm_dhcp_objects {
 			<td>$row->config_data $icons</td>
 			<td></td>
 			<td>$row->config_comment</td>
-			<td id="row_actions">$edit_status</td>
+			<td class="column-actions">$edit_status</td>
 		</tr>
 
 HTML;

@@ -287,7 +287,7 @@ class fm_module_policies {
 				$grab_bars = ($num_rows > 1) ? $checkbox : null;
 				$class[] = 'no-grab';
 			}
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
+			$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 		}
 		
 		$source = ($row->policy_source) ? $this->formatPolicyIDs($row->policy_source) : 'any';

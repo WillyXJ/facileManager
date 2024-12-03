@@ -20,6 +20,11 @@
  +-------------------------------------------------------------------------+
 */
 
+if (isset($_GET['manage-records'])) {
+	include(dirname(__FILE__) . '/zone-records.php');
+	exit;
+}
+
 if (!currentUserCan(array('manage_zones', 'manage_records', 'reload_zones', 'view_all'), $_SESSION['module'])) unAuth();
 
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');

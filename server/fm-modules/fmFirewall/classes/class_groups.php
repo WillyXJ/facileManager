@@ -57,6 +57,7 @@ class fm_module_groups {
 			array('title' => _('Actions'), 'class' => 'header-actions header-nosort')
 		));
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -215,7 +216,7 @@ class fm_module_groups {
 			} else {
 				$checkbox = '<td></td>';
 			}
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
+			$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 		}
 		
 		/** Process group items */

@@ -27,7 +27,7 @@ if (!isset($fm_wifi_acls)) {
 }
 
 /** Ensure user can use this page */
-$required_permission[] = 'manage_wlan_wlan_users';
+$required_permission[] = 'manage_wlan_users';
 
 $include_submenus = false;
 

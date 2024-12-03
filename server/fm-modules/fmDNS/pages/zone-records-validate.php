@@ -45,7 +45,7 @@ $domain_info['clone_of']    = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fm
 $domain_info['template_id'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
 
 /* RR types that allow record append */
-$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'CERT', 'RP', 'NAPTR');
+$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'RP', 'NAPTR');
 
 if (isset($_POST['update'])) {
 	if ($_POST['update']['soa_template_chosen']) {

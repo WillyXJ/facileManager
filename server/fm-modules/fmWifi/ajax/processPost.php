@@ -39,7 +39,7 @@ $unpriv_message = __('You do not have sufficient privileges.');
 $checks_array = @array('servers' => 'manage_servers',
 					'wlans' => 'manage_wlans',
 					'wlan_users' => 'manage_wlan_users',
-					'acls' => 'manage_wlan_wlan_users',
+					'acls' => 'manage_wlan_users',
 					'options' => 'manage_servers'
 				);
 

@@ -33,7 +33,8 @@ class fm_module_servers extends fm_shared_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		if (currentUserCan('manage_servers', $_SESSION['module'])) {
+		$perm_manage_servers = currentUserCan('manage_servers', $_SESSION['module']);
+		if ($perm_manage_servers) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
 		if (currentUserCan('build_server_configs', $_SESSION['module']) && $type == 'servers') {
@@ -78,11 +79,14 @@ class fm_module_servers extends fm_shared_module_servers {
 				array('title' => __('Secondary Servers'), 'class' => 'header-nosort'),
 				));
 		}
-		$title_array[] = array(
+		if ($type == 'servers' || $perm_manage_servers) {
+			$title_array[] = array(
 							'title' => __('Actions'),
 							'class' => 'header-actions header-nosort'
 						);
+		}
 
+		echo '<div class="overflow-container">';
 		echo displayTableHeader($table_info, $title_array);
 		
 		if ($result) {
@@ -484,7 +488,7 @@ class fm_module_servers extends fm_shared_module_servers {
 		if ($type == 'servers') {
 			$os_image = ($row->server_type == 'remote') ? '<i class="fa fa-globe fa-2x grey" style="font-size: 1.5em" title="' . __('Remote server') . '" aria-hidden="true"></i>' : setOSIcon($row->server_os_distro);
 
-			$edit_actions = $preview = ($row->server_type != 'remote') ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'width=700,height=500,toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
+			$edit_actions = $preview = ($row->server_type != 'remote') ? '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=' . $row->server_serial_no . '\',\'1356124444538\',\'' . $__FM_CONFIG['default']['popup']['dimensions'] . ',toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;">' . $__FM_CONFIG['icons']['preview'] . '</a>' : null;
 			if ($row->server_type != 'url-only') $icons[] = sprintf('<a href="config-options.php?server_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $row->server_id, __('Configure Additional Options'));
 			if ($row->server_url_server_type) $icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-globe" aria-hidden="true"></i></a>', sprintf(__('This server hosts URL redirects with %s for the URL RR'), $row->server_url_server_type));
 			$checkbox = null;
@@ -561,21 +565,23 @@ class fm_module_servers extends fm_shared_module_servers {
 			<td>$row->server_config_file</td>
 			<td>$row->server_root_dir</td>
 			<td>$server_zones_dir</td>
-			<td id="row_actions">$edit_status</td>
+			<td class="column-actions">$edit_status</td>
 		</tr>
 
 HTML;
 		} elseif ($type == 'groups') {
-			$checkbox = (currentUserCan('manage_servers', $_SESSION['module'])) ? '<input type="checkbox" name="group_list[]" value="g' . $row->group_id .'" />' : null;
+			$checkbox = null;
 
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
-				$edit_status = '<a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				$checkbox = '<input type="checkbox" name="group_list[]" value="g' . $row->group_id .'" />';
+				$edit_status = '<td class="column-actions"><a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$query = "SELECT domain_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' AND 
 					(domain_name_servers='g_{$row->group_id}' OR domain_name_servers LIKE 'g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id}')";
 				$result = $fmdb->get_results($query);
 				if (!$fmdb->num_rows) {
 					$edit_status .= '<a href="#" class="delete" name="' . $type . '">' . $__FM_CONFIG['icons']['delete'] . '</a>';
 				}
+				$edit_status .= '</td>';
 			}
 			
 			/** Process group masters */
@@ -606,7 +612,7 @@ HTML;
 			<td>$row->group_name</td>
 			<td>$group_masters</td>
 			<td>$group_slaves</td>
-			<td id="row_actions">$edit_status</td>
+			$edit_status
 		</tr>
 
 HTML;
