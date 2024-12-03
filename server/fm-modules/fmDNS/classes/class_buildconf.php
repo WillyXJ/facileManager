@@ -1421,7 +1421,8 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 						break;
 					case 'MX':
 						$record_array[2 . $record_result[$i]->record_type]['Description'] = 'Mail Exchange records';
-						$record_array[2 . $record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_priority . $separator . $record_result[$i]->record_value . $record_comment . "\n";
+						$record_value = ($record_result[$i]->record_append == 'yes') ? $record_result[$i]->record_value . '.' . $domain_name_trim . '.' : $record_result[$i]->record_value;
+						$record_array[2 . $record_result[$i]->record_type]['Data'][] = $record_start . $separator . $record_result[$i]->record_priority . $separator . $record_value . $record_comment . "\n";
 						break;
 					case 'NAPTR':
 						$record_array[$record_result[$i]->record_type]['Description'] = 'Name Authority Pointer records';
