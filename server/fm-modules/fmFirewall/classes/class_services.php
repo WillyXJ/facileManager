@@ -214,7 +214,7 @@ class fm_module_services {
 			} else {
 				$checkbox = '<td></td>';
 			}
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
+			$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 		}
 		
 		/** Process TCP Flags */

@@ -255,7 +255,7 @@ class fm_dns_masters {
 		if ($row->master_status == 'disabled') $classes[] = 'disabled';
 		
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_status = '<td id="row_actions">';
+			$edit_status = '<td class="column-actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			if (!getConfigAssoc($row->master_id, 'primary')) {
 				$edit_status .= '<a class="status_form_link" href="#" rel="';

@@ -285,7 +285,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			<td>$row->server_update_method $port</td>
 			<td>$row->server_version</td>
 			<td>$row->server_config_file</td>
-			<td id="row_actions">$edit_status</td>
+			<td class="column-actions">$edit_status</td>
 		</tr>
 
 HTML;

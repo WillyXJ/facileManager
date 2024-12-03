@@ -84,7 +84,7 @@ class fm_module_templates {
 		$checkbox = null;
 
 		if (currentUserCan('manage_zones', $_SESSION['module'])) {
-			$edit_status = '<td id="row_actions">';
+			$edit_status = '<td class="column-actions">';
 			$edit_status .= '<a class="edit_form_link" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 			$show_delete = true;
 			

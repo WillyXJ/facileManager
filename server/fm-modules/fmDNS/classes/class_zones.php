@@ -909,7 +909,7 @@ class fm_dns_zones {
 				$clone_comment</td>
 			<td align="center">$record_count
 				$clone_counts</td>
-			<td id="row_actions">
+			<td class="column-actions">
 				$reload_zone
 				$edit_status
 			</td>
@@ -929,7 +929,7 @@ HTML;
 			}
 			
 			if (currentUserCan('manage_zones', $_SESSION['module'])) {
-				$edit_status = '<td id="row_actions">';
+				$edit_status = '<td class="column-actions">';
 				$edit_status .= '<a class="edit_form_link" name="' . $map . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$edit_status .= '<a class="status_form_link" href="#" rel="';
 				$edit_status .= ($row->group_status == 'active') ? 'disabled' : 'active';

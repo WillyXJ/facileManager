@@ -137,7 +137,7 @@ class fm_dhcp_leases {
 			}
 
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
+			$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 			$checkbox = '<td><input type="checkbox" name="bulk_list[]" value="' . $ip .'" /></td>';
 		}
 		

@@ -211,7 +211,7 @@ class fm_module_time {
 			} else {
 				$checkbox = '<td></td>';
 			}
-			$edit_status = '<td id="row_actions">' . $edit_status . '</td>';
+			$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 		}
 		
 		/** Format date range */

@@ -388,7 +388,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			<td>$row->server_version</td>
 			<td>$row->server_config_file</td>
 			<td id="ap_status">$ap_status</td>
-			<td id="row_actions">$edit_status</td>
+			<td class="column-actions">$edit_status</td>
 		</tr>
 
 HTML;
@@ -425,7 +425,7 @@ HTML;
 			<td>$row->group_name</td>
 			<td>$group_members</td>
 			<td>$row->group_comment</td>
-			<td id="row_actions">$edit_status</td>
+			<td class="column-actions">$edit_status</td>
 		</tr>
 
 HTML;

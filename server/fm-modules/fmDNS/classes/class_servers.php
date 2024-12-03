@@ -565,7 +565,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			<td>$row->server_config_file</td>
 			<td>$row->server_root_dir</td>
 			<td>$server_zones_dir</td>
-			<td id="row_actions">$edit_status</td>
+			<td class="column-actions">$edit_status</td>
 		</tr>
 
 HTML;
@@ -574,7 +574,7 @@ HTML;
 
 			if (currentUserCan('manage_servers', $_SESSION['module'])) {
 				$checkbox = '<input type="checkbox" name="group_list[]" value="g' . $row->group_id .'" />';
-				$edit_status = '<td id="row_actions"><a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+				$edit_status = '<td class="column-actions"><a class="edit_form_link" name="' . $type . '" href="#">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 				$query = "SELECT domain_id FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}domains WHERE account_id='{$_SESSION['user']['account_id']}' AND domain_status!='deleted' AND 
 					(domain_name_servers='g_{$row->group_id}' OR domain_name_servers LIKE 'g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id};%' OR domain_name_servers LIKE '%;g_{$row->group_id}')";
 				$result = $fmdb->get_results($query);

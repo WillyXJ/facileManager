@@ -1,5 +1,5 @@
 tr.import_swap span,
-td#row_actions > .fa-refresh {
+td.column-actions > .fa-refresh {
 	cursor: pointer;
 	color: #3a62a3;
 }
