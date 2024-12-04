@@ -95,13 +95,17 @@ if (!getSOACount($domain_id)) {
 	$response_class = 'attention';
 }
 
-$addl_buttons[] = sprintf('<input type="button" value="%s" class="button validate-all-records disabled" disabled="true" />' . "\n", __('Validate All'));
-$addl_buttons[] = sprintf('<input type="button" value="%s" class="button save-record-submit primary" style="display: none;" />' . "\n", __('Save All'));
+$current_user_can_manage_records = currentUserCan('manage_records', $_SESSION['module']);
 
-echo printPageHeader(array('message' => $response, 'class' => $response_class), null, !in_array($record_type, array('SOA', 'CUSTOM')) && currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed, 'zone-records', null, 'noscroll', $addl_title_blocks);
+if ($current_user_can_manage_records && $zone_access_allowed) {
+	$addl_buttons[] = sprintf('<input type="button" value="%s" class="button validate-all-records disabled" disabled="true" />' . "\n", __('Validate All'));
+	$addl_buttons[] = sprintf('<input type="button" value="%s" class="button save-record-submit primary disabled" disabled="true" />' . "\n", __('Save All'));
+} else $addl_buttons = null;
+
+echo printPageHeader(array('message' => $response, 'class' => $response_class), null, !in_array($record_type, array('SOA', 'CUSTOM')) && $current_user_can_manage_records && $zone_access_allowed, 'zone-records', null, 'noscroll', $addl_title_blocks);
 
 
-if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
+if ($current_user_can_manage_records && $zone_access_allowed) {
 	$form = '<form method="POST" action="zone-records-validate.php" id="zone-records-form">
 <input type="hidden" name="domain_id" value="' . $domain_id . '" />
 <input type="hidden" name="record_type" value="' . $record_type . '" />
@@ -115,7 +119,7 @@ if ($record_type == 'SOA') {
 		`soa_status`='active'";
 	$result = $fmdb->get_results($soa_query);
 	$body .= $form . $fm_dns_records->buildSOA($result);
-	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
+	if ($current_user_can_manage_records && $zone_access_allowed) {
 		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", __('Validate'));
 	}
 } elseif ($record_type == 'CUSTOM') {
@@ -135,7 +139,7 @@ if ($record_type == 'SOA') {
 		__('Error checking is not provided and the data is appended to the zone file.'));
 	$body .= '<div class="display_results"><textarea rows="20" style="width: 100%;" name="' . $create_update . '[' . $record_id . '][record_value]">' . $domain_custom_rr_value . '</textarea></div>' . "\n";
 	
-	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
+	if ($current_user_can_manage_records && $zone_access_allowed) {
 		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", _('Save'));
 	}
 } else {
@@ -177,7 +181,7 @@ if ($record_type == 'SOA') {
 	
 	$record_rows = $fm_dns_records->rows($result, $record_type, $domain_id, $page);
 
-	if (!currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
+	if (!$current_user_can_manage_records && $zone_access_allowed) {
 		$body .= '<div class="table-results-container">' . $record_rows;
 		$body .= sprintf('</div><div class="new-container">
 	<a name="#manage"></a>

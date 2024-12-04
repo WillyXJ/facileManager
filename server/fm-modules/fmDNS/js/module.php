@@ -94,6 +94,8 @@ $(document).ready(function() {
 					width: "80px"
 				});
 				more_clicks = more_clicks + 1;
+
+				setValidateAllStatus();
 			}
 		});
 
@@ -166,21 +168,27 @@ $(document).ready(function() {
 			$(this).parent().hide();
 		}
 
-		/* Remove save all button if nothing is present to save */
-		setTimeout(function(){
-			var $unsaved_changes = $("#zone-records-form tr.record-changed");
-			if ($unsaved_changes.length <= 0) {
-				$(".save-record-submit").fadeOut();
-			}
+		setTimeout(function() {
+			setSaveAllStatus();
+			setValidateAllStatus();
 		}, 1000);
-
-		setValidateAllStatus();
 	});
 
 	/* Validate the record and flag for saving */
 	$("#zone-records-form").delegate(".inline-record-validate", "click tap", function() {
 		var $this = $(this);
 		var $row_element = $(this).parents("tr");
+
+		/** (un)check append box */
+		var $record_value = $row_element.find("input[name*=\'record_value\']");
+		var $record_append = $row_element.find("input[name*=\'record_append\']");
+		if ($record_value.val() && $record_append.val()) {
+			if ($record_value.val().substr($record_value.val().length - 1) == ".") {
+				$record_append.prop("checked", false);
+			} else {
+				$record_append.prop("checked", true);
+			}
+		}
 
 		/** Get element changes */
 		var addl_form_data = {
@@ -220,8 +228,8 @@ $(document).ready(function() {
 							$row_element.addClass("ok");
 						}
 						$this.hide();
-						$(".save-record-submit").fadeIn();
 
+						setSaveAllStatus();
 						setValidateAllStatus();
 					}
 				}
@@ -231,9 +239,7 @@ $(document).ready(function() {
 
 	/* Validate the record and flag for saving */
 	$(".validate-all-records").on("click", function() {
-		console.log("validate all");
 		$("#zone-records-form tr.notice").each(function() {
-			console.log($(this));
 			$(this).find(".inline-record-validate").click();
 		});
 
@@ -249,6 +255,9 @@ $(document).ready(function() {
 				__('There are pending changes still to validate.'),
 				buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'))))) . '");
 			$unsaved_changes.first().parents("tr").find("input").first().focus();
+		} else if($unsaved_changes.length == 0) {
+		 	setSaveAllStatus();
+			return;
 		} else {
 			$("body").addClass("fm-noscroll");
 			$("#manage_item").fadeIn(200);
@@ -276,7 +285,6 @@ $(document).ready(function() {
 						return false;
 					}
 					if (response != "Success" && !$.isNumeric(response)) {
-						console.log(response);
 						$("#manage_item").fadeOut(200);
 						$("body").removeClass("fm-noscroll");
 
@@ -313,7 +321,7 @@ $(document).ready(function() {
 							$("#manage_item").fadeOut(200);
 							$("body").removeClass("fm-noscroll");
 							location.reload();
-						}, 1500);
+						}, 1200);
 					}
 				}
 			});
@@ -586,7 +594,8 @@ $(document).ready(function() {
 			$row_element.removeClass("ok").addClass("notice");
 			$row_element.find(".inline-record-validate").show();
 			$row_element.find(".inline-record-actions").show();
-			$(".validate-all-records").removeClass("disabled").attr("disabled", false);
+
+			setValidateAllStatus();
 		}
 	});
 
@@ -606,7 +615,8 @@ $(document).ready(function() {
 		}
 		$row_element.find(".inline-record-validate").show();
 		$row_element.find(".inline-record-actions").show();
-		$(".validate-all-records").removeClass("disabled").attr("disabled", false);
+
+		setValidateAllStatus();
 	});
 
 	$("#manage_item_contents").delegate("#cfg_destination", "change", function(e) {
@@ -952,11 +962,23 @@ function validateTimeFormat(event, that) {
 	}
 }
 
+function setSaveAllStatus() {
+	/* Disable save all button if nothing is present to save */
+	var $unsaved_changes = $("#zone-records-form tr.record-changed");
+	if ($unsaved_changes.length <= 0) {
+		$(".save-record-submit").addClass("disabled").attr("disabled", true);
+	} else {
+		$(".save-record-submit").removeClass("disabled").attr("disabled", false);
+	}
+}
+
 function setValidateAllStatus() {
 	/* Disable validate all button if nothing is present to validate */
 	var $validate_changes = $("#zone-records-form tr.notice");
 	if ($validate_changes.length <= 0) {
 		$(".validate-all-records").addClass("disabled").attr("disabled", true);
+	} else {
+		$(".validate-all-records").removeClass("disabled").attr("disabled", false);
 	}
 }
 ';

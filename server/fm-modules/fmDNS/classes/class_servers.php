@@ -33,8 +33,8 @@ class fm_module_servers extends fm_shared_module_servers {
 		$num_rows = $fmdb->num_rows;
 		$results = $fmdb->last_result;
 
-		$perm_manage_servers = currentUserCan('manage_servers', $_SESSION['module']);
-		if ($perm_manage_servers) {
+		$current_user_can_manage_servers = currentUserCan('manage_servers', $_SESSION['module']);
+		if ($current_user_can_manage_servers) {
 			$bulk_actions_list[] = __('Upgrade');
 		}
 		if (currentUserCan('build_server_configs', $_SESSION['module']) && $type == 'servers') {
@@ -79,7 +79,7 @@ class fm_module_servers extends fm_shared_module_servers {
 				array('title' => __('Secondary Servers'), 'class' => 'header-nosort'),
 				));
 		}
-		if ($type == 'servers' || $perm_manage_servers) {
+		if ($type == 'servers' || $current_user_can_manage_servers) {
 			$title_array[] = array(
 							'title' => __('Actions'),
 							'class' => 'header-actions header-nosort'
