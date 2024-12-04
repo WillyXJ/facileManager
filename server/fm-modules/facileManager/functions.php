@@ -2030,10 +2030,11 @@ function verifyNumber($number, $min_range = 0, $max_range = null, $decimal_allow
  *
  * @param string $data Address to check
  * @param mixed $filter_type PHP filter type to use
+ * @param array $filter_options PHP filter options to pass
  * @return boolean
  */
-function verifySimpleVariable($data, $filter_type) {
-	return filter_var($data, $filter_type);
+function verifySimpleVariable($data, $filter_type, $filter_options = array()) {
+	return filter_var($data, $filter_type, $filter_options);
 }
 
 

@@ -440,7 +440,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		foreach ($fmdb->last_result as $wlan_user) {
 			$comment = ($wlan_user->wlan_user_comment) ? ' (' . $wlan_user->wlan_user_comment . ')' : null;
 			$config['accept'][] = '# ' . $wlan_user->wlan_user_login . $comment;
-			$config['accept'][] = $wlan_user->wlan_user_mac;
+			$config['accept'][] = ($wlan_user->wlan_user_vlan) ? $wlan_user->wlan_user_mac . ' ' . $wlan_user->wlan_user_vlan : $wlan_user->wlan_user_mac;
 		}
 		
 		/** Get MAC ACLs for SSID */

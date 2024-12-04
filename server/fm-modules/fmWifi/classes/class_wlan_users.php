@@ -100,24 +100,35 @@ class fm_wifi_wlan_users {
 	 * @return boolean|string
 	 */
 	function add($post) {
-		global $fmdb, $__FM_CONFIG;
+		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
 		$post = $this->validatePost($post);
 		if (!is_array($post)) return $post;
 		
-		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}wlan_users` (`account_id`, `wlan_user_login`, `wlan_user_password`, `wlan_user_comment`, `wlan_user_mac`, `wlan_ids`) 
-				VALUES('{$_SESSION['user']['account_id']}', '{$post['wlan_user_login']}', '{$post['wlan_user_password']}', '{$post['wlan_user_comment']}', '{$post['wlan_user_mac']}', '{$post['wlan_ids']}')";
+		$log_message = __("Added a WLAN user with the following") . ":\n";
+		$logging_excluded_fields = array_merge($global_form_field_excludes, array('type', 'user_id', 'wlan_user_password', 'log_message_member_wlans'));
+		foreach ($post as $key => $data) {
+			if (in_array($key, $logging_excluded_fields)) continue;
+			if ($key == 'wlan_ids') {
+				$log_message .= formatLogKeyData('', 'Associated WLANs', $post['log_message_member_wlans']);
+			} else {
+				$log_message .= formatLogKeyData(array('wlan_user_', 'wlan_'), $key, $data);
+			}
+		}
+
+		$query = "INSERT INTO `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}wlan_users` (`account_id`, `wlan_user_login`, `wlan_user_password`, `wlan_user_comment`, `wlan_user_mac`, `wlan_ids`, `wlan_user_vlan`) 
+				VALUES('{$_SESSION['user']['account_id']}', '{$post['wlan_user_login']}', '{$post['wlan_user_password']}', '{$post['wlan_user_comment']}', '{$post['wlan_user_mac']}', '{$post['wlan_ids']}', '{$post['wlan_user_vlan']}')";
 		$fmdb->query($query);
 		
 		if ($fmdb->sql_errors) {
 			return formatError(_('Could not add the user because a database error occurred.'), 'sql');
 		}
 		
-		addLogEntry(__('Added a WLAN User with the following details') . ":\n" . __('Name') . ": {$post['wlan_user_login']}\n" . __('Hardware Address') . ": {$post['wlan_user_mac']}\n" . __('Associated WLANs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['wlan_user_comment']}");
-		
 //		setBuildUpdateConfigFlag(getWLANServers($insert_id), 'yes', 'build');
 		
+		addLogEntry($log_message);
+
 		return true;
 	}
 
@@ -141,17 +152,23 @@ class fm_wifi_wlan_users {
 		$exclude = array_merge($global_form_field_excludes, array('user_id', 'type', 'log_message_member_wlans'));
 
 		$sql_edit = '';
+		$old_name = getNameFromID($post['user_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', 'wlan_user_', 'wlan_user_id', 'wlan_user_login');
+		$log_message = sprintf(__("Updated WLAN user '%s' to the following"), $old_name) . ":\n";
 		
 		/** Loop through all posted keys and values to build SQL statement */
 		foreach ($post as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				$sql_edit .= $key . "='" . $data . "', ";
+				if ($key == 'wlan_ids') {
+					$log_message .= formatLogKeyData('', 'Associated WLANs', $post['log_message_member_wlans']);
+				} else {
+					$log_message .= formatLogKeyData(array('wlan_user_', 'wlan_'), $key, $data);
+				}
 			}
 		}
 		$sql = rtrim($sql_edit, ', ');
-		
+
 		/** Update the item */
-		$old_name = getNameFromID($post['user_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'wlan_users', 'wlan_user_', 'wlan_user_id', 'wlan_user_login');
 		$query = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}wlan_users` SET $sql WHERE `wlan_user_id`={$post['user_id']} AND `account_id`='{$_SESSION['user']['account_id']}'";
 		$fmdb->query($query);
 		
@@ -166,7 +183,7 @@ class fm_wifi_wlan_users {
 //		setBuildUpdateConfigFlag(getServerSerial($post['server_id'], $_SESSION['module']), 'yes', 'build');
 		
 		/** Add entry to audit log */
-		addLogEntry(sprintf(__('Updated WLAN user \'%s\' with the following details'), $old_name) . ":\n" . __('Name') . ": {$post['wlan_user_login']}\n" . __('Hardware Address') . ": {$post['wlan_user_mac']}\n" . __('Associated WLANs') . ": {$post['log_message_member_wlans']}\n" . _('Comment') . ": {$post['wlan_user_comment']}");
+		addLogEntry($log_message);
 		return true;
 	}
 	
@@ -265,7 +282,7 @@ HTML;
 		
 		include(ABSPATH . 'fm-modules/facileManager/classes/class_users.php');
 		
-		$assoc_wlans = $wlan_user_mac = $wlan_user_comment = null;
+		$assoc_wlans = $wlan_user_mac = $wlan_user_comment = $wlan_user_vlan = null;
 		$wlan_ids = 0;
 		
 		if (!empty($_POST) && !array_key_exists('is_ajax', $_POST)) {
@@ -280,8 +297,12 @@ HTML;
 		if (isset($wlan_user_id)) {
 			$data[0]->user_id = $wlan_user_id;
 		}
+		if (!$wlan_user_vlan) {
+			$wlan_user_vlan = null;
+		}
 		
 		$assoc_wlans = buildSelect('wlan_ids', 'wlan_ids', $fm_wifi_wlans->getWLANList('wpa2'), $wlan_ids, 1, null, true);
+		$vlan_id_note = sprintf(' <a href="#" class="tooltip-right" data-tooltip="%s"><i class="fa fa-question-circle"></i></a>', __('Optionally specify the VLAN ID (1-4096) for the user.'));
 		
 		$popup_title = ($action == 'add') ? _('Add User') : _('Edit User');
 		$popup_header = buildPopup('header', $popup_title);
@@ -295,6 +316,10 @@ HTML;
 							<tr>
 								<th width="33&#37;" scope="row"><label for="wlan_user_mac">%s</label></th>
 								<td width="67&#37;" nowrap><input name="wlan_user_mac" id="wlan_user_mac" type="text" value="%s" maxlength="17" /></td>
+							</tr>
+							<tr>
+								<th width="33&#37;" scope="row"><label for="wlan_user_vlan">%s</label> %s</th>
+								<td width="67&#37;" nowrap><input name="wlan_user_vlan" id="wlan_user_vlan" type="text" value="%s" maxlength="4" style="width: 5em;" onkeydown="return validateNumber(event)" /></td>
 							</tr>
 							<tr>
 								<th width="33&#37;" scope="row"><label for="wlan_ids">%s</label></th>
@@ -318,6 +343,7 @@ HTML;
 				$popup_header,
 				$fm_users->printUsersForm($data, $action, array('editable'=>'user_login', 'user_password' => $GLOBALS['PWD_STRENGTH']), 'wlan_users', null, null, null, false, 'embed'),
 				__('MAC Address'), $wlan_user_mac,
+				__('Assigned VLAN'), $vlan_id_note, $wlan_user_vlan,
 				__('Associated WLANs'), $assoc_wlans,
 				_('Comment'), $wlan_user_comment,
 				$popup_footer
@@ -365,6 +391,12 @@ HTML;
 		/** Valid MAC address? */
 		if (version_compare(PHP_VERSION, '5.5.0', '>=') && !verifySimpleVariable($post['wlan_user_mac'], FILTER_VALIDATE_MAC)) {
 			return __('The hardware address is invalid.');
+		}
+		
+		/** Valid VLAN ID? */
+		$post['wlan_user_vlan'] = (!isset($post['wlan_user_vlan']) || empty($post['wlan_user_vlan'])) ? 0 : intval($post['wlan_user_vlan']);
+		if (version_compare(PHP_VERSION, '5.5.0', '>=') && verifySimpleVariable($post['wlan_user_vlan'], FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 4096))) === false) {
+			return __('The VLAN ID is invalid.');
 		}
 		
 		if (!isset($fm_wifi_wlans)) {

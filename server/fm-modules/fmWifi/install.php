@@ -133,6 +133,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}wlan
   `wlan_user_mac` varchar(20) NOT NULL,
   `wlan_ids` varchar(255) NOT NULL DEFAULT '0',
   `wlan_user_password` varchar(255) NOT NULL,
+  `wlan_user_vlan` INT(10) NULL DEFAULT NULL,
   `wlan_user_comment` varchar(255) DEFAULT NULL,
   `wlan_user_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`wlan_user_id`)
