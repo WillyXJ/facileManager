@@ -95,7 +95,8 @@ if (!getSOACount($domain_id)) {
 	$response_class = 'attention';
 }
 
-$save_all_button = sprintf('<input type="button" value="%s" class="button save-record-submit primary" style="display: none;"/>' . "\n", __('Save All'));
+$addl_buttons[] = sprintf('<input type="button" value="%s" class="button validate-all-records disabled" disabled="true" />' . "\n", __('Validate All'));
+$addl_buttons[] = sprintf('<input type="button" value="%s" class="button save-record-submit primary" style="display: none;" />' . "\n", __('Save All'));
 
 echo printPageHeader(array('message' => $response, 'class' => $response_class), null, !in_array($record_type, array('SOA', 'CUSTOM')) && currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed, 'zone-records', null, 'noscroll', $addl_title_blocks);
 
@@ -135,7 +136,7 @@ if ($record_type == 'SOA') {
 	$body .= '<div class="display_results"><textarea rows="20" style="width: 100%;" name="' . $create_update . '[' . $record_id . '][record_value]">' . $domain_custom_rr_value . '</textarea></div>' . "\n";
 	
 	if (currentUserCan('manage_records', $_SESSION['module']) && $zone_access_allowed) {
-		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", __('Validate'));
+		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", _('Save'));
 	}
 } else {
 	switch ($record_type) {
@@ -171,7 +172,7 @@ if ($record_type == 'SOA') {
 	$result = basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', array($sort_field, 'record_name'), 'record_', $record_sql, null, $ip_sort, $sort_direction);
 	$total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);
 	if ($page > $total_pages) $page = $total_pages;
-	$pagination = displayPagination($page, $total_pages, $save_all_button);
+	$pagination = displayPagination($page, $total_pages, $addl_buttons);
 	$body .= $pagination . '<div class="overflow-container">' . $form; //. sprintf('<input type="submit" name="submit" value="%s" class="button" style="display: none;" />' . "\n", __('Validate'));
 	
 	$record_rows = $fm_dns_records->rows($result, $record_type, $domain_id, $page);

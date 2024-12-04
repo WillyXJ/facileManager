@@ -172,6 +172,8 @@ $(document).ready(function() {
 				$(".save-record-submit").fadeOut();
 			}
 		}, 1000);
+
+		setValidateAllStatus();
 	});
 
 	/* Validate the record and flag for saving */
@@ -218,12 +220,24 @@ $(document).ready(function() {
 						}
 						$this.hide();
 						$(".save-record-submit").fadeIn();
+
+						setValidateAllStatus();
 					}
 				}
 			}
 		});
 	});
 
+	/* Validate the record and flag for saving */
+	$(".validate-all-records").on("click", function() {
+		console.log("validate all");
+		$("#zone-records-form tr.notice").each(function() {
+			console.log($(this));
+			$(this).find(".inline-record-validate").click();
+		});
+
+		setValidateAllStatus();
+	});
 
 	$(".save-record-submit").on("click", function() {
 		var $unsaved_changes = $(".inline-record-validate").filter(":visible");
@@ -231,7 +245,7 @@ $(document).ready(function() {
 			$("#manage_item").fadeIn(200);
 			$("#manage_item_contents").html("' . addslashes(str_replace("\n", '', sprintf('%s<p>%s</p>%s',
 				buildPopup('header', _('Error')),
-				__('There are unsaved pending changes.'),
+				__('There are pending changes still to validate.'),
 				buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'))))) . '");
 			$unsaved_changes.first().parents("tr").find("input").first().focus();
 		} else {
@@ -564,10 +578,15 @@ $(document).ready(function() {
 	
 	/* Changing record values */
 	$(".table-results-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change keyup blur", function(e) {
-		$(this).parents("tr").not(".new-record").addClass("build");
-		$(this).parents("tr").removeClass("ok").addClass("notice");
-		$(this).parents("tr").find(".inline-record-validate").show();
-		$(this).parents("tr").find(".inline-record-actions").show();
+		var $row_element = $(this).parents("tr");
+
+		$row_element.not(".new-record").addClass("build");
+		if (!$row_element.hasClass("attention")) {
+			$row_element.removeClass("ok").addClass("notice");
+			$row_element.find(".inline-record-validate").show();
+			$row_element.find(".inline-record-actions").show();
+			$(".validate-all-records").removeClass("disabled").attr("disabled", false);
+		}
 	});
 
 	/* Automatically select to set/update PTR */
@@ -577,13 +596,16 @@ $(document).ready(function() {
 
 	/* Record delete checkbox */
 	$(".display_results").delegate("input[id^=\'record_delete_\']", "click tap", function(e) {
+		var $row_element = $(this).parents("tr");
+
 		if ($(this).is(":checked")) {
-			$(this).parents("tr").removeClass("ok").addClass("attention notice");
+			$row_element.removeClass("ok").addClass("attention notice");
 		} else {
-			$(this).parents("tr").removeClass("attention");
+			$row_element.removeClass("attention").addClass("notice");
 		}
-		$(this).parents("tr").find(".inline-record-validate").show();
-		$(this).parents("tr").find(".inline-record-actions").show();
+		$row_element.find(".inline-record-validate").show();
+		$row_element.find(".inline-record-actions").show();
+		$(".validate-all-records").removeClass("disabled").attr("disabled", false);
 	});
 
 	$("#manage_item_contents").delegate("#cfg_destination", "change", function(e) {
@@ -926,6 +948,14 @@ function validateTimeFormat(event, that) {
 		if (event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
 			event.preventDefault();
 		}
+	}
+}
+
+function setValidateAllStatus() {
+	/* Disable validate all button if nothing is present to validate */
+	var $validate_changes = $("#zone-records-form tr.notice");
+	if ($validate_changes.length <= 0) {
+		$(".validate-all-records").addClass("disabled").attr("disabled", true);
 	}
 }
 ';
