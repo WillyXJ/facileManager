@@ -84,8 +84,9 @@ $__FM_CONFIG['records']['digest_types'] = array(
 											array('SHA-1', 1),
 											array('SHA-256', 2)
 											);
-$__FM_CONFIG['records']['tlsa_flags'] = array('0', '1', '2', '3');
-$__FM_CONFIG['records']['caa_flags']		= array('issue', 'issuewild', 'iodef');
+$__FM_CONFIG['records']['tlsa_flags'] 	= array('0', '1', '2', '3');
+$__FM_CONFIG['records']['caa_flags']	= array('0', '128');
+$__FM_CONFIG['records']['caa_tags']		= array('issue', 'issuewild', 'iodef');
 
 $__FM_CONFIG['servers']['avail_types']    = array('servers' => _('Servers'), 'groups' => _('Groups'));
 $__FM_CONFIG['options']['avail_types']    = array('global' => __('Global'), 'ratelimit' => __('Rate Limit'), 'rrset' => __('RRSet'), 'rpz' => __('Response Policy'));

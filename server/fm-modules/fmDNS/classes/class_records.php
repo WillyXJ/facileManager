@@ -66,7 +66,13 @@ class fm_dns_records {
 			$query = "SELECT * FROM fm_{$__FM_CONFIG['fmDNS']['prefix']}records WHERE domain_id=$domain_id AND record_name='{$new_array['record_name']}'
 					AND record_value='{$new_array['record_value']}' AND record_type='$record_type' AND record_status != 'deleted'";
 			if (in_array($record_type, array('NAPTR', 'CAA'))) {
-				$query .= " AND record_params='{$new_array['record_params']}' AND record_regex='{$new_array['record_regex']}'";
+				$query .= " AND record_params='{$new_array['record_params']}'";
+			}
+			if (in_array($record_type, array('NAPTR'))) {
+				$query .= " AND record_regex='{$new_array['record_regex']}'";
+			}
+			if (in_array($record_type, array('CAA'))) {
+				$query .= " AND record_flags='{$new_array['record_flags']}'";
 			}
 			$result = $fmdb->get_results($query);
 			
@@ -316,7 +322,8 @@ class fm_dns_records {
 		}
 		
 		if ($type == 'CAA') {
-			$title_array[] = array('title' => __('Type'), 'rel' => 'record_params');
+			$title_array[] = array('title' => __('Flags'), 'rel' => 'record_flags');
+			$title_array[] = array('title' => __('Tags'), 'rel' => 'record_params');
 		}
 		
 		if (in_array($type, array('SMIMEA', 'TLSA'))) {
@@ -423,7 +430,8 @@ class fm_dns_records {
 			}
 
 			if ($record_type == 'CAA') {
-				$field_values['data']['Value']['Flags'] = buildSelect($action . '[_NUM_][record_params]', '_NUM_', $__FM_CONFIG['records']['caa_flags'], $record_params);
+				$field_values['data']['Value']['subgroup-1']['Flags'] = buildSelect($action . '[_NUM_][record_flags]', '_NUM_', $__FM_CONFIG['records']['caa_flags'], $record_flags);
+				$field_values['data']['Value']['subgroup-1']['Tags'] = buildSelect($action . '[_NUM_][record_params]', '_NUM_', $__FM_CONFIG['records']['caa_tags'], $record_params);
 			}
 			
 			if ($record_type == 'CERT') {

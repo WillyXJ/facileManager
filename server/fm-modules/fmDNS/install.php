@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}reco
   `record_cert_type` tinyint(4) DEFAULT NULL,
   `record_key_tag` int(11) DEFAULT NULL,
   `record_algorithm` tinyint(4) DEFAULT NULL,
-  `record_flags` enum('0','256','257','','U','S','A','P') DEFAULT NULL,
+  `record_flags` enum('0','128','256','257','','U','S','A','P') DEFAULT NULL,
   `record_text` varchar(255) DEFAULT NULL,
   `record_comment` varchar(200) DEFAULT NULL,
   `record_append` enum('yes','no') NOT NULL DEFAULT 'yes',
