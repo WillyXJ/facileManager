@@ -31,15 +31,20 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.
 
 if (is_array($_POST) && count($_POST)) {
 	if (isset($_POST['action']) && $_POST['action'] == 'get-record-value-form' && isset($_POST['record_type'])) {
+		$results = null;
 		extract($_POST);
 		$index = 1;
-		if (isset($_POST['id_index'])) {
-			preg_match('/\[\d+\]/', $_POST['id_index'], $matches);
+		if (isset($id_index)) {
+			preg_match('/\[\d+\]/', $id_index, $matches);
 			if ($matches) {
 				$index = intval(str_replace(array('[', ']'), '', $matches[0]));
 			}
 		}
-		$form = $fm_dns_records->getInputForm($record_type, true, $domain_id, null, 'record-value-group-only', $index);
+		if (isset($page_record_type)) {
+			$results = new stdClass();
+			$results->page_record_type = $page_record_type;
+		}
+		$form = $fm_dns_records->getInputForm($record_type, true, $domain_id, $results, 'record-value-group-only', $index);
 		echo $form;
 		exit;
 	}

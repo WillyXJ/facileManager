@@ -385,6 +385,7 @@ class fm_dns_records {
 			$results = get_object_vars($results);
 			extract($results);
 		}
+		if (!isset($page_record_type)) $page_record_type = null;
 
 		if ($record_type == 'CUSTOM') return null;
 
@@ -576,7 +577,8 @@ class fm_dns_records {
 			}
 
 			if ($record_type == 'CAA') {
-				$field_values['data']['Value']['Flags'] = $record_params;
+				$field_values['data']['Value']['subgroup-1']['Flags'] = $record_flags;
+				$field_values['data']['Value']['subgroup-1']['Tags'] = $record_params;
 			}
 			
 			if ($record_type == 'CERT') {
@@ -687,7 +689,7 @@ class fm_dns_records {
 								}
 							}
 						} else {
-							$tmp_val .= ($new || !$subtitle || $selected_type == 'ALL') ? sprintf('<div>%s%s</div>', $subtitle, $subval) : sprintf('%s</td><td>', $subval);
+							$tmp_val .= (($new && $page_record_type == 'ALL') || !$subtitle || $selected_type == 'ALL') ? sprintf('<div>%s%s</div>', $subtitle, $subval) : sprintf('%s</td><td>', $subval);
 						}
 					}
 					$val = $tmp_val;

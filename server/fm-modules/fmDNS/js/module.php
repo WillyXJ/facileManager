@@ -110,6 +110,7 @@ $(document).ready(function() {
 			domain_id: getUrlVars()["domain_id"],
 			id_index: $this.attr("name"),
 			record_type: $this.val(),
+			page_record_type: getUrlVars()["record_type"],
 			is_ajax: 1
 		};
 
