@@ -577,7 +577,6 @@ h4 {
 .display_results td {
 	padding: 5px 6px;
 	max-width: 40em;
-	overflow: auto;
 }
 
 .display_results th {
