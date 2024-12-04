@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}acls
   `acl_comment` text,
   `acl_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`acl_id`),
-  UNIQUE KEY `idx_server_serial_no` (`server_serial_no`)
+  KEY `idx_server_serial_no` (`server_serial_no`)
 ) ENGINE = INNODB  DEFAULT CHARSET=utf8;
 TABLESQL;
 

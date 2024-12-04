@@ -283,6 +283,7 @@ function upgradefmWifi_070b3($__FM_CONFIG, $running_version) {
 	if (!columnExists("fm_{$__FM_CONFIG['fmWifi']['prefix']}wlan_users", 'wlan_user_vlan')) {
 		$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmWifi']['prefix']}wlan_users` ADD `wlan_user_vlan` INT(10) NULL DEFAULT NULL AFTER `wlan_user_password`";
 	}
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmWifi']['prefix']}acls` DROP INDEX `idx_server_serial_no`, ADD INDEX `idx_server_serial_no` (`server_serial_no`)";
 	
 	/** Create table schema */
 	if (isset($queries) && count($queries) && $queries[0]) {

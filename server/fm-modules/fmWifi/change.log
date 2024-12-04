@@ -3,6 +3,7 @@
 * Server - [improvement] fM 5.0.0-beta3 compatibility.
 * Server - [improvement] Added support to specify a VLAN ID for each user.
 * Server - [bug] Typo fixes.
+* Server - [bug] Fixed issue where ACLs could not be created.
 
 0.7.0-beta2 (2024-11-20)
 ========================
