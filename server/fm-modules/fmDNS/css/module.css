@@ -162,6 +162,9 @@ table.form-table > tbody > tr.dnssec-key-addl-options {
 	color: var(--tab-unselected-text);
 }
 
+div.record-value-group {
+	overflow: auto;
+}
 div.record-value-group p.record-sub-value {
 	margin: 0;
 	font-size: 11px;

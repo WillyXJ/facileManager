@@ -269,7 +269,7 @@ div.header-container {
 	display: flex;
     align-items: center;
 	white-space: nowrap;
-	overflow: scroll;
+	overflow: auto;
 }
 #account_info > div:first-child span {
 	width: 100%;
@@ -559,7 +559,7 @@ h4 {
 	height: 100%;
 	right: 2em;
 	left: 2em;
-	overflow: scroll;
+	overflow: auto;
 }
 
 .fm-noscroll {
@@ -577,7 +577,7 @@ h4 {
 .display_results td {
 	padding: 5px 6px;
 	max-width: 40em;
-	overflow: scroll;
+	overflow: auto;
 }
 
 .display_results th {
@@ -1108,7 +1108,7 @@ i.text_icon {
 }
 #popup_response div#error {
 	display: none;
-	overflow: scroll;
+	overflow: auto;
 }
 
 .replace {
@@ -2069,6 +2069,9 @@ a.subelement_edit img {
 	margin-top: 9px;
 }
 
+.overflow {
+	overflow: auto;
+}
 .nowrap {
 	white-space: nowrap;
 }
