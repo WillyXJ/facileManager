@@ -214,7 +214,8 @@ class fm_module_options {
 		
 		$disabled_class = ($row->config_status == 'disabled') ? ' class="disabled"' : null;
 		$uneditable_options = array('ctrl_interface', 'ctrl_interface_group', 'wpa_passphrase');
-		
+		$checkbox = null;
+
 		if (currentUserCan($required_permission, $_SESSION['module'])) {
 			if (!in_array($row->config_name, $uneditable_options)) {
 				$edit_status = '<td class="column-actions">';
@@ -228,10 +229,10 @@ class fm_module_options {
 				$edit_status .= '</td>';
 				$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" />';
 			} else {
-				$edit_status = $checkbox = '<td></td>';
+				$edit_status = '<td></td>';
 			}
 		} else {
-			$edit_status = $checkbox = null;
+			$edit_status = null;
 		}
 		
 		$comments = nl2br($row->config_comment);
