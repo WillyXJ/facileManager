@@ -1,3 +1,7 @@
+7.0.0-beta4 (2024-??-??)
+========================
+* Server - [bug] Fixed adding zone clones, ACLs, and primaries (introduced in 7.0.0-beta1).
+
 7.0.0-beta3 (2024-12-03)
 ========================
 * Server - [improvement] Managing zone records is revamped and all resource records can be displayed and

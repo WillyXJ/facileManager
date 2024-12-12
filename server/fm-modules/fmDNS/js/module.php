@@ -405,7 +405,7 @@ $(document).ready(function() {
 	});
 
 	/* Add clone or acl element */
-	$("#zones,#acls,#masters").delegate("#plus", "click tap", function(e) {
+	$("#zones,#acls,#masters").delegate("#plus_subelement", "click tap", function(e) {
 		var $this 		= $(this);
 		item_type		= $("#table_edits").attr("name");
 		item_sub_type	= $this.attr("name");
@@ -448,34 +448,6 @@ $(document).ready(function() {
 				$(".datepicker").datepicker();
 				$(".form-table input:text, .form-table select").first().focus();
 				$(".popup-wait").hide();
-			}
-		});
-
-		return false;
-	});
-
-	/* Add more records */
-	$("#add_records").click(function() {
-		var $this 		= $(this);
-		var item_id		= getUrlVars()["domain_id"];
-		var item_type	= getUrlVars()["record_type"];
-
-		var form_data = {
-			domain_id: item_id,
-			record_type: item_type,
-			clicks: more_clicks,
-			is_ajax: 1
-		};
-
-		$.ajax({
-			type: "POST",
-			url: "fm-modules/' . $module_name . '/ajax/addFormElements.php",
-			data: form_data,
-			success: function(response)
-			{
-				$("#more_records").append(response);
-				$("select").select2({minimumResultsForSearch: 10});
-				more_clicks = more_clicks + 1;
 			}
 		});
 

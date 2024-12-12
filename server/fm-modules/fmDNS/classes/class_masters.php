@@ -273,7 +273,7 @@ class fm_dns_masters {
 		
 		$edit_name = '<b>' . $row->master_name . '</b>';
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_name .= displayAddNew('masters', $row->master_id, null, 'fa fa-plus-square-o');
+			$edit_name .= displayAddNew('masters', $row->master_id, null, 'fa fa-plus-square-o', 'plus_subelement');
 		}
 		$edit_addresses = nl2br(str_replace(',', "\n", $row->master_addresses));
 		$edit_addresses = $this->getMasterElements($row->master_id);
