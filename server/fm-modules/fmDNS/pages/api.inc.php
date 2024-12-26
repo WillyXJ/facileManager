@@ -31,7 +31,7 @@ if (isset($_POST['domain_id'])) {
     $domain_id = intval($_POST['domain_id']);
 }
 
-$exclude = array('action', 'domain_id');
+$exclude = array('action', 'domain_id', 'autoupdate');
 
 foreach ($_POST['api'] as $key => $val) {
     if (!in_array($key, $exclude)) $record_data[$key] = sanitize($val);
@@ -131,6 +131,9 @@ if ($error) {
     $data = throwAPIError($code);
     // $data .= $fmdb->last_error;
 } elseif ($data === true) {
+    if ($_POST['api']['autoupdate'] == "yes") {
+        reloadZoneSQL($domain_id, 'no', 'single');
+    }
     $data = _('Success') . "\n";
 }
 
