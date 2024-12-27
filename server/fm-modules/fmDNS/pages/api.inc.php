@@ -133,6 +133,7 @@ if ($error) {
 } elseif ($data === true) {
     if ($_POST['api']['autoupdate'] == "yes") {
         reloadZoneSQL($domain_id, 'no', 'single');
+        $fm_dns_zones->buildZoneConfig($domain_id);
     }
     $data = _('Success') . "\n";
 }
