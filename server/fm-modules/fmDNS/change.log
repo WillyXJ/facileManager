@@ -1,4 +1,4 @@
-7.0.0-beta4 (2024-??-??)
+7.0.0-beta4 (2024-12-30)
 ========================
 * Server - [bug] Fixed adding zone clones, ACLs, and primaries (bug introduced in 7.0.0-beta1).
 * Server - [bug] Fixed inability to add IPv6 subnets to ACLs. (Issue #643)
