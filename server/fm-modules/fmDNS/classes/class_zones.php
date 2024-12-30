@@ -790,7 +790,7 @@ class fm_dns_zones {
 			}
 
 			if ($row->domain_type == 'primary' && $row->domain_clone_domain_id == 0 && currentUserCan('manage_zones', $_SESSION['module'])) {
-				$add_new = displayAddNew($map, $row->domain_id, __('Clone this zone'), 'fa fa-clone');
+				$add_new = displayAddNew($map, $row->domain_id, __('Clone this zone'), 'fa fa-clone', 'plus_subelement');
 			}
 
 			$clones = $this->cloneDomainsList($row->domain_id);

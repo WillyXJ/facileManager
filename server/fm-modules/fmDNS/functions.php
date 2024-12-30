@@ -989,7 +989,14 @@ function checkCIDR($ip, $prefix, $max_bits) {
 	/* Check if the ip is the network id 
 	 * Used from https://stackoverflow.com/questions/4931721/getting-list-ips-from-cidr-notation-in-php
 	*/
-	if ($ip != long2ip((ip2long($ip)) & ((-1 << (32 - (int)$prefix))))) return false;
+	if (strpos($ip, ':') === false) {
+		if ($ip != long2ip((ip2long($ip)) & ((-1 << ($max_bits - (int)$prefix))))) return false;
+	} else {
+		/** IPv6
+		 * Used from https://gist.github.com/pavinjosdev/cb1d636ea9dc2bd201d54107d10650c5#file-validate_cidr-php-L33
+		 */
+		return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+	}
 
 	return true;
 }

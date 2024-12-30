@@ -259,7 +259,7 @@ class fm_dns_acls {
 		
 		$edit_name = '<b>' . $row->acl_name . '</b>';
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_name .= displayAddNew('acl', $row->acl_id, null, 'fa fa-plus-square-o');
+			$edit_name .= displayAddNew('acl', $row->acl_id, null, 'fa fa-plus-square-o', 'plus_subelement');
 		}
 		$edit_addresses = nl2br(str_replace(',', "\n", $row->acl_addresses));
 		$edit_addresses = $this->getACLElements($row->acl_id);

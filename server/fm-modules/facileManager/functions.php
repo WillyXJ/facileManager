@@ -3191,7 +3191,7 @@ function countArrayDimensions($array) {
  * @param string $style Use an image or font
  * @return string
  */
-function displayAddNew($name = null, $rel = null, $title = null, $style = 'default') {
+function displayAddNew($name = null, $rel = null, $title = null, $style = 'default', $id = 'plus') {
 	global $__FM_CONFIG;
 	
 	if (empty($title)) $title = _('Add New');
@@ -3205,7 +3205,7 @@ function displayAddNew($name = null, $rel = null, $title = null, $style = 'defau
 		$title = 'null" class="tooltip-top mini-icon" data-tooltip="' . $title;
 	}
 	
-	return sprintf('<a id="plus" href="#" title="%s"%s%s>%s</a>', $title, $name, $rel, $image);
+	return sprintf('<a id="%s" href="#" title="%s"%s%s>%s</a>', $id, $title, $name, $rel, $image);
 }
 
 
