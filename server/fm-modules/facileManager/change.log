@@ -1,3 +1,7 @@
+5.0.0-beta4 (2024-12-??)
+========================
+* Server - [improvement] Viewing admin logs no longer defaults the cursor to the date filter field.
+
 5.0.0-beta3 (2024-12-03)
 ========================
 * Server - [improvement] Configuration preview and help windows are larger.

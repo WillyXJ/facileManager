@@ -71,7 +71,9 @@ if (isset($__FM_CONFIG)) {
 		}
 	});
 	
-	$("input:text, input:password, select, textarea").first().focus();
+	if (!onPage("admin-logs.php")) {
+		$("input:text, input:password, select, textarea").first().focus();
+	}
 	
 	// Everything we need for scrolling up and down.
 	$(window).scroll( function(){
