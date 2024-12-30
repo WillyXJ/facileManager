@@ -255,7 +255,7 @@ $(document).ready(function() {
 				__('There are pending changes still to validate.'),
 				buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'))))) . '");
 			$unsaved_changes.first().parents("tr").find("input").first().focus();
-		} else if($unsaved_changes.length == 0) {
+		} else if($unsaved_changes.length == 0 && $(".display_results .build").filter(":visible").length == 0) {
 		 	setSaveAllStatus();
 			return;
 		} else {
