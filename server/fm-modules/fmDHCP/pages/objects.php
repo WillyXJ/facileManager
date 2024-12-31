@@ -35,7 +35,7 @@ if (!isset($addl_title_blocks)) $addl_title_blocks = array();
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, $display_type, currentUserCan($required_permission, $_SESSION['module']), $type, null, null, $addl_title_blocks);
+echo printPageHeader((string) $response, $display_type, currentUserCan($required_permission, $_SESSION['module']), $type, null, 'noscroll', $addl_title_blocks);
 
 /** Get server listing */
 $sort_direction = null;

@@ -42,7 +42,7 @@ if (!isset($include_submenus)) $include_submenus = true;
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, $display_type, currentUserCan($required_permission, $_SESSION['module']));
+echo printPageHeader((string) $response, $display_type, currentUserCan($required_permission, $_SESSION['module']), null, null, 'noscroll');
 
 if ($include_submenus === true) {
 //	$avail_servers = buildServerSubMenu($server_serial_no);

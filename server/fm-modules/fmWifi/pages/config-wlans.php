@@ -37,7 +37,7 @@ $server_serial_no = (isset($_REQUEST['server_serial_no'])) ? sanitize($_REQUEST[
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, null, currentUserCan($required_permission, $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan($required_permission, $_SESSION['module']), null, null, 'noscroll');
 
 /** Get server listing */
 $sort_direction = null;

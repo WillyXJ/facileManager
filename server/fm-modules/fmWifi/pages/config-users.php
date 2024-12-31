@@ -29,7 +29,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_wlan_use
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, null, currentUserCan($required_permission, $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan($required_permission, $_SESSION['module']), null, null, 'noscroll');
 
 $sort_direction = null;
 $sort_field = 'wlan_user_login';

@@ -160,7 +160,7 @@ if ($option_type == 'rpz') {
 	$tmp_num_rows = $fmdb->num_rows;
 }
 
-echo printPageHeader(array('message' => (string) $response, 'comment' => $comment), $display_option_type . ' ' . getPageTitle() . $display_option_sub, $perms, $name, $rel, null, $addl_title_blocks);
+echo printPageHeader(array('message' => (string) $response, 'comment' => $comment), $display_option_type . ' ' . getPageTitle() . $display_option_sub, $perms, $name, $rel, 'noscroll', $addl_title_blocks);
 
 $fmdb->last_result = $tmp_last_result;
 $fmdb->num_rows = $tmp_num_rows;

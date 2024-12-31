@@ -1,5 +1,6 @@
 0.7.0-beta4 (2025-??-??)
 ========================
+* Server - [bug] Page scrolling fixes.
 * Server - [bug] Fixed WLAN logging.
 
 0.7.0-beta3 (2024-12-03)

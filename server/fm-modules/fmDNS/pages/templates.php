@@ -35,7 +35,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_template
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_zones', $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan('manage_zones', $_SESSION['module']), null, null, 'noscroll');
 	
 $sort_direction = null;
 $sort_field = $template_type . '_name';

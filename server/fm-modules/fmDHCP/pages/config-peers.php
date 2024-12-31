@@ -59,7 +59,7 @@ if (currentUserCan('manage_peers', $_SESSION['module'])) {
 printHeader();
 @printMenu();
 
-echo printPageHeader($response, null, currentUserCan('manage_peers', $_SESSION['module']));
+echo printPageHeader($response, null, currentUserCan('manage_peers', $_SESSION['module']), null, null, 'noscroll');
 
 /** Get server listing */
 $result = basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'peers', 'peer_name', 'peer_');

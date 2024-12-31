@@ -1165,6 +1165,7 @@ function buildHelpFile() {
 <div id="issue_tracker">
 	<p>Have an idea for a new feature? Found a bug? Submit a report with the <a href="https://github.com/WillyXJ/facileManager/issues" target="_blank">issue tracker</a>.</p>
 </div>
+<div>
 <h3>$fm_name</h3>
 <ul>
 	<li>
@@ -1316,7 +1317,7 @@ HTML;
 		}
 	}
 
-	return parseMenuLinks($body) . '<br />';
+	return parseMenuLinks($body) . '</div>';
 }
 
 
@@ -2231,7 +2232,7 @@ function printPageHeader($message = null, $title = null, $allowed_to_add = false
 	}
 
 	echo '<div id="body_container"';
-	if ($scroll == 'noscroll') echo ' class="fm-noscroll" style="padding-bottom: 0;"';
+	if ($scroll == 'noscroll') echo ' class="fm-noscroll"';
 	echo '>' . "\n";
 	printf('<div id="body_top_container">
 	<div id="response" class="%s" %s>%s</div>

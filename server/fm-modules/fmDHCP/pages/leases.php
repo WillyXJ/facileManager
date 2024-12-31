@@ -29,7 +29,7 @@ printHeader();
 @printMenu();
 
 $addl_title_blocks[] = buildServerSubMenu($server_serial_no, null, null, __('Select a server'));
-echo printPageHeader((string) $response, null, false, null, null, null, $addl_title_blocks);
+echo printPageHeader((string) $response, null, false, null, null, 'noscroll', $addl_title_blocks);
 
 $placeholder = sprintf('<div><p>%s:</p>%s</div>', __('Please choose a server to view leases from.'), $addl_title_blocks[0]);
 

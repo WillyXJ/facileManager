@@ -529,14 +529,15 @@ h4 {
 	margin-top: 1.5em;
 }
 
-
+.fm-noscroll #body_top_container {
+	bottom: 8em;
+}
 #body_top_container {
-	padding: 1em 2em 5em;
+	padding: 1em 2em 1em;
 	position: absolute;
 	right: 0em;
 	left: 17em;
 	top: 3.7em;
-	bottom: 8em;
 }
 #page_title_container {
 	border-bottom: 1px solid var(--page-title-line);
@@ -1179,12 +1180,11 @@ i.delete {
 .manage_form_contents {
 	z-index: 1003;
 	position: relative;
-	top: -6em;
+	top: -5%;
 	margin: auto;
 	opacity: 1.0;
 	min-width: 500px;
 	max-width: 80%;
-	max-height: 60%;
 	background-color: var(--form-popup-bg);
 	border: 1px solid #999;
 	border: 1px solid rgba(0, 0, 0, 0.3);
@@ -1645,6 +1645,10 @@ span.not_installed {
 	font-size: 9pt;
 	overflow-y: auto;
 	height: 90%;
+}
+
+#help_file_container > div:last-of-type {
+	margin-bottom: 10em;
 }
 
 #help_file_container ul {

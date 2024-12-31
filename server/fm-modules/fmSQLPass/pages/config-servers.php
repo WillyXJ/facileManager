@@ -27,7 +27,7 @@ include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_servers.
 printHeader();
 @printMenu();
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader((string) $response, null, currentUserCan('manage_servers', $_SESSION['module']), null, null, 'noscroll');
 
 $result = basicGetList('fm_' . $__FM_CONFIG['fmSQLPass']['prefix'] . 'servers', 'server_name', 'server_');
 $total_pages = ceil($fmdb->num_rows / $_SESSION['user']['record_count']);

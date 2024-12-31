@@ -31,7 +31,7 @@ printHeader();
 @printMenu();
 
 $addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['servers']['avail_types']);
-echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
+echo printPageHeader((string) $response, $display_type, currentUserCan('manage_servers', $_SESSION['module']), $type, null, 'noscroll', $addl_title_blocks);
 
 $sort_direction = null;
 $sort_field = null;

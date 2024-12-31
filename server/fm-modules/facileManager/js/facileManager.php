@@ -81,8 +81,9 @@ if (isset($__FM_CONFIG)) {
 		else $("#scroll-to-top").removeClass("displayed");
 	} );
 	
-	$(".table-results-container").scroll( function(){
-		if($(".table-results-container").scrollTop() > 150) $("#scroll-to-top").addClass("displayed");
+	$(".overflow-container").scroll( function(){
+		console.log($(".overflow-container").scrollTop());
+		if($(".overflow-container").scrollTop() > 150) $("#scroll-to-top").addClass("displayed");
 		else $("#scroll-to-top").removeClass("displayed");
 	} );
 	
@@ -92,7 +93,7 @@ if (isset($__FM_CONFIG)) {
 	} );
 	
 	$("#scroll-to-top").click( function(){
-		$(".table-results-container").animate( { scrollTop: "0px" } );
+		$(".overflow-container").animate( { scrollTop: "0px" } );
 		return false;
 	} );
 	

@@ -1,6 +1,7 @@
 5.0.0-beta5 (2025-??-??)
 ========================
 * Server - [bug] Login banner is retained with login failure messages.
+* Server - [bug] Page scrolling fixes.
 
 5.0.0-beta4 (2024-12-30)
 ========================

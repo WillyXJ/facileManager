@@ -29,7 +29,7 @@ $response = isset($response) ? $response : null;
 printHeader();
 @printMenu();
 
-echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']));
+echo printPageHeader($response, null, currentUserCan('manage_servers', $_SESSION['module']), null, null, 'noscroll');
 
 /** Get server listing */
 $sort_direction = null;

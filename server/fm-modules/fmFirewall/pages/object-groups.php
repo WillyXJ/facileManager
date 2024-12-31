@@ -33,7 +33,7 @@ $group_type = 'object';
 
 $search_query = createSearchSQL(array('name', 'items', 'comment'), 'group_');
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_objects', $_SESSION['module']), $group_type);
+echo printPageHeader((string) $response, null, currentUserCan('manage_objects', $_SESSION['module']), $group_type, null, 'noscroll');
 
 $sort_direction = null;
 $sort_field = 'group_name';

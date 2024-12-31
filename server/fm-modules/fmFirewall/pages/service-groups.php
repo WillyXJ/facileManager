@@ -33,7 +33,7 @@ $search_query = createSearchSQL(array('name', 'items', 'comment'), 'group_');
 
 $group_type = 'service';
 
-echo printPageHeader((string) $response, null, currentUserCan('manage_services', $_SESSION['module']), $group_type);
+echo printPageHeader((string) $response, null, currentUserCan('manage_services', $_SESSION['module']), $group_type, null, 'noscroll');
 
 $sort_direction = null;
 $sort_field = 'group_name';

@@ -33,7 +33,7 @@ printHeader();
 @printMenu();
 
 $addl_title_blocks[] = buildSubMenu($type, $__FM_CONFIG['keys']['avail_types']);
-echo printPageHeader((string) $response, __('Keys') . " ($display_type)", currentUserCan('manage_servers', $_SESSION['module']), $type, null, null, $addl_title_blocks);
+echo printPageHeader((string) $response, __('Keys') . " ($display_type)", currentUserCan('manage_servers', $_SESSION['module']), $type, null, 'noscroll', $addl_title_blocks);
 	
 $sort_direction = null;
 $sort_field = 'key_name';

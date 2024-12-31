@@ -96,7 +96,7 @@ $search_form = sprintf('<form class="log_search_form" id="date-range" method="ge
 		);
 
 $fmdb->num_rows = $log_count;
-echo printPageHeader($response);
+echo printPageHeader($response, null, false, null, null, 'noscroll');
 echo displayPagination($page, $total_pages, array($search_form, null));
 echo '<div class="overflow-container">';
 echo displayTableHeader($table_info, $title_array);
