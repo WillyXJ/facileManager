@@ -120,7 +120,7 @@ class fm_wifi_wlans {
 		if (empty($name)) return __('No name defined.');
 		
 		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_name', 'config_comment', 'config_parent_id', 'config_aps', 'config_type'));
-		$logging_excluded_fields = array('account_id', 'config_is_parent', 'config_type', 'config_data');
+		$logging_excluded_fields = array('account_id', 'config_is_parent', 'config_type', 'config_name');
 		$log_message = __("Added WLAN with the following") . ":\n";
 		
 		/** Insert the category parent */
@@ -129,6 +129,7 @@ class fm_wifi_wlans {
 				if ($data) {
 					$sql_fields .= $key . ', ';
 					$sql_values .= "'$data', ";
+					if ($key == 'config_data') $key = 'SSID';
 					$log_message .= ($data && !in_array($key, $logging_excluded_fields)) ? formatLogKeyData('config_', $key, $data) : null;
 				}
 			}
@@ -190,8 +191,9 @@ class fm_wifi_wlans {
 				if ($i) $sql_fields .= $key . ', ';
 				
 				$sql_values .= "'$data', ";
-				$log_message .= ($post[$handler]) ? formatLogKeyData('config_', $handler, $post[$handler]) : null;
 			}
+			if ($handler == 'wpa_passphrase') $post[$handler] = str_repeat('*', 8);
+			$log_message .= ($post[$handler]) ? formatLogKeyData('config_', $handler, $post[$handler]) : null;
 			$i = 0;
 			$sql_values = rtrim($sql_values, ', ') . '), (';
 		}
@@ -239,7 +241,7 @@ class fm_wifi_wlans {
 		if (empty($name)) return __('No name defined.');
 		
 		$include = array_merge(array('account_id', 'server_serial_no', 'config_is_parent', 'config_data', 'config_name', 'config_comment', 'config_parent_id', 'config_aps'));
-		$logging_excluded_fields = array('account_id', 'config_is_parent', 'config_type', 'config_data');
+		$logging_excluded_fields = array('account_id', 'config_is_parent', 'config_type', 'config_name');
 		
 		$old_name = getNameFromID($post['config_id'], 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', 'config_', 'config_id', 'config_data');
 		$log_message = sprintf(__("Updated WLAN '%s' to the following"), $old_name) . ":\n";
@@ -249,6 +251,7 @@ class fm_wifi_wlans {
 			if (in_array($key, $include)) {
 				if ($data) {
 					$sql_values .= "$key='$data', ";
+					if ($key == 'config_data') $key = 'SSID';
 					$log_message .= ($data && !in_array($key, $logging_excluded_fields)) ? formatLogKeyData('config_', $key, $data) : null;
 				}
 			}
@@ -286,6 +289,7 @@ class fm_wifi_wlans {
 			foreach ($child as $key => $data) {
 				$sql_values .= "$key='$data', ";
 			}
+			if ($handler == 'wpa_passphrase') $post[$handler] = str_repeat('*', 8);
 			$log_message .= ($post[$handler]) ? formatLogKeyData('config_', $handler, $post[$handler]) : null;
 			$sql_values = rtrim($sql_values, ', ');
 			
