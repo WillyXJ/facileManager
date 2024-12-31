@@ -2,6 +2,7 @@
 ========================
 * Server - [improvement] Viewing admin logs no longer defaults the cursor to the date filter field.
 * Server - [improvement] Module updates now handle file and database changes together.
+* Server - [bug] Users with the manage modules permission can perform upgrades.
 
 5.0.0-beta3 (2024-12-03)
 ========================

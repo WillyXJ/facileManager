@@ -42,7 +42,7 @@ error_reporting(0);
 
 $response = null;
 
-if (!$fm_login->isLoggedIn() || (!currentUserCan('do_everything') && getOption('fm_db_version') >= 32)) {
+if (!$fm_login->isLoggedIn() || (!currentUserCan(array('do_everything', 'manage_modules')) && getOption('fm_db_version') >= 32)) {
 	header('Location: ' . dirname($_SERVER['PHP_SELF']));
 	exit;
 }

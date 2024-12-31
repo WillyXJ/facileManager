@@ -145,7 +145,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 					if (currentUserCan(array('do_everything', 'manage_modules')) || (getOption('fm_db_version') < 32 && $_SESSION['user']['fm_perms'] & 1)) {
 						echo $GLOBALS['RELPATH'] . 'fm-upgrade.php';
 					} else {
-						session_destroy();
+						@session_destroy();
 						printf('<p class="failed">' . _('The database for %1s and its modules still needs to be upgraded.<br />Please contact a privileged user.') . '</p>', $fm_name);
 					}
 				} else echo $_SERVER['REQUEST_URI'];
