@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-03 15:43-0700\n"
+"POT-Creation-Date: 2024-12-31 12:09-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -922,14 +922,14 @@ msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_templates.php:123
 #: server/fm-modules/fmFirewall/classes/class_templates.php:223
-#: server/fm-modules/fmFirewall/classes/class_templates.php:584
+#: server/fm-modules/fmFirewall/classes/class_templates.php:583
 msgid "All Servers"
 msgstr ""
 
 #: server/fm-modules/fmFirewall/classes/class_templates.php:128
 #: server/fm-modules/fmFirewall/classes/class_templates.php:228
-#: server/fm-modules/fmFirewall/classes/class_templates.php:584
-#: server/fm-modules/fmFirewall/classes/class_templates.php:587
+#: server/fm-modules/fmFirewall/classes/class_templates.php:583
+#: server/fm-modules/fmFirewall/classes/class_templates.php:586
 msgid "None"
 msgstr ""
 
@@ -973,11 +973,11 @@ msgstr ""
 msgid "Selected"
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_templates.php:551
+#: server/fm-modules/fmFirewall/classes/class_templates.php:550
 msgid "No name is defined."
 msgstr ""
 
-#: server/fm-modules/fmFirewall/classes/class_templates.php:555
+#: server/fm-modules/fmFirewall/classes/class_templates.php:554
 #: server/fm-modules/fmFirewall/classes/class_time.php:401
 #, php-format
 msgid "Name is too long (maximum %d character)."
@@ -985,7 +985,7 @@ msgid_plural "Name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmFirewall/classes/class_templates.php:559
+#: server/fm-modules/fmFirewall/classes/class_templates.php:558
 msgid "This template name already exists."
 msgstr ""
 

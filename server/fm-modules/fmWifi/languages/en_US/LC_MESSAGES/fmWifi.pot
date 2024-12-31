@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-03 15:43-0700\n"
+"POT-Creation-Date: 2024-12-31 12:09-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: server/fm-modules/fmWifi/functions.php:67
 #: server/fm-modules/fmWifi/classes/class_wlans.php:68
-#: server/fm-modules/fmWifi/classes/class_wlans.php:646
+#: server/fm-modules/fmWifi/classes/class_wlans.php:650
 msgid "SSID"
 msgstr ""
 
@@ -42,7 +42,7 @@ msgid "Band"
 msgstr ""
 
 #: server/fm-modules/fmWifi/functions.php:67
-#: server/fm-modules/fmWifi/classes/class_wlans.php:657
+#: server/fm-modules/fmWifi/classes/class_wlans.php:661
 msgid "Channel"
 msgstr ""
 
@@ -168,9 +168,9 @@ msgstr ""
 
 #: server/fm-modules/fmWifi/functions.php:618
 #: server/fm-modules/fmWifi/classes/class_acls.php:256
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:228
-#: server/fm-modules/fmWifi/classes/class_wlans.php:829
-#: server/fm-modules/fmWifi/classes/class_wlans.php:870
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:245
+#: server/fm-modules/fmWifi/classes/class_wlans.php:833
+#: server/fm-modules/fmWifi/classes/class_wlans.php:874
 msgid "All WLANs"
 msgstr ""
 
@@ -214,7 +214,7 @@ msgid ""
 msgstr ""
 
 #: server/fm-modules/fmWifi/variables.inc.php:74
-#: server/fm-modules/fmWifi/classes/class_wlans.php:501
+#: server/fm-modules/fmWifi/classes/class_wlans.php:505
 msgid ""
 "The ACL functionality of hostapd (macaddr_acl) does not seem to work with "
 "Raspbian. Therefore, the use of ebtables is recommended to deny clients."
@@ -261,7 +261,7 @@ msgstr ""
 #: server/fm-modules/fmWifi/classes/class_acls.php:69
 #: server/fm-modules/fmWifi/classes/class_acls.php:352
 #: server/fm-modules/fmWifi/classes/class_wlan_users.php:68
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:320
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:345
 msgid "MAC Address"
 msgstr ""
 
@@ -285,8 +285,6 @@ msgstr ""
 
 #: server/fm-modules/fmWifi/classes/class_acls.php:137
 #: server/fm-modules/fmWifi/classes/class_acls.php:192
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:117
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:169
 msgid "Hardware Address"
 msgstr ""
 
@@ -300,9 +298,7 @@ msgstr ""
 #: server/fm-modules/fmWifi/classes/class_acls.php:192
 #: server/fm-modules/fmWifi/classes/class_acls.php:351
 #: server/fm-modules/fmWifi/classes/class_wlan_users.php:69
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:117
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:169
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:321
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:347
 msgid "Associated WLANs"
 msgstr ""
 
@@ -317,8 +313,8 @@ msgid "Updated MAC ACL '%s' with the following details"
 msgstr ""
 
 #: server/fm-modules/fmWifi/classes/class_acls.php:214
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:190
-#: server/fm-modules/fmWifi/classes/class_wlans.php:336
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:207
+#: server/fm-modules/fmWifi/classes/class_wlans.php:340
 msgid "This item could not be deleted because a database error occurred."
 msgstr ""
 
@@ -389,9 +385,9 @@ msgid "Empty values are not allowed."
 msgstr ""
 
 #: server/fm-modules/fmWifi/classes/class_options.php:122
-#: server/fm-modules/fmWifi/classes/class_wlans.php:145
-#: server/fm-modules/fmWifi/classes/class_wlans.php:205
-#: server/fm-modules/fmWifi/classes/class_wlans.php:264
+#: server/fm-modules/fmWifi/classes/class_wlans.php:146
+#: server/fm-modules/fmWifi/classes/class_wlans.php:207
+#: server/fm-modules/fmWifi/classes/class_wlans.php:267
 msgid "Could not add the item because a database error occurred."
 msgstr ""
 
@@ -408,35 +404,35 @@ msgstr ""
 msgid "Option '%s' for %s was deleted."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_options.php:298
+#: server/fm-modules/fmWifi/classes/class_options.php:299
 msgid "Add Option"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_options.php:298
+#: server/fm-modules/fmWifi/classes/class_options.php:299
 msgid "Edit Option"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_options.php:337
+#: server/fm-modules/fmWifi/classes/class_options.php:338
 msgid "Option Name"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_options.php:483
+#: server/fm-modules/fmWifi/classes/class_options.php:484
 #, php-format
 msgid "%s is an invalid number."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_options.php:486
+#: server/fm-modules/fmWifi/classes/class_options.php:487
 #, php-format
 msgid "%s is not in the valid range (%s)."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_options.php:490
+#: server/fm-modules/fmWifi/classes/class_options.php:491
 #, php-format
 msgid "%s is an invalid port number."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_options.php:500
-#: server/fm-modules/fmWifi/classes/class_options.php:505
+#: server/fm-modules/fmWifi/classes/class_options.php:501
+#: server/fm-modules/fmWifi/classes/class_options.php:506
 #, php-format
 msgid "%s is an invalid IP address."
 msgstr ""
@@ -501,14 +497,12 @@ msgstr ""
 
 #: server/fm-modules/fmWifi/classes/class_servers.php:158
 #: server/fm-modules/fmWifi/classes/class_servers.php:232
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:117
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:169
 msgid "Name"
 msgstr ""
 
 #: server/fm-modules/fmWifi/classes/class_servers.php:158
 #: server/fm-modules/fmWifi/classes/class_wlans.php:71
-#: server/fm-modules/fmWifi/classes/class_wlans.php:647
+#: server/fm-modules/fmWifi/classes/class_wlans.php:651
 msgid "Associated APs"
 msgstr ""
 
@@ -659,7 +653,7 @@ msgid "Access point group already exists."
 msgstr ""
 
 #: server/fm-modules/fmWifi/classes/class_servers.php:635
-#: server/fm-modules/fmWifi/classes/class_wlans.php:803
+#: server/fm-modules/fmWifi/classes/class_wlans.php:807
 #, php-format
 msgid "Group name is too long (maximum %d character)."
 msgid_plural "Group name is too long (maximum %d characters)."
@@ -681,45 +675,57 @@ msgstr ""
 msgid "Server update port must be a valid TCP port."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:117
-msgid "Added a WLAN User with the following details"
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:109
+msgid "Added a WLAN user with the following"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:169
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:156
 #, php-format
-msgid "Updated WLAN user '%s' with the following details"
+msgid "Updated WLAN user '%s' to the following"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:193
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:210
 #, php-format
 msgid "WLAN User '%s' was deleted."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:347
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:305
+msgid "Optionally specify the VLAN ID (1-4096) for the user."
+msgstr ""
+
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:346
+msgid "Assigned VLAN"
+msgstr ""
+
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:373
 msgid "No username is defined."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:348
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:374
 msgid "No password is defined."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:356
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:382
 #, php-format
 msgid "User name is too long (maximum %d character)."
 msgid_plural "User name is too long (maximum %d characters)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:360
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:386
 msgid "This user already exists."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:363
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:389
 msgid "This hardware address already exists."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlan_users.php:367
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:393
 msgid "The hardware address is invalid."
+msgstr ""
+
+#: server/fm-modules/fmWifi/classes/class_wlan_users.php:399
+msgid "The VLAN ID is invalid."
 msgstr ""
 
 #: server/fm-modules/fmWifi/classes/class_wlans.php:69
@@ -727,13 +733,13 @@ msgid "Frequency"
 msgstr ""
 
 #: server/fm-modules/fmWifi/classes/class_wlans.php:70
-#: server/fm-modules/fmWifi/classes/class_wlans.php:650
-#: server/fm-modules/fmWifi/classes/class_wlans.php:652
+#: server/fm-modules/fmWifi/classes/class_wlans.php:654
+#: server/fm-modules/fmWifi/classes/class_wlans.php:656
 msgid "Security"
 msgstr ""
 
 #: server/fm-modules/fmWifi/classes/class_wlans.php:120
-#: server/fm-modules/fmWifi/classes/class_wlans.php:239
+#: server/fm-modules/fmWifi/classes/class_wlans.php:241
 msgid "No name defined."
 msgstr ""
 
@@ -741,37 +747,37 @@ msgstr ""
 msgid "Added WLAN with the following"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:245
+#: server/fm-modules/fmWifi/classes/class_wlans.php:247
 #, php-format
 msgid "Updated WLAN '%s' to the following"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:296
+#: server/fm-modules/fmWifi/classes/class_wlans.php:300
 msgid "Could not update the item because a database error occurred."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:339
+#: server/fm-modules/fmWifi/classes/class_wlans.php:343
 #, php-format
 msgid "WLAN '%s' was deleted."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:374
+#: server/fm-modules/fmWifi/classes/class_wlans.php:378
 msgid "Configure Additional Options"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:467
+#: server/fm-modules/fmWifi/classes/class_wlans.php:471
 msgid "Accept unless in deny list"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:468
+#: server/fm-modules/fmWifi/classes/class_wlans.php:472
 msgid "Deny unless in accept list"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:469
+#: server/fm-modules/fmWifi/classes/class_wlans.php:473
 msgid "Use external RADIUS server"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:511
+#: server/fm-modules/fmWifi/classes/class_wlans.php:515
 msgid ""
 "Limit the number of clients that can connect or leave empty for the maximum "
 "(2007). In addition, you can choose to ignore broadcast Probe Request frames "
@@ -780,91 +786,91 @@ msgid ""
 "association would be rejected due to the maximum client limit."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:531
+#: server/fm-modules/fmWifi/classes/class_wlans.php:535
 msgid "Add Item"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:531
+#: server/fm-modules/fmWifi/classes/class_wlans.php:535
 msgid "Edit Item"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:645
+#: server/fm-modules/fmWifi/classes/class_wlans.php:649
 msgid "Basic"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:646
+#: server/fm-modules/fmWifi/classes/class_wlans.php:650
 msgid "Do not broadcast SSID"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:648
+#: server/fm-modules/fmWifi/classes/class_wlans.php:652
 msgid "Hardware Mode"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:649
+#: server/fm-modules/fmWifi/classes/class_wlans.php:653
 msgid "Enable short preamble"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:649
+#: server/fm-modules/fmWifi/classes/class_wlans.php:653
 msgid "Enable 802.11n"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:649
+#: server/fm-modules/fmWifi/classes/class_wlans.php:653
 msgid "Enable 802.11ac"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:649
+#: server/fm-modules/fmWifi/classes/class_wlans.php:653
 msgid "Enable QoS Support"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:650
+#: server/fm-modules/fmWifi/classes/class_wlans.php:654
 msgid "Enable WPA2"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:650
+#: server/fm-modules/fmWifi/classes/class_wlans.php:654
 msgid "MAC address filtering"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:653
+#: server/fm-modules/fmWifi/classes/class_wlans.php:657
 msgid "WPA Passphrase"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:653
+#: server/fm-modules/fmWifi/classes/class_wlans.php:657
 msgid "Show"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:654
+#: server/fm-modules/fmWifi/classes/class_wlans.php:658
 msgid "Encryption Key"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:655
+#: server/fm-modules/fmWifi/classes/class_wlans.php:659
 msgid "Pairwise Cipher Suite"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:656
+#: server/fm-modules/fmWifi/classes/class_wlans.php:660
 msgid "Advanced"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:658
+#: server/fm-modules/fmWifi/classes/class_wlans.php:662
 msgid "Country"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:658
+#: server/fm-modules/fmWifi/classes/class_wlans.php:662
 msgid "Limit the frequencies to regulatory limits"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:659
+#: server/fm-modules/fmWifi/classes/class_wlans.php:663
 msgid "Client Limit"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:659
+#: server/fm-modules/fmWifi/classes/class_wlans.php:663
 msgid "Ignore broadcast Probe Request frames"
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:799
+#: server/fm-modules/fmWifi/classes/class_wlans.php:803
 msgid "No name is defined."
 msgstr ""
 
-#: server/fm-modules/fmWifi/classes/class_wlans.php:807
+#: server/fm-modules/fmWifi/classes/class_wlans.php:811
 msgid "This WLAN already exists."
 msgstr ""
 
