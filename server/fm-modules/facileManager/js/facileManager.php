@@ -138,7 +138,7 @@ if (isset($__FM_CONFIG)) {
 					}
 					$("#login_form table").effect("shake");	
 				} else if (response.indexOf("failed") >=0) {
-					$("#message").html(response);
+					$("#message").prepend(response);
 				} else {
 					window.location = response;
 				}
