@@ -1332,11 +1332,18 @@ if (isset($__FM_CONFIG)) {
 	/* Update module */
 	$("#manage_item_contents").delegate("input#update_module", "click tap", function(e) {
 		module_name = $("input[name=module]").val();
+		if (module_name == "' . $fm_name . '") {
+			task = "update_core";
+			process_file = "processTools.php";
+		} else {
+			task = "module_upgrade";
+			process_file = "processPost.php";
+		}
 		/* Process items and action */
 		var form_data = {
 			item: module_name,
 			item_id: [module_name],
-			task: "module_upgrade",
+			task: task,
 			action: "bulk",
 			bulk_action: "update",
 			is_ajax: 1
@@ -1348,7 +1355,7 @@ if (isset($__FM_CONFIG)) {
 
 		$.ajax({
 			type: "POST",
-			url: "fm-modules/facileManager/ajax/processPost.php",
+			url: "fm-modules/facileManager/ajax/"+process_file,
 			data: form_data,
 			success: function(response)
 			{

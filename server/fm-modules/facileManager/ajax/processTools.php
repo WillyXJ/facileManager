@@ -66,6 +66,8 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 				$response .= '<p>' . $fm_tools->purgeLogs() . '</p>';
 				break;
 			case 'update_core':
+				include(ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'ajax' . DIRECTORY_SEPARATOR . 'functions.php');
+				
 				$fm_new_version_available = getOption('version_check', 0, $fm_name);
 				$response = buildPopup('header', _('Core Update Results'));
 				
@@ -74,8 +76,11 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 					$message .= extractPackage($local_update_package);
 				}
 				
+				// Graphic highlighting
+				$message = transformOutput($message);
+
 				$response .= '<p><pre>' . $message . '</pre></p>';
-				$response .= sprintf('<p>%s</p>', _('The next step is to upgrade the database.'));
+				if (strpos($message, '!') === false) $response .= sprintf('<p>%s</p>', _('The next step is to upgrade the database.'));
 				$response .= buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL(_('Modules')));
 				
 				echo $response;
