@@ -112,12 +112,13 @@ if (count($modules)) {
 		/** Get module status */
 		$module_version = getOption('version', 0, $module_name);
 		if ($module_version !== false) {
-			if (in_array($module_name, getActiveModules())) {
+			$active_modules = getActiveModules();
+			if (in_array($module_name, $active_modules)) {
 				$activate_link = sprintf('<a href="?action=deactivate&module=%s">%s</a>' . "\n", $module_name, _('Deactivate'));
 				$class[] = 'active';
 			}
 			if (version_compare($module_version, $__FM_CONFIG[$module_name]['version'], '>=')) {
-				if (!in_array($module_name, getActiveModules())) {
+				if (!in_array($module_name, $active_modules)) {
 					if (version_compare($fm_version, $__FM_CONFIG[$module_name]['required_fm_version'], '<')) {
 						$activate_link .= sprintf('<p>' . _('%s v%s or later is required.') . '</p>', $fm_name, $__FM_CONFIG[$module_name]['required_fm_version']);
 					} else {

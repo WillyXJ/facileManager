@@ -75,7 +75,16 @@ class fm_tools {
 			
 			/** Include module variables */
 			require(ABSPATH . 'fm-includes/version.php');
-			@include(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+			$fm_temp_directory = getOption('fm_temp_directory');
+			$tmp_vars = file_get_contents(ABSPATH . 'fm-modules/' . $module_name . '/variables.inc.php');
+			file_put_contents($fm_temp_directory . '/tmp_fm_vars.inc.php', $tmp_vars);
+			require($fm_temp_directory . '/tmp_fm_vars.inc.php');
+			unlink($fm_temp_directory . '/tmp_fm_vars.inc.php');
+
+			/** Ensure running_version is set */
+			if (!$running_version) {
+				$running_version = getOption('version', $_SESSION['user']['account_id'], $module_name);
+			}
 
 			/** Ensure there is actually an upgrade to perform */
 			if (version_compare($__FM_CONFIG[$module_name]['version'], $running_version, '<=')) {
@@ -83,12 +92,16 @@ class fm_tools {
 			}
 			
 			/** Ensure the minimum core version is installed */
-			if (version_compare($__FM_CONFIG[$module_name]['required_fm_version'], $fm_version, '<=') === false) {
+			if (in_array('module_name', getActiveModules()) && version_compare($__FM_CONFIG[$module_name]['required_fm_version'], $fm_version, '<=') === false) {
 				$fmdb->last_error = sprintf(_('%s v%s requires %s v%s or later.'), $module_name, $__FM_CONFIG[$module_name]['version'], $fm_name, $__FM_CONFIG[$module_name]['required_fm_version']);
 				if ($process == 'quiet') return false;
 				return sprintf('<p>' . _('%s upgrade failed!') . '</p>%s', $module_name, $fmdb->last_error);
 			}
 			
+			/** Include core upgrade functions */
+			if (!function_exists('columnExists')) {
+				include(ABSPATH . 'fm-modules/' . $fm_name . '/upgrade.php');
+			}
 			$function = 'upgrade' . $module_name . 'Schema';
 			if (function_exists($function)) {
 				$output = $function($running_version);
@@ -168,12 +181,20 @@ class fm_tools {
 					if ($local_update_package !== false) {
 						$message .= extractPackage($local_update_package);
 					}
+
+					/** Update the database */
+					if (strpos($message, '!') === false) {
+						global $fmdb;
+						$message .= _('Upgrading the database') . "\n";
+						$message .= $this->upgradeModule($module_name);
+						if ($fmdb->last_error) $message .= $fmdb->last_error;
+					}
 				} else {
 					$message = _('No updated packages are found.');
 				}
 				
 				$response = '<strong>' . $module_name . '</strong><br /><pre>' . $message . '</pre>';
-				if (strpos($message, "\n")) $response .= sprintf('<p>%s</p>', _('The next step is to upgrade the database.'));
+				if (strpos($message, '!') === false) $response .= sprintf('<p>%s</p>', _('The next step is to upgrade the database.'));
 				
 				return $response;
 		}

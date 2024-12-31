@@ -1323,9 +1323,44 @@ if (isset($__FM_CONFIG)) {
 
 		$("body").addClass("fm-noscroll");
 		$("#manage_item").fadeIn(200);
-		$("#manage_item_contents").html(\'' . str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('header', _('Changelog')))) . '<iframe src=\'+changelog_href+\' ></iframe>'. str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('footer', _('OK'), array('cancel_button' => 'cancel')))) .'\');
+		$("#manage_item_contents").html(\'' . str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('header', _('Changelog')))) . '<input type="hidden" name="module" value="\'+changelog_href.split("/").pop()+\'" /><iframe src=\'+changelog_href+\' ></iframe>'. str_replace(array(PHP_EOL, "\t"), '', preg_replace('~\R~u', '', buildPopup('footer', _('Update'), array('update_module' => 'submit', 'cancel_button' => 'cancel')))) .'\');
 
 		return false;
+	});
+
+	/* Update module */
+	$("#manage_item_contents").delegate("input#update_module", "click tap", function(e) {
+		module_name = $("input[name=module]").val();
+		/* Process items and action */
+		var form_data = {
+			item: module_name,
+			item_id: [module_name],
+			task: "module_upgrade",
+			action: "bulk",
+			bulk_action: "update",
+			is_ajax: 1
+		};
+
+		$("body").addClass("fm-noscroll");
+		$("#manage_item").fadeIn(200);
+		$("#manage_item_contents").html("<p>' . _('Processing Module Update') . '... <i class=\"fa fa-spinner fa-spin\"></i></p>");
+
+		$.ajax({
+			type: "POST",
+			url: "fm-modules/facileManager/ajax/processPost.php",
+			data: form_data,
+			success: function(response)
+			{
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+					doLogout();
+					return false;
+				} else if (response != "Success") {
+					$("#manage_item_contents").html(response);
+				} else {
+					location.reload();
+				}
+			}
+		});
 	});
 });
 
