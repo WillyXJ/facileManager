@@ -30,6 +30,8 @@ $zone_access_allowed = true;
 include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
 if (is_array($_POST) && count($_POST)) {
+	if (!isset($_POST['record_type'])) $_POST['record_type'] = 'ALL';
+
 	if (isset($_POST['action']) && $_POST['action'] == 'get-record-value-form' && isset($_POST['record_type'])) {
 		$results = null;
 		extract($_POST);

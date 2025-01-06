@@ -80,22 +80,24 @@ $(document).ready(function() {
 					doLogout();
 					return false;
 				}
-				if ($("table.display_results tbody tr").length <= 0) {
-					$("table.display_results tbody").html(response);
-				} else {
-					$("table.display_results tbody tr:first").before(response);
-				}
-				$("table.display_results tbody tr:first div.inline-record-actions").show();
-				$("table.display_results tbody tr:first input:text").first().focus();
-				$("select").select2({
-					minimumResultsForSearch: 10
-				});
-				$("select.record-type").select2({
-					width: "80px"
-				});
-				more_clicks = more_clicks + 1;
+				if (response.length > 0) {
+					if ($("table.display_results tbody tr").length <= 0) {
+						$("table.display_results tbody").html(response);
+					} else {
+						$("table.display_results tbody tr:first").before(response);
+					}
+					$("table.display_results tbody tr:first div.inline-record-actions").show();
+					$("table.display_results tbody tr:first input:text").first().focus();
+					$("select").select2({
+						minimumResultsForSearch: 10
+					});
+					$("select.record-type").select2({
+						width: "80px"
+					});
+					more_clicks = more_clicks + 1;
 
-				setValidateAllStatus();
+					setValidateAllStatus();
+				}
 			}
 		});
 
@@ -232,6 +234,10 @@ $(document).ready(function() {
 						setSaveAllStatus();
 						setValidateAllStatus();
 					}
+				} else if (response.indexOf("popup_response") >= 0) {
+					$("body").addClass("fm-noscroll");
+					$("#manage_item").fadeIn(200);
+					$("#manage_item_contents").html(response);
 				}
 			}
 		});

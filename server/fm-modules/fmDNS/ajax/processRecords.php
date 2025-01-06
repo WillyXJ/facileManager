@@ -37,7 +37,7 @@ if (!in_array($_POST['action'], array('process-record-updates', 'validate-record
 	exit;
 }
 
-// extract($_POST);
+if (!isset($_POST['uri_params']['record_type'])) $_POST['uri_params']['record_type'] = 'ALL';
 
 /** Should the user be here? */
 if (!isset($_POST['uri_params'])) returnUnAuth();

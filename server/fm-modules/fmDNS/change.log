@@ -1,3 +1,7 @@
+7.0.0-rc2 (2025-01-??)
+======================
+* Server - [bug] Fixed add/validate of records in ALL RR view (bug introduced in 7.0.0-beta3).
+
 7.0.0-rc1 (2024-12-31)
 ======================
 * Server - [bug] Page scrolling fixes.
