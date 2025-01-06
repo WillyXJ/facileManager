@@ -2878,6 +2878,7 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 		if (count($matches)) {
 			foreach ($matches as $match_array) {
 				list($search, $type, $id) = $match_array;
+				if (!in_array($type, array('domain'))) continue;
 				$value = getNameFromID($id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . $type . 's', $type . '_', $type . '_id', $type . '_name');
 
 				$record_value = str_replace(array($search), array($value), $record_value);

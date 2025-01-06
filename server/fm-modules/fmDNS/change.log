@@ -1,5 +1,6 @@
 7.0.0-rc2 (2025-01-??)
 ======================
+* Server - [security] Fixed an issue where unsupported built-in variables would return data.
 * Server - [improvement] Added confirmation if leaving zone-records with unsaved changes.
 * Server - [improvement] Top bar provides visual that unsaved changes exist for the active zone.
 * Server - [improvement] Replaced most record actions with icons.
