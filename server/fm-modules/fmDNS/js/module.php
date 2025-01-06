@@ -23,7 +23,6 @@ $(document).ready(function() {
 		$menuitem.parent().addClass("current");
 
 		/* Add body class */
-		// $("body").addClass("fm-noscroll");
 		$("#plus").addClass("add-inline add-zone-records");
 
 		$("select.record-type").select2({
@@ -51,7 +50,7 @@ $(document).ready(function() {
 		$(window).on("beforeunload", function() {
 			var $unsaved_changes = $("#zone-records-form tr.record-changed");
 			var $validate_changes = $("#zone-records-form tr.notice");
-			if ($unsaved_changes.length > 0 || $validate_changes.length > 0) {
+			if ($("#manage_item").is(":hidden") && ($unsaved_changes.length > 0 || $validate_changes.length > 0)) {
 				return "You have unsaved changes.";
 			}
 		});
