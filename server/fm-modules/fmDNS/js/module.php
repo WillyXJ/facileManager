@@ -12,6 +12,16 @@ $(document).ready(function() {
 	more_clicks = 0;
 
 	if (onPage("zone-records.php")) {
+		/* Select proper menu item */
+		$zone_map = getUrlVars()["map"];
+		if ($zone_map == "" || $zone_map == null) {
+			$zone_map = "forward";
+		}
+		$menuitem = $("div#subitems ul li a").filter(function(){
+			return $(this).prop("href").indexOf("zones-" + $zone_map + ".php") != -1;
+		});
+		$menuitem.parent().addClass("current");
+
 		/* Add body class */
 		// $("body").addClass("fm-noscroll");
 		$("#plus").addClass("add-inline add-zone-records");
