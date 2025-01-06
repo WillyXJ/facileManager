@@ -565,7 +565,7 @@ class fm_dns_records {
 			$field_values['data']['Status'] = $status;
 
 			if (!$new) {
-				$field_values['data']['Actions'] = '<label><input type="checkbox" id="record_delete_' . $record_id . '" name="' . $action . '[_NUM_][Delete]" />' . _('Delete') . '</label>';
+				$field_values['data']['Actions'] = '<label><input type="checkbox" id="record_delete_' . $record_id . '" name="' . $action . '[_NUM_][Delete]" style="display: none;"/>' . $__FM_CONFIG['icons']['delete'] . '</label>';
 			}
 		} else {
 			$domain = strlen($domain) > 23 ? substr($domain, 0, 20) . '...' : $domain;
@@ -653,7 +653,7 @@ class fm_dns_records {
 			$field_values['class'] = 'new-record build notice';
 			if (!isset($field_values['data']['Actions'])) $field_values['data']['Actions'] = '';
 		}
-		if (isset($field_values['data']['Actions'])) $field_values['data']['Actions'] .= sprintf('<div class="inline-record-actions" style="display: none;"><a href="#" class="inline-record-validate">%s</a><a href="#" class="inline-record-cancel">%s</a></div>', __('Validate'), _('Cancel'));
+		if (isset($field_values['data']['Actions'])) $field_values['data']['Actions'] .= sprintf('<div class="inline-record-actions" style="display: none;"><a href="#" class="inline-record-validate"><i class="fa fa-check" title="%s" aria-hidden="true"></i></a><a href="#" class="inline-record-cancel"><i class="fa fa-undo" title="%s" aria-hidden="true"></i></a></div>', __('Validate'), _('Cancel'));
 		
 		for ($i=$start; $i<=$end; $i++) {
 			$form .= '<tr class="' . $field_values['class'] . '">' . "\n";

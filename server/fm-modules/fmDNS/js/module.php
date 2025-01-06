@@ -185,6 +185,7 @@ $(document).ready(function() {
 			});
 			$row_element.removeClass("record-changed build attention notice");
 			$(this).parent().hide();
+			$row_element.find("input[id^=\'record_delete_\']").parent().show();
 		}
 
 		setTimeout(function() {
@@ -605,14 +606,17 @@ $(document).ready(function() {
 		var $row_element = $(this).parents("tr");
 
 		if ($(this).is(":checked")) {
-			$row_element.removeClass("ok").addClass("build attention notice");
-		} else {
-			$row_element.removeClass("attention").addClass("notice");
-		}
-		$row_element.find(".inline-record-validate").show();
-		$row_element.find(".inline-record-actions").show();
+			$row_element.removeClass("ok").addClass("build attention record-changed");
+			$(this).parent().hide();
+			$row_element.find(".inline-record-validate").hide();
+			$row_element.find(".inline-record-actions").show();
 
-		setValidateAllStatus();
+			setValidateAllStatus();
+			setSaveAllStatus();
+		} else {
+			$row_element.removeClass("attention record-changed");
+			$row_element.find(".inline-record-cancel").click();
+		}
 	});
 
 	$("#manage_item_contents").delegate("#cfg_destination", "change", function(e) {

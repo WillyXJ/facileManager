@@ -155,11 +155,8 @@ table.form-table > tbody > tr.dnssec-key-addl-options {
 .inline-record-actions a:hover {
 	opacity: unset;
 }
-.inline-record-validate {
-	font-weight: bold;
-}
-.inline-record-cancel {
-	color: var(--tab-unselected-text);
+.inline-record-validate > i {
+	color: #12c012;
 }
 
 div.record-value-group {
