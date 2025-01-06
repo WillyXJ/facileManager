@@ -8,7 +8,7 @@ header("Content-Type: text/javascript");
 
 echo '
 $(document).ready(function() {
-	
+
 	more_clicks = 0;
 
 	if (onPage("zone-records.php")) {
@@ -36,7 +36,15 @@ $(document).ready(function() {
 					$row_element.find(".inline-record-cancel").click();
 				}
 			} 
-		});	
+		});
+
+		$(window).on("beforeunload", function() {
+			var $unsaved_changes = $("#zone-records-form tr.record-changed");
+			var $validate_changes = $("#zone-records-form tr.notice");
+			if ($unsaved_changes.length > 0 || $validate_changes.length > 0) {
+				return "You have unsaved changes.";
+			}
+		});
 	}
 
 	if (onPage("zones-forward.php") || onPage("zones-reverse.php")) {
