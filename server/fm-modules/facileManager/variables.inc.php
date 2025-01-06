@@ -46,7 +46,7 @@ $__FM_CONFIG['icons']['fail']			= sprintf('<i class="fa fa-times fa-lg fail" alt
 $__FM_CONFIG['icons']['caution']		= sprintf('<i class="fa fa-exclamation-triangle fa-lg notice" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Caution'));
 $__FM_CONFIG['icons']['ok']				= sprintf('<i class="fa fa-check fa-lg ok" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('OK'));
 $__FM_CONFIG['icons']['edit']			= sprintf('<i class="fa fa-pencil-square-o preview" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Edit'));
-$__FM_CONFIG['icons']['delete']			= sprintf('<i class="fa fa-window-close delete" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Delete'));
+$__FM_CONFIG['icons']['delete']			= sprintf('<i class="fa fa-trash delete" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Delete'));
 $__FM_CONFIG['icons']['copy']			= sprintf('<i class="fa fa-copy" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Duplicate'));
 $__FM_CONFIG['icons']['enable']			= sprintf('<i class="fa fa-toggle-off toggle" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Enable (currently disabled)'));
 $__FM_CONFIG['icons']['disable']		= sprintf('<i class="fa fa-toggle-on toggle" alt="%1$s" title="%1$s" aria-hidden="true"></i>', _('Disable (currently enabled)'));
