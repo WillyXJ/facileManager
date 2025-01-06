@@ -650,7 +650,7 @@ class fm_dns_records {
 		}
 
 		if ($new) {
-			$field_values['class'] = 'new-record notice';
+			$field_values['class'] = 'new-record build notice';
 			if (!isset($field_values['data']['Actions'])) $field_values['data']['Actions'] = '';
 		}
 		if (isset($field_values['data']['Actions'])) $field_values['data']['Actions'] .= sprintf('<div class="inline-record-actions" style="display: none;"><a href="#" class="inline-record-validate">%s</a><a href="#" class="inline-record-cancel">%s</a></div>', __('Validate'), _('Cancel'));
