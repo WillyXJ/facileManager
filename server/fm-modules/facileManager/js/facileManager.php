@@ -82,7 +82,6 @@ if (isset($__FM_CONFIG)) {
 	} );
 	
 	$(".overflow-container").scroll( function(){
-		console.log($(".overflow-container").scrollTop());
 		if($(".overflow-container").scrollTop() > 150) $("#scroll-to-top").addClass("displayed");
 		else $("#scroll-to-top").removeClass("displayed");
 	} );
