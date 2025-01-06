@@ -184,3 +184,13 @@ div[class^="record-value-subgroup"] {
 div[class^="record-value-subgroup"] > div {
 	padding-right: 1em;
 }
+
+#tophead span {
+	margin-left: 7px;
+}
+#tophead span.pending-changes {
+	display: none;
+}
+#tophead span.pending-changes a {
+	color: var(--table-rows-notice-hightlight);
+}

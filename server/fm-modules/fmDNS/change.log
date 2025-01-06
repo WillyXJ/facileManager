@@ -1,6 +1,7 @@
 7.0.0-rc2 (2025-01-??)
 ======================
 * Server - [improvement] Added confirmation if leaving zone-records with unsaved changes.
+* Server - [improvement] Top bar provides visual that unsaved changes exist for the active zone.
 * Server - [bug] Fixed add/validate of records in ALL RR view (bug introduced in 7.0.0-beta3).
 * Server - [bug] The correct Zones menu item is select when editing zone records.
 * Server - [bug] Fixed message text when there are no records (bug introduced in 7.0.0-beta3).

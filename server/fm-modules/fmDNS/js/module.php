@@ -190,6 +190,7 @@ $(document).ready(function() {
 		setTimeout(function() {
 			setSaveAllStatus();
 			setValidateAllStatus();
+			$("span.pending-changes").fadeOut(200);
 		}, 1000);
 	});
 
@@ -964,6 +965,7 @@ function setSaveAllStatus() {
 		$(".save-record-submit").addClass("disabled").attr("disabled", true);
 	} else {
 		$(".save-record-submit").removeClass("disabled").attr("disabled", false);
+		$("span.pending-changes").fadeIn(200);
 	}
 }
 
@@ -974,6 +976,7 @@ function setValidateAllStatus() {
 		$(".validate-all-records").addClass("disabled").attr("disabled", true);
 	} else {
 		$(".validate-all-records").removeClass("disabled").attr("disabled", false);
+		$("span.pending-changes").fadeIn(200);
 	}
 }
 ';
