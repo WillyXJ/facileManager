@@ -25,7 +25,7 @@ $map = (isset($_GET['map'])) ? strtolower($_GET['map']) : 'forward';
 /** Include module variables */
 if (isset($_SESSION['module'])) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/variables.inc.php');
 
-$default_record_type = $map == 'reverse' ? 'PTR' : 'ALL';
+$default_record_type = ($map == 'reverse') ? 'PTR' : 'ALL';
 if (isset($_GET['record_type'])) {
 	$record_type = strtoupper($_GET['record_type']);
 } else {
@@ -86,11 +86,11 @@ $addl_title_blocks[] = buildRecordTypes($record_type, $parent_domain_ids, $map, 
 if (reloadZone($domain_id)) {
 	if (reloadAllowed($domain_id) && currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) $response = sprintf('<p>%s</p>', sprintf(__('You need to %s this zone'), sprintf('<a href="" class="zone_reload" id="' . $domain_id . '">%s</a>', __('reload'))));
 }
-if (!getNSCount($domain_id)) {
+if (!$ns_count = getNSCount($domain_id)) {
 	$response = sprintf('<p>%s</p>', __('One or more NS records still needs to be created for this zone'));
 	$response_class = 'attention';
 }
-if (!getSOACount($domain_id)) {
+if (!$soa_count = getSOACount($domain_id)) {
 	$response = sprintf('<p>%s</p>', __('The SOA record still needs to be created for this zone'));
 	$response_class = 'attention';
 }
@@ -98,8 +98,11 @@ if (!getSOACount($domain_id)) {
 $current_user_can_manage_records = currentUserCan('manage_records', $_SESSION['module']);
 
 if ($current_user_can_manage_records && $zone_access_allowed) {
-	$addl_buttons[] = sprintf('<input type="button" value="%s" class="button validate-all-records disabled" disabled="true" />' . "\n", __('Validate All'));
-	$addl_buttons[] = sprintf('<input type="button" value="%s" class="button save-record-submit primary disabled" disabled="true" />' . "\n", __('Save All'));
+	$addl_buttons[] = sprintf('<a class="button validate-all-records disabled" disabled="true" /><i class="fa fa-check" aria-hidden="true"></i>%s</a>' . "\n", __('Validate All'));
+	$addl_buttons[] = sprintf('<a class="button save-record-submit primary disabled" disabled="true" /><i class="fa fa-floppy-o" aria-hidden="true"></i>%s</a>' . "\n", __('Save All'));
+	if ($soa_count && $ns_count && getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type') == 'primary') {
+		$addl_buttons[] = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=-1&config=zone&domain_id=' . $domain_id . '\',\'1356124444538\',\'' . $__FM_CONFIG['default']['popup']['dimensions'] . ',toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;" class="button"><i class="fa fa-search" aria-hidden="true"></i>' . __('Preview') . '</a>';
+	}
 } else $addl_buttons = null;
 
 echo printPageHeader(array('message' => $response, 'class' => $response_class), null, !in_array($record_type, array('SOA', 'CUSTOM')) && $current_user_can_manage_records && $zone_access_allowed, 'zone-records', null, 'noscroll', $addl_title_blocks);

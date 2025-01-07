@@ -191,7 +191,9 @@ $(document).ready(function() {
 		setTimeout(function() {
 			setSaveAllStatus();
 			setValidateAllStatus();
-			$("span.pending-changes").fadeOut(200);
+			if ($(".save-record-submit").hasClass("disabled") && $(".validate-all-records").hasClass("disabled")) {
+				$("span.pending-changes").fadeOut(200);
+			}
 		}, 1000);
 	});
 
