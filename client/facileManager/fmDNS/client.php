@@ -46,7 +46,7 @@ if (!$api_call) {
 } else {
 	$api_supported_rr = array('A', 'AAAA', 'CNAME', 'DNAME', 'MX', 'NS', 'PTR', 'TXT');
 	$api_params = array(
-		'common' => array('action', 'id', 'type', 'name', 'value', 'ttl', 'comment', 'status', 'reloadzone'),
+		'common' => array('action', 'id', 'type', 'name', 'value', 'ttl', 'comment', 'status', 'reload'),
 		'CNAME'  => array('append'),
 		'DNAME'  => array('append'),
 		'MX'  => array('priority', 'append'),
@@ -82,7 +82,7 @@ for ($i=0; $i < count($argv); $i++) {
 		foreach (array_unique(call_user_func_array('array_merge', array_values($api_params))) as $param) {
 			if (strncmp(strtolower($argv[$i]), $param . '=', strlen($param) + 1) == 0) {
 				$prefix = ($param == 'id') ? 'domain_' : 'record_';
-				if (in_array($param, array('action', 'reloadzone'))) $prefix = null;
+				if (in_array($param, array('action', 'reload'))) $prefix = null;
 				$data['api'][$prefix . $param] = substr($argv[$i], strlen($param) + 1);
 
 				validateAPIParam($param, $data['api'][$prefix . $param]);
