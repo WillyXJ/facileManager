@@ -585,7 +585,7 @@ $(document).ready(function() {
 	});
 	
 	/* Changing record values */
-	$(".table-results-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change keyup blur", function(e) {
+	$(".table-results-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change input", function(e) {
 		var $row_element = $(this).parents("tr");
 
 		$row_element.not(".new-record").addClass("build");
@@ -606,7 +606,7 @@ $(document).ready(function() {
 	});
 
 	/* Automatically select to set/update PTR */
-	$(".table-results-container .display_results").delegate("input[name*=\'record_name\'], input[name*=\'record_value\']", "change keyup blur", function(e) {
+	$(".table-results-container .display_results").delegate("input[name*=\'record_name\'], input[name*=\'record_value\']", "change input", function(e) {
 		$(this).parents("tr").find("input[name*=\'\[PTR\]\']").prop("checked", true);
 	});
 
