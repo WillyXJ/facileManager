@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-31 12:09-0700\n"
+"POT-Creation-Date: 2025-01-06 21:09-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -177,7 +177,7 @@ msgstr ""
 
 #: server/fm-install.php:359 server/password_reset.php:98
 #: server/fm-modules/facileManager/classes/class_users.php:712
-#: server/fm-modules/facileManager/js/facileManager.php:1383
+#: server/fm-modules/facileManager/js/facileManager.php:1389
 #, php-format
 msgid "No Password"
 msgstr ""
@@ -475,7 +475,7 @@ msgstr ""
 
 #: server/fm-modules/facileManager/functions.php:3080
 #: server/fm-modules/facileManager/classes/class_accounts.php:48
-#: server/fm-modules/facileManager/js/facileManager.php:396
+#: server/fm-modules/facileManager/js/facileManager.php:395
 msgid "Success"
 msgstr ""
 
@@ -563,7 +563,7 @@ msgid "Close"
 msgstr ""
 
 #: server/fm-modules/facileManager/functions.php:3904
-#: server/fm-modules/facileManager/js/facileManager.php:610
+#: server/fm-modules/facileManager/js/facileManager.php:609
 msgid "more"
 msgstr ""
 
@@ -614,7 +614,7 @@ msgstr ""
 #: server/fm-modules/facileManager/ajax/formatOutput.php:36
 #: server/fm-modules/facileManager/ajax/functions.php:35
 #: server/fm-modules/facileManager/ajax/functions.php:55
-#: server/fm-modules/facileManager/ajax/processTools.php:86
+#: server/fm-modules/facileManager/ajax/processTools.php:91
 #: server/fm-modules/shared/ajax/processTools.php:47
 #: server/fm-modules/shared/classes/class_servers.php:35
 #: server/fm-modules/shared/classes/class_servers.php:206
@@ -632,11 +632,11 @@ msgstr ""
 #: server/fm-modules/facileManager/ajax/processReload.php:51
 #: server/fm-modules/facileManager/ajax/processTools.php:47
 #: server/fm-modules/facileManager/ajax/processTools.php:56
-#: server/fm-modules/facileManager/ajax/processTools.php:79
-#: server/fm-modules/facileManager/ajax/processTools.php:90
+#: server/fm-modules/facileManager/ajax/processTools.php:84
+#: server/fm-modules/facileManager/ajax/processTools.php:95
 #: server/fm-modules/facileManager/classes/class_users.php:1003
 #: server/fm-modules/facileManager/classes/class_users.php:1038
-#: server/fm-modules/facileManager/js/facileManager.php:1268
+#: server/fm-modules/facileManager/js/facileManager.php:1267
 #: server/fm-modules/shared/classes/class_servers.php:37
 #: server/fm-modules/shared/classes/class_servers.php:208
 msgid "OK"
@@ -758,7 +758,7 @@ msgstr ""
 #: server/fm-modules/facileManager/ajax/processPost.php:96
 #: server/fm-modules/facileManager/ajax/processTools.php:47
 #: server/fm-modules/facileManager/ajax/processTools.php:56
-#: server/fm-modules/facileManager/ajax/processTools.php:79
+#: server/fm-modules/facileManager/ajax/processTools.php:84
 #: server/fm-modules/facileManager/pages/admin-modules.php:45
 #: server/fm-modules/facileManager/pages/admin-modules.php:51
 #: server/fm-modules/facileManager/pages/index.php:24
@@ -858,7 +858,7 @@ msgid "Build Config"
 msgstr ""
 
 #: server/fm-modules/facileManager/variables.inc.php:78
-#: server/fm-modules/facileManager/js/facileManager.php:1403
+#: server/fm-modules/facileManager/js/facileManager.php:1409
 msgid "Medium"
 msgstr ""
 
@@ -869,7 +869,7 @@ msgid ""
 msgstr ""
 
 #: server/fm-modules/facileManager/variables.inc.php:79
-#: server/fm-modules/facileManager/js/facileManager.php:1397
+#: server/fm-modules/facileManager/js/facileManager.php:1403
 msgid "Strong"
 msgstr ""
 
@@ -1065,16 +1065,16 @@ msgstr ""
 msgid "Log Purge Results"
 msgstr ""
 
-#: server/fm-modules/facileManager/ajax/processTools.php:70
+#: server/fm-modules/facileManager/ajax/processTools.php:72
 msgid "Core Update Results"
 msgstr ""
 
-#: server/fm-modules/facileManager/ajax/processTools.php:78
+#: server/fm-modules/facileManager/ajax/processTools.php:83
 #: server/fm-modules/facileManager/classes/class_tools.php:197
 msgid "The next step is to upgrade the database."
 msgstr ""
 
-#: server/fm-modules/facileManager/ajax/processTools.php:87
+#: server/fm-modules/facileManager/ajax/processTools.php:92
 msgid "You are not authorized to run this tool."
 msgstr ""
 
@@ -1169,7 +1169,7 @@ msgid "Generate"
 msgstr ""
 
 #: server/fm-modules/facileManager/classes/class_settings.php:187
-#: server/fm-modules/facileManager/js/facileManager.php:505
+#: server/fm-modules/facileManager/js/facileManager.php:504
 msgid "SSH key pair is generated."
 msgstr ""
 
@@ -1970,71 +1970,71 @@ msgstr ""
 msgid "Manage Settings"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:154
-#: server/fm-modules/facileManager/js/facileManager.php:177
-#: server/fm-modules/facileManager/js/facileManager.php:441
-#: server/fm-modules/facileManager/js/facileManager.php:741
+#: server/fm-modules/facileManager/js/facileManager.php:153
+#: server/fm-modules/facileManager/js/facileManager.php:176
+#: server/fm-modules/facileManager/js/facileManager.php:440
+#: server/fm-modules/facileManager/js/facileManager.php:740
 msgid "Processing...please wait."
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:385
+#: server/fm-modules/facileManager/js/facileManager.php:384
 msgid "Are you sure you want to delete this item?"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:613
+#: server/fm-modules/facileManager/js/facileManager.php:612
 msgid "less"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:768
+#: server/fm-modules/facileManager/js/facileManager.php:767
 msgid "Click to confirm"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:896
+#: server/fm-modules/facileManager/js/facileManager.php:895
 msgid "Are you sure you want to build the config for this server?"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:900
+#: server/fm-modules/facileManager/js/facileManager.php:899
 msgid "Processing Config Build"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:1010
+#: server/fm-modules/facileManager/js/facileManager.php:1009
 msgid "Processing Bulk Action"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:1046
+#: server/fm-modules/facileManager/js/facileManager.php:1045
 msgid "Are you sure you want to process all updates?"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:1051
+#: server/fm-modules/facileManager/js/facileManager.php:1050
 msgid "Processing Updates"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:1327
+#: server/fm-modules/facileManager/js/facileManager.php:1326
 msgid "Changelog"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:1327
+#: server/fm-modules/facileManager/js/facileManager.php:1326
 #: server/fm-modules/facileManager/pages/admin-modules.php:86
 msgid "Update"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:1347
+#: server/fm-modules/facileManager/js/facileManager.php:1353
 msgid "Processing Module Update"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:1391
+#: server/fm-modules/facileManager/js/facileManager.php:1397
 msgid "More Characters"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:1415
+#: server/fm-modules/facileManager/js/facileManager.php:1421
 msgid "Weak"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:1423
+#: server/fm-modules/facileManager/js/facileManager.php:1429
 msgid "Passwords don't match"
 msgstr ""
 
-#: server/fm-modules/facileManager/js/facileManager.php:1433
+#: server/fm-modules/facileManager/js/facileManager.php:1439
 msgid "No Username Specified"
 msgstr ""
 
@@ -2136,11 +2136,6 @@ msgstr ""
 
 #: server/fm-modules/facileManager/pages/admin-modules.php:68
 msgid "Update Core"
-msgstr ""
-
-#: server/fm-modules/facileManager/pages/admin-modules.php:73
-#, php-format
-msgid "Update %s Core"
 msgstr ""
 
 #: server/fm-modules/facileManager/pages/admin-modules.php:86
