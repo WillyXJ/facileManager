@@ -427,7 +427,7 @@ class fm_dns_records {
 					sort($supported_record_types);
 					$field_values['data']['Type'] = buildSelect($action . '[_NUM_][record_type]', '_NUM_', $supported_record_types, $record_type, 1, null, false, null, 'record-type');
 				} else {
-					$field_values['data']['Type'] = $record_type;
+					$field_values['data']['Type'] = $this->getRRTypeLink($record_type);
 				}
 			}
 
@@ -574,7 +574,7 @@ class fm_dns_records {
 			
 			/** Resource Record types */
 			if ($selected_type == 'ALL') {
-				$field_values['data']['Type'] = $record_type;
+				$field_values['data']['Type'] = $this->getRRTypeLink($record_type);
 			}
 
 			if ($record_type == 'CAA') {
@@ -1123,6 +1123,27 @@ HTML;
 		}
 		
 		return $fm_module_tools->zoneImportWizard($domain_id);
+	}
+
+
+	/**
+	 * Creates a link for the RR type
+	 *
+	 * @since 5.0.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param string $record_type Record type to link to
+	 * @return string
+	 */
+	private function getRRTypeLink($record_type) {
+		$uri = array();
+		foreach ($GLOBALS['URI'] as $k => $v) {
+			if ($k == 'p') continue;
+			if ($k == 'record_type') $v = $record_type;
+			$uri[] = sprintf('%s=%s', $k, $v);
+		}
+		return sprintf('<a href="%s?%s">%s</s>', $GLOBALS['basename'], join('&', $uri), $record_type);
 	}
 	
 }
