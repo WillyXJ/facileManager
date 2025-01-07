@@ -616,7 +616,8 @@ function validateAPIParam($param, $value) {
 	$api_quick_validation = array(
 		'append' => array('yes', 'no'),
 		'action' => array('add', 'update', 'delete'),
-		'status' => array('active', 'disabled')
+		'status' => array('active', 'disabled'),
+		'autoupdate' => array('yes', 'no')
 	);
 
 	if (array_key_exists($param, $api_quick_validation)) {
