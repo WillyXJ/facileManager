@@ -36,7 +36,7 @@
  */
 
 if (!defined('NO_DASH')) {
-	$menu[2] = array(_('Dashboard'), _('Dashboard'), 'home', null, $fm_name, 'index.php', null, null, true);
+	$menu[2] = array(_('Dashboard'), _('Dashboard'), 'th-large', null, $fm_name, 'index.php', null, null, true);
 }
 
 $_fm_last_object_menu = 2;

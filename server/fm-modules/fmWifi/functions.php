@@ -454,10 +454,10 @@ function getModuleBadgeCounts($type) {
 function buildModuleMenu() {
 	$badge_counts = getModuleBadgeCounts('type1');
 	
-	addObjectPage(__('Config'), _('Access Points'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
+	addObjectPage(array(__('Config'), 'sliders'), _('Access Points'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
 		addSubmenuPage('config-servers.php', _('Access Points'), _('Access Points'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
 
-	addObjectPage(__('WLAN'), __('Manage WLANs'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-wlans.php');
+	addObjectPage(array(__('WLAN'), 'wifi'), __('Manage WLANs'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-wlans.php');
 		addSubmenuPage('config-wlans.php', _('Manage'), _('Manage WLANs'), array('manage_wlans', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-wlans.php');
 		addSubmenuPage('config-wlans.php', __('Options'), __('Options'), array('manage_wlans', 'view_all'), $_SESSION['module'], 'config-options.php');
 		addSubmenuPage('config-wlans.php', __('Users'), __('Users'), array('manage_wlan_users', 'view_all'), $_SESSION['module'], 'config-users.php');

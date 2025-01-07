@@ -332,19 +332,19 @@ function getModuleBadgeCounts($type) {
  * @subpackage fmFirewall
  */
 function buildModuleMenu() {
-	addObjectPage(__('Firewalls'), __('Firewall Servers'), array('manage_servers', 'build_server_configs', 'manage_policies', 'view_all'), $_SESSION['module'], 'config-servers.php', null, true, getModuleBadgeCounts('servers'));
+	addObjectPage(array(__('Firewalls'), 'fire'), __('Firewall Servers'), array('manage_servers', 'build_server_configs', 'manage_policies', 'view_all'), $_SESSION['module'], 'config-servers.php', null, true, getModuleBadgeCounts('servers'));
 
-	addObjectPage(__('Policies'), __('Firewall Policy'), array('manage_policies', 'view_all'), $_SESSION['module'], 'config-policy.php');
+	addObjectPage(array(__('Policies'), 'file-text'), __('Firewall Policy'), array('manage_policies', 'view_all'), $_SESSION['module'], 'config-policy.php');
 		addSubmenuPage('config-policy.php', __('Policies'), __('Firewall Policy'), array('manage_policies', 'view_all'), $_SESSION['module'], 'config-policy.php');
 		addSubmenuPage('config-policy.php', __('Templates'), __('Policy Templates'), array('manage_policies', 'view_all'), $_SESSION['module'], 'templates-policy.php');
 
-	addObjectPage(__('Objects'), __('Address Groups'), array('manage_addresses', 'view_all'), $_SESSION['module'], 'object-groups.php');
+	addObjectPage(array(__('Objects'), 'cubes'), __('Address Groups'), array('manage_addresses', 'view_all'), $_SESSION['module'], 'object-groups.php');
 		addSubmenuPage('object-groups.php', __('Address Groups'), __('Address Groups'), array('manage_addresses', 'view_all'), $_SESSION['module'], 'object-groups.php');
 		addSubmenuPage('object-groups.php', __('Addresses'), __('Addresses'), array('manage_addresses', 'view_all'), $_SESSION['module'], 'objects.php');
 		addSubmenuPage('object-groups.php', __('Service Groups'), __('Service Groups'), array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
 		addSubmenuPage('object-groups.php', __('Services'), __('Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services.php');
 
-	addObjectPage(__('Time'), __('Time Restrictions'), array('manage_time', 'view_all'), $_SESSION['module'], 'config-time.php');
+	addObjectPage(array(__('Time'), 'clock-o'), __('Time Restrictions'), array('manage_time', 'view_all'), $_SESSION['module'], 'config-time.php');
 }
 
 

@@ -565,7 +565,7 @@ HTML;
 			<div><span>{$star}{$_SESSION['user']['name']}</span></div>
 			<div id="account_info_actions" class="flex-apart">
 				$profile_link
-				<div><a href="{$GLOBALS['RELPATH']}?logout"><i class="fa fa-power-off" aria-hidden="true"></i>$logout</a></div>
+				<div><a href="{$GLOBALS['RELPATH']}?logout"><i class="fa fa-sign-out" aria-hidden="true"></i>$logout</a></div>
 			</div>
 			<div><hr /></div>
 HTML;

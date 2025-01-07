@@ -180,18 +180,18 @@ function getModuleBadgeCounts($type) {
 function buildModuleMenu() {
 	$badge_counts = getModuleBadgeCounts('type1');
 	
-	addObjectPage(__('Objects'), __('Objects'), array('manage_hosts', 'manage_groups', 'manage_pools', 'manage_networks', 'manage_peers', 'view_all'), $_SESSION['module'], 'object-hosts.php');
+	addObjectPage(array(__('Objects'), 'cubes'), __('Objects'), array('manage_hosts', 'manage_groups', 'manage_pools', 'manage_networks', 'manage_peers', 'view_all'), $_SESSION['module'], 'object-hosts.php');
 		addSubmenuPage('object-hosts.php', __('Hosts'), __('Hosts'), array('manage_hosts', 'manage_servers', 'view_all'), $_SESSION['module'], 'object-hosts.php');
 		addSubmenuPage('object-hosts.php', __('Groups'), __('Groups'), array('manage_groups', 'manage_servers', 'view_all'), $_SESSION['module'], 'object-groups.php');
 		addSubmenuPage('object-hosts.php', __('Pools'), __('Pools'), array('manage_pools', 'manage_servers', 'view_all'), $_SESSION['module'], 'object-pools.php');
 		addSubmenuPage('object-hosts.php', __('Networks'), __('Networks'), array('manage_networks', 'manage_servers', 'view_all'), $_SESSION['module'], 'object-networks.php');
 		addSubmenuPage('object-hosts.php', __('Peers'), __('Failover Peers'), array('manage_peers', 'manage_servers', 'view_all'), $_SESSION['module'], 'object-peers.php');
 
-	addObjectPage(__('Config'), _('Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
+	addObjectPage(array(__('Config'), 'sliders'), _('Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
 		addSubmenuPage('config-servers.php', _('Servers'), _('Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
 		addSubmenuPage('config-servers.php', __('Options'), __('Options'), array('manage_servers', 'view_all'), $_SESSION['module'], 'config-options.php');
 
-	addObjectPage(__('Leases'), __('Leases'), array('manage_leases', 'view_all'), $_SESSION['module'], 'leases.php');
+	addObjectPage(array(__('Leases'), 'file-text-o'), __('Leases'), array('manage_leases', 'view_all'), $_SESSION['module'], 'leases.php');
 
 	addSettingsPage($_SESSION['module'], sprintf(__('%s Settings'), $_SESSION['module']), array('manage_settings', 'view_all'), $_SESSION['module'], 'module-settings.php');
 }
