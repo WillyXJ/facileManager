@@ -59,6 +59,7 @@ function printModuleHelp () {
      status=XX                Defines the record status (active, disabled)
      newname=XX               Defines the new record name (when action=update)
      newvalue=XX              Defines the new record value (when action=update)
+     reloadzone=XX            Defines whether to reload the zone or not (yes, no)
 
      install url-only         Installs the client app to be a URL RR web server only
      enable url               Enables the URL RR web server support on a previous installation
@@ -617,7 +618,7 @@ function validateAPIParam($param, $value) {
 		'append' => array('yes', 'no'),
 		'action' => array('add', 'update', 'delete'),
 		'status' => array('active', 'disabled'),
-		'autoupdate' => array('yes', 'no')
+		'reloadzone' => array('yes', 'no')
 	);
 
 	if (array_key_exists($param, $api_quick_validation)) {
