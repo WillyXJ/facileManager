@@ -264,7 +264,7 @@ $(document).ready(function() {
 		});
 	});
 
-	/* Validate the record and flag for saving */
+	/* Validate all records and flag for saving */
 	$(".validate-all-records").on("click", function() {
 		$("#zone-records-form tr.notice").each(function() {
 			$(this).find(".inline-record-validate").click();
@@ -590,11 +590,18 @@ $(document).ready(function() {
 
 		$row_element.not(".new-record").addClass("build");
 		if (!$row_element.hasClass("attention")) {
-			$row_element.removeClass("ok").addClass("notice");
-			$row_element.find(".inline-record-validate").show();
-			$row_element.find(".inline-record-actions").show();
+			if ($(this).is(":checkbox") && $(this).attr("name").indexOf("record_skipped") > 0) {
+				$row_element.removeClass("ok").addClass("build record-changed");
+				$row_element.find(".inline-record-validate").hide();
+				$row_element.find(".inline-record-actions").show();
+			} else {
+				$row_element.removeClass("ok").addClass("notice");
+				$row_element.find(".inline-record-validate").show();
+				$row_element.find(".inline-record-actions").show();
+			}
 
 			setValidateAllStatus();
+			setSaveAllStatus();
 		}
 	});
 
