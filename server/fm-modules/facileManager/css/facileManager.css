@@ -1416,7 +1416,8 @@ i.delete {
 	box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.08);
 }
 
-input.disabled {
+input.disabled,
+a.button.disabled {
 	background-image: -moz-linear-gradient(top, var(--form-input-disabled-primary), var(--form-input-disabled-secondary));
 	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(var(--form-input-disabled-primary)), to(var(--form-input-disabled-secondary)));
 	background-image: -webkit-linear-gradient(top, var(--form-input-disabled-primary), var(--form-input-disabled-secondary));
@@ -1430,6 +1431,10 @@ input.disabled {
 label.disabled {
 	color: var(--form-input-disabled);
 	cursor: not-allowed;
+}
+
+a.button i {
+	margin-right: 5px;
 }
 
 .left {
