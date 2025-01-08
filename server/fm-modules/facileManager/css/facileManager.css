@@ -254,7 +254,7 @@ div.header-container {
     flex-direction: column;
 	color: var(--menu-text);
 }
-#menuback li:hover a {
+#menuback li:hover > a {
 	color: var(--menu-text);
 }
 
