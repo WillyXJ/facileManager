@@ -141,12 +141,19 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 					echo "password_reset.php?key=$reset_key&login=$user_login";
 				} elseif ($logged_in !== true) {
 					printf('<p class="failed">%s</p>', $logged_in);
+				} elseif (isMaintenanceMode()) {
+					if (currentUserCan('manage_modules')) {
+						echo $_SERVER['REQUEST_URI'];
+					} else {
+						@session_destroy();
+						printf('<p class="failed">%s</p>', sprintf(_('%s is currently undergoing maintenance. Please try again later.'), $fm_name));
+					}
 				} elseif (isUpgradeAvailable()) {
 					if (currentUserCan(array('do_everything', 'manage_modules')) || (getOption('fm_db_version') < 32 && $_SESSION['user']['fm_perms'] & 1)) {
 						echo $GLOBALS['RELPATH'] . 'fm-upgrade.php';
 					} else {
 						@session_destroy();
-						printf('<p class="failed">' . _('The database for %1s and its modules still needs to be upgraded.<br />Please contact a privileged user.') . '</p>', $fm_name);
+						printf('<p class="failed">%s</p>', sprintf(_('The database for %s and its modules still needs to be upgraded.<br />Please contact a privileged user.'), $fm_name));
 					}
 				} else echo $_SERVER['REQUEST_URI'];
 			} else {
@@ -203,7 +210,7 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 		if (!defined('UPGRADE')) {
 			/** Once logged in process the menuing */
 			if ($is_logged_in) {
-				if (isUpgradeAvailable()) {
+				if (isUpgradeAvailable() || (isMaintenanceMode() && !currentUserCan('manage_modules'))) {
 					if (defined('AJAX')) {
 						exit('<div class="hidden">force_logout</div>');
 					}

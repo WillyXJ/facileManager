@@ -546,6 +546,59 @@ if (isset($__FM_CONFIG)) {
 		return false;
 	});
 	
+	/** Maintenance Mode toggle */
+	$(".toggle-maintenance-mode").click(function() {
+        var $this 		= $(this);
+		var mode_status = $this.attr("rel");
+
+		var form_data = {
+			item_type: "fm_maintenance_mode",
+			mode_status: mode_status,
+			is_ajax: 1
+		};
+
+		$.ajax({
+			type: "POST",
+			url: "fm-modules/facileManager/ajax/processPost.php",
+			data: form_data,
+			success: function(response)
+			{
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+					doLogout();
+					return false;
+				} else if (response == "Success") {
+					if (mode_status == "disabled") {
+						$(".top-banner").slideUp();
+						$this.attr("rel", "active");
+						$this.html("' . addslashes($__FM_CONFIG['icons']['enable']) . '");
+					} else {
+						$(".top-banner").slideDown();
+						$this.attr("rel", "disabled");
+						$this.html("' . addslashes($__FM_CONFIG['icons']['disable']) . '");
+					}
+				} else {
+					$("#response").removeClass("static").html(response);
+					$("#response")
+						.addClass("static")
+						.css("opacity", 0)
+						.slideDown(400, function() {
+							$("#response").animate(
+								{ opacity: 1 },
+								{ queue: false, duration: 200 }
+							);
+						});
+					if (response.toLowerCase().indexOf("response_close") == -1) {
+						$("#response").delay(3000).fadeTo(200, 0.00, function() {
+							$("#response").slideUp(400);
+						});
+					}
+				}
+			}
+		});
+		
+		return false;
+	});
+
 	/* Account settings */
     $(".account_settings").click(function() {
         var $this 		= $(this);

@@ -75,6 +75,23 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 		echo 'admin-modules.php';
 	}
 
+/** Handle maintenance mode */
+} elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_maintenance_mode') {
+	if (!currentUserCan('manage_modules')) returnUnAuth('response-close');
+
+	if (isset($_POST['mode_status'])) {
+		$modes = array('disabled', 'active');
+		if (in_array($_POST['mode_status'], $modes)) {
+			setOption('maintenance_mode', array_search($_POST['mode_status'], $modes), 'auto', false);
+			if ($fmdb->num_rows) {
+				addLogEntry(sprintf('Set maintenance mode status to %s.', $_POST['mode_status']), $fm_name);
+				exit('Success');
+			}
+		}
+	}
+
+	exit(sprintf('<p class="error">%s</p>', _('Failed to set the maintenance mode.')));
+
 /** Handle bulk actions */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'bulk' &&
 	array_key_exists('bulk_action', $_POST) && in_array($_POST['bulk_action'], array('upgrade', 'build config', 'activate', 'deactivate', 'update'))) {

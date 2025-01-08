@@ -174,6 +174,14 @@ HTML;
 	$module_display .= sprintf(_('<p>If you don\'t have any modules, you can download them from the %smodule directory</a>.</p>') . "\n", '<a href="http://www.facilemanager.com/modules/">');
 }
 
+/** Set maintenance mode toggle */
+$maintenance_mode = getOption('maintenance_mode');
+$maintenance_mode_toggle = '<a class="toggle-maintenance-mode" href="#" rel="';
+$maintenance_mode_toggle .= ($maintenance_mode) ? 'disabled' : 'active';
+$maintenance_mode_toggle .= '">';
+$maintenance_mode_toggle .= ($maintenance_mode) ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
+$maintenance_mode_toggle .= '</a>';
+
 printf('
 	<div id="admin-tools">
 		<form enctype="multipart/form-data" method="post" action="">
@@ -184,6 +192,8 @@ printf('
 		</form>
 	</div>
 </div>' . "\n",
-		$update_core, printPageHeader($response), displayPagination(0, 0, buildBulkActionMenu($bulk_actions_list, 'module_list')), $module_display);
+		$update_core,
+		printPageHeader($response), displayPagination(0, 0, array(buildBulkActionMenu($bulk_actions_list, 'module_list'), sprintf('<b>%s:</b> %s', _('Maintenance Mode'), $maintenance_mode_toggle))),
+		$module_display);
 
 printFooter(null, $output);

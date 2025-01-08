@@ -72,7 +72,7 @@ foreach($_POST as $name => $array) {
 printHeader();
 @printMenu();
 
-printf('<div id="body_container">
+printf('<div id="body_container" class="flex-column">
 	<h2>%s</h2>
 	<form method="POST" action="zone-records-write.php">
 	<input type="hidden" name="domain_id" value="%d">

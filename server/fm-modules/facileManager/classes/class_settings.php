@@ -333,6 +333,9 @@ class fm_settings {
 
 		$ssh_user = getOption('ssh_user', $_SESSION['user']['account_id']);
 		$sm_brand_img = getBrandLogo();
+
+		$maintenance_mode = getOption('maintenance_mode');
+		$maintenance_mode_checked = $maintenance_mode ? 'checked' : null;
 		
 		$return_form = '
 		<form name="manage" id="manage" method="post" action="' . $GLOBALS['basename'] . '">
@@ -347,6 +350,7 @@ class fm_settings {
 			<input type="hidden" name="mail_smtp_tls" value="0" />
 			<input type="hidden" name="show_errors" value="0" />
 			<input type="hidden" name="software_update" value="0" />
+			<input type="hidden" name="maintenance_mode" value="0" />
 			<div id="settings">
 				<div id="settings-section">
 					<div id="setting-row">
@@ -816,6 +820,17 @@ class fm_settings {
 						</div>
 						<div class="choices">
 							<input name="sm_brand_img" id="sm_brand_img" type="text" value="' . $sm_brand_img . '" size="40" placeholder="path/to/image" />
+						</div>
+					</div>
+				</div>
+				<div id="settings-section">
+					<div id="setting-row">
+						<div class="description">
+							<label for="maintenance_mode">' . _('Enable Maintenance Mode') . '</label>
+							<p>' . sprintf(_('This allows only users with Super Admin or Module Management privileges to authenticate.'), $fm_name) . '</p>
+						</div>
+						<div class="choices">
+							<input name="maintenance_mode" id="maintenance_mode" type="checkbox" value="1" ' . $maintenance_mode_checked . ' /><label for="maintenance_mode">' . _('Enable Maintenance Mode') . '</label>
 						</div>
 					</div>
 				</div>

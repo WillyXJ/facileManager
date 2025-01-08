@@ -79,7 +79,8 @@ foreach ($tools_option as $tool) {
 	$admin_tools .= $tool;
 }
 
-echo '<div id="body_container">' . "\n";
+echo '<div id="body_container" class="flex-column">
+<div id="body_top_container" class="flex-column">' . "\n";
 if (!empty($response)) echo '<div id="response">' . displayResponseClose($response) . "</div>\n";
 else echo '<div id="response" style="display: none;"></div>' . "\n";
 

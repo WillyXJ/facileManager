@@ -301,8 +301,8 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 		$module_js
 	</head>
 <body>
-$head
 <a href="#" id="scroll-to-top" class=""></a>
+$head
 HTML;
 }
 
@@ -316,6 +316,8 @@ function printFooter($classes = null, $text = null, $block_style = null) {
 	echo <<<FOOT
 		</div>
 	</div>
+</div>
+</div>
 </div>
 <div class="manage_form_container" id="manage_item" $block_style>
 	<div class="manage_form_container_flex">
@@ -340,6 +342,8 @@ function getTopHeader($help) {
 	include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
 	
 	$fm_new_version_available = $account_menu = $user_account_menu = $module_menu = $module_version_info = $return_extra = null;
+
+	$banner = sprintf('<div class="fm-header-container top-banner" style="display: %s;">%s</div>', isMaintenanceMode() ? 'block' : 'none', sprintf(_('%s is currently in maintenance mode.'), $fm_name)) . "\n";
 
 	$sections = array('left' => array(), 'right' => array());
 	
@@ -431,9 +435,9 @@ HTML;
 		}
 		$return_parts .= '</div>' . "\n";
 	}
-	$return = sprintf("<div id=\"tophead\" class=\"flex-apart\">\n%s</div>\n", $return_parts);
+	$return = sprintf("<div id=\"tophead\" class=\"fm-header-container flex-apart\">\n%s</div>\n", $return_parts);
 
-	return $return . $return_extra;
+	return $return_extra . '<div class="fm-site-container flex-column">' . $banner . $return . '<div class="fm-body flex">';
 }
 
 /**
@@ -2231,10 +2235,10 @@ function printPageHeader($message = null, $title = null, $allowed_to_add = false
 		$message = displayResponseClose($message);
 	}
 
-	echo '<div id="body_container"';
-	if ($scroll == 'noscroll') echo ' class="fm-noscroll"';
-	echo '>' . "\n";
-	printf('<div id="body_top_container">
+	echo '<div id="body_container" class="flex-column';
+	if ($scroll == 'noscroll') echo ' fm-noscroll';
+	echo '">' . "\n";
+	printf('<div id="body_top_container" class="flex-column">
 	<div id="response" class="%s" %s>%s</div>
 	<div id="page_title_container" class="flex-apart">
 		<div class="flex-left">
@@ -4267,4 +4271,17 @@ function getThemes() {
 	sort($themes);
 	
 	return $themes;
+}
+
+
+/**
+ * Gets the maintenance mode status
+ *
+ * @since 5.0.0
+ * @package facileManager
+ *
+ * @return bool
+ */
+function isMaintenanceMode() {
+	return getOption('maintenance_mode');
 }
