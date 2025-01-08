@@ -184,17 +184,7 @@ if ($record_type == 'SOA') {
 	
 	$record_rows = $fm_dns_records->rows($result, $record_type, $domain_id, $page);
 
-	if (!$current_user_can_manage_records && $zone_access_allowed) {
-		$body .= '<div class="table-results-container">' . $record_rows;
-		$body .= sprintf('</div><div class="new-container">
-	<a name="#manage"></a>
-	<h2>%s</h2>
-	%s
-	<p><input type="submit" name="submit" value="%s" class="button" /></p>
-</form></div>' . "\n", __('Add Record'), $fm_dns_records->printRecordsForm($record_type, $domain_id), __('Validate'));
-	} else {
-		$body .= '<div class="table-results-container">' . $record_rows;
-	}
+	$body .= '<div class="table-results-container">' . $record_rows;
 }
 
 echo $body . "\n";

@@ -240,22 +240,6 @@ class fm_dns_records {
 		return $result;
 	}
 	
-	
-	/**
-	 * Displays the form to add new record
-	 */
-	function printRecordsForm($record_type, $domain_id) {
-		$table_info = array('class' => 'display_results');
-
-		$return = displayTableHeader($table_info, $this->getHeader(strtoupper($record_type), 'no-actions'), 'more_records');
-		$return .= $this->getInputForm(strtoupper($record_type), true, $domain_id, null, 'no-actions');
-		$return .= sprintf('</tbody>
-		</table>
-		<p class="add_more add_records"><a id="add_records" href="#">+ %s</a></p>', __('Add more records'));
-		
-		return $return;
-	}
-
 	function getHeader($type, $include = 'actions') {
 		global $zone_access_allowed;
 		
