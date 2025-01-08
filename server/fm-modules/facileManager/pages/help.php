@@ -36,7 +36,7 @@ if (!$fm_login->isLoggedIn()) {
 
 printHeader('fmHelp', 'facileManager', 'help-file');
 
-echo '<div id="help_file_container" style="padding-top: 5em;">' . "\n";
+echo '<div id="help_file_container">' . "\n";
 echo buildHelpFile();
 echo '</div>' . "\n";
 

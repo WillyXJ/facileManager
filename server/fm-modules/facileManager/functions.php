@@ -342,12 +342,13 @@ function getTopHeader($help) {
 	include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
 	
 	$fm_new_version_available = $account_menu = $user_account_menu = $module_menu = $module_version_info = $return_extra = null;
-
-	$banner = sprintf('<div class="fm-header-container top-banner" style="display: %s;">%s</div>', isMaintenanceMode() ? 'block' : 'none', sprintf(_('%s is currently in maintenance mode.'), $fm_name)) . "\n";
+	$banner = null;
 
 	$sections = array('left' => array(), 'right' => array());
 	
 	if ($help != 'help-file') {
+		$banner = sprintf('<div class="fm-header-container top-banner" style="display: %s;">%s</div>', isMaintenanceMode() ? 'block' : 'none', sprintf(_('%s is currently in maintenance mode.'), $fm_name)) . "\n";
+
 		$branding_logo = getBrandLogo();
 		
 		if (isset($_SESSION['module']) && $_SESSION['module'] != $fm_name) {
@@ -371,15 +372,15 @@ function getTopHeader($help) {
 			foreach ($modules as $module_name) {
 				if ($module_name == $_SESSION['module']) continue;
 				if (in_array($module_name, getActiveModules(true))) {
-					$avail_modules .= "<li class='last'><a href='{$GLOBALS['RELPATH']}?module=$module_name'><span>$module_name</span></a></li>\n";
+					$avail_modules .= "<li><a href='{$GLOBALS['RELPATH']}?module=$module_name'><span>$module_name</span></a></li>\n";
 				}
 			}
 			
 			if ($avail_modules) {
 				$module_menu = <<<HTML
-			<div id="cssmenu">
+			<div id="menu_mainitems" class="drop-down">
 			<ul>
-				<li class="has-sub last"><a href="#"><span>{$_SESSION['module']}</span></a>
+				<li class="has-sub"><a href="#"><span>{$_SESSION['module']}</span><i class="fa fa-caret-down menu-icon" aria-hidden="true"></i></a>
 					<ul class="sub-right">
 					$avail_modules
 					</ul>
@@ -437,7 +438,7 @@ HTML;
 	}
 	$return = sprintf("<div id=\"tophead\" class=\"fm-header-container flex-apart\">\n%s</div>\n", $return_parts);
 
-	return $return_extra . '<div class="fm-site-container flex-column">' . $banner . $return . '<div class="fm-body flex">';
+	return '<div class="fm-site-container flex-column">' . $banner . $return . '<div class="fm-body flex">' . $return_extra;
 }
 
 /**
@@ -494,7 +495,7 @@ function printMenu() {
 				}
 				
 				$sub_menu_html = <<<HTML
-					<div id="subitems">
+					<div id="menu_subitems">
 						<ul>
 						$sub_menu_html
 						</ul>
@@ -533,7 +534,7 @@ HTML;
 		$arrow = null;
 		$main_menu_item_link = $slug;
 		if (in_array('has-sub', $classes)) {
-			$arrow = sprintf('<span class="menu-arrow"><i class="fa fa-angle-%s menu-icon" aria-hidden="true"></i></span>', (in_array('current', $classes)) ? 'down' : 'right');
+			$arrow = sprintf('<span class="menu-arrow"><i class="fa fa-caret-%s menu-icon" aria-hidden="true"></i></span>', (in_array('current', $classes)) ? 'down' : 'right');
 			$main_menu_item_link = '#';
 		}
 		$menu_icon = ($menu_icon) ? sprintf('<i class="fa fa-%s" aria-hidden="true"></i>', $menu_icon) : null;
@@ -581,7 +582,7 @@ echo <<<MENU
 		<div id="account_info" class="flex-apart">
 		$account_info
 		</div>
-		<div id="mainitems">
+		<div id="menu_mainitems" class="drop-right">
 			<ul>
 $main_menu_html
 			</ul>
