@@ -1,6 +1,7 @@
 5.0.0-rc3 (2025-01-??)
 ======================
 * Server - [feature] Added a maintenance mode setting.
+* Server - [bug] Fixed duplicate string sanitization for settings values.
 
 5.0.0-rc2 (2025-01-06)
 ======================

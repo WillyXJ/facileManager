@@ -1423,8 +1423,8 @@ function setOption($option = null, $value = null, $insert_update = 'auto', $auto
 	global $fmdb;
 	
 	if ($auto_serialize) {
-		$value = isSerialized($value) ? sanitize($value) : serialize($value);
-	} else $value = sanitize($value);
+		$value = isSerialized($value) ? $value : serialize($value);
+	};
 	$option = sanitize($option);
 	
 	$module_sql = ($module_name) ? "AND module_name='$module_name'" : null;

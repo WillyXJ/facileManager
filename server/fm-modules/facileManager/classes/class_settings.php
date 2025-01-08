@@ -70,7 +70,7 @@ class fm_settings {
 				} else $account_id = 0;
 				
 				/** Update with the new value */
-				$result = setOption($option, $option_value, $command, false, $account_id);
+				setOption($option, $option_value, $command, false, $account_id);
 				unset($account_id);
 	
 				if ($fmdb->sql_errors) {
@@ -154,7 +154,7 @@ class fm_settings {
 				list($option_value, $command) = $value;
 				
 				/** Update with the new value */
-				$result = setOption($option, $option_value, $command, false, $_SESSION['user']['account_id']);
+				setOption($option, $option_value, $command, false, $_SESSION['user']['account_id']);
 		
 				if ($fmdb->sql_errors) {
 					return formatError(_('Could not save settings because a database error occurred.'), 'sql');
