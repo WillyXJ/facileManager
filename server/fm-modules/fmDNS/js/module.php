@@ -17,7 +17,7 @@ $(document).ready(function() {
 		if ($zone_map == "" || $zone_map == null) {
 			$zone_map = "forward";
 		}
-		$menuitem = $("div#subitems ul li a").filter(function(){
+		$menuitem = $("div#menu_subitems ul li a").filter(function(){
 			return $(this).prop("href").indexOf("zones-" + $zone_map + ".php") != -1;
 		});
 		$menuitem.parent().addClass("current");

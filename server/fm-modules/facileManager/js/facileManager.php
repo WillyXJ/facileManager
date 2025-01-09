@@ -1021,7 +1021,7 @@ if (isset($__FM_CONFIG)) {
 		});
 	});
 
-	$("#mainitems .has-sub").hover(function() {
+	$("#menu_mainitems .has-sub").hover(function() {
 		$(this).find("span.arrow").show();
 	}, function() {
 		$("span.arrow").hide();
