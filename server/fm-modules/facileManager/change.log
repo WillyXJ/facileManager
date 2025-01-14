@@ -2,6 +2,7 @@
 ======================
 * Server - [feature] Added a maintenance mode setting.
 * Server - [bug] Fixed duplicate string sanitization for settings values.
+* Client - [bug] Fixed message typo.
 
 5.0.0-rc2 (2025-01-06)
 ======================

@@ -68,7 +68,7 @@ if (version_compare(PHP_VERSION, '5.0.0', '<')) {
 
 /** Check if zlib exists */
 if (!function_exists('gzuncompress')) {
-	if ($debug) echo fM("PHP 'zlib' module is missing; therefore, compression cannot be used and enforcing SSL with be attempted.\n");
+	if ($debug) echo fM("PHP 'zlib' module is missing; therefore, compression cannot be used and enforcing SSL will be attempted.\n");
 	$compress = false;
 	$proto = 'https';
 }
