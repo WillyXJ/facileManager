@@ -162,15 +162,16 @@ if (!$server_path['port']) {
 	$port = $server_path['port'];
 }
 if (!socketTest($server_path['hostname'], $port)) {
+	$socket_failure = $server_path['hostname'] . " is currently not available via tcp/$port.  Aborting.\n";
 	if ($proto == 'https') {
 		if (socketTest($server_path['hostname'], 80)) {
 			$proto = 'http';
 		} else {
-			echo fM($server_path['hostname'] . " is currently not available via tcp/$port.  Aborting.\n");
+			echo fM($socket_failure);
 			exit(1);
 		}
 	} else {
-		echo fM($server_path['hostname'] . " is currently not available via tcp/$port.  Aborting.\n");
+		echo fM($socket_failure);
 		exit(1);
 	}
 }
@@ -518,7 +519,13 @@ function findProgram($program) {
  * @package facileManager
  */
 function socketTest($host, $port, $timeout = '20') {
+	global $debug;
+
 	$fm = @fsockopen($host, $port, $errno, $errstr, $timeout);
+	if ($debug) {
+		echo fM(sprintf("Socket test failed to %s tcp/%s.\n", $host, $port));
+		echo fM(sprintf("Error [%s]: %s\n", $errno, $errstr));
+	}
 	if (!$fm) return false;
 	else {
 		fclose($fm);
