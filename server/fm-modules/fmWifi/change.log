@@ -1,27 +1,17 @@
-0.7.0-rc1 (2024-12-31)
-======================
-* Server - [bug] Page scrolling fixes.
-* Server - [bug] Fixed WLAN logging.
-
-0.7.0-beta3 (2024-12-03)
-========================
-* Server - [improvement] fM 5.0.0-beta3 compatibility.
-* Server - [improvement] Added support to specify a VLAN ID for each user.
-* Server - [bug] Typo fixes.
-* Server - [bug] Fixed issue where ACLs could not be created.
-* Server - [bug] Fixed Options table display.
-
-0.7.0-beta2 (2024-11-20)
-========================
-* Server - [improvement] All configuration pages are sortable.
-
-0.7.0-beta1 (2024-11-13)
-========================
+0.7.0 (2025-01-18)
+==================
 * Server - [improvement] Made form validation global.
 * Server - [improvement] fM 5.0 compatibility.
 * Server - [improvement] Provide better configuration logging.
+* Server - [improvement] All configuration pages are sortable.
+* Server - [improvement] Added support to specify a VLAN ID for each user.
 * Server - [bug] Duplicate WLAN names can no longer exist.
 * Server - [bug] AP group members can be modified.
+* Server - [bug] Typo fixes.
+* Server - [bug] Fixed issue where ACLs could not be created.
+* Server - [bug] Fixed Options table display.
+* Server - [bug] Page scrolling fixes.
+* Server - [bug] Fixed WLAN logging.
 
 0.6.0 (2024-09-30)
 ==================

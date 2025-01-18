@@ -1,47 +1,6 @@
-7.0.0-rc2 (2025-01-06)
-======================
+7.0.0 (2025-01-18)
+==================
 * Server - [security] Fixed an issue where unsupported built-in variables would return data.
-* Server - [improvement] Added confirmation if leaving zone-records with unsaved changes.
-* Server - [improvement] Top bar provides visual that unsaved changes exist for the active zone.
-* Server - [improvement] Replaced most record actions with icons.
-* Server - [improvement] Zone configuration preview is now available when editing zone records.
-* Server - [improvement] RR type is now a link when viewing all records.
-* Both   - [improvement] Added reload API parameter to reload a zone. (Issue #645) (Fixed by gianlucagiacometti)
-* Server - [bug] Fixed add/validate of records in ALL RR view (bug introduced in 7.0.0-beta3).
-* Server - [bug] The correct Zones menu item is select when editing zone records.
-* Server - [bug] Fixed message text when there are no records (bug introduced in 7.0.0-beta3).
-* Server - [bug] Fixed inability to save new or deleted records (bug introduced in 7.0.0-beta3).
-
-7.0.0-rc1 (2024-12-31)
-======================
-* Server - [bug] Page scrolling fixes.
-
-7.0.0-beta4 (2024-12-30)
-========================
-* Server - [bug] Fixed adding zone clones, ACLs, and primaries (bug introduced in 7.0.0-beta1).
-* Server - [bug] Fixed inability to add IPv6 subnets to ACLs. (Issue #643)
-
-7.0.0-beta3 (2024-12-03)
-========================
-* Server - [improvement] Managing zone records is revamped and all resource records can be displayed and
-           edited on a single page. (Issue #406)
-* Server - [improvement] When A record values are changed, the checkbox to automatically create/update the PTR
-           is checked by default.
-* Server - [improvement] fM 5.0.0-beta3 compatibility.
-* Server - [bug] Fixed PHP errors. (Issues #641 #642)
-* Server - [bug] MX records now append the domain to the record value when defined.
-* Server - [bug] Added missing support for CAA critical flag.
-
-7.0.0-beta2 (2024-11-20)
-========================
-* Server - [improvement] Moved RPZ under Config->Options.
-* Server - [improvement] Individual zones now get checked for loadable syntax prior to reloading.
-* Server - [improvement] All configuration pages are sortable.
-* Server - [improvement] An IP address can now be specified for servers to ensure communication availability.
-* Server - [improvement] Comments can be added to zones.
-
-7.0.0-beta1 (2024-11-13)
-========================
 * Server - [feature] When using server groups, primary zones can automatically
            set also-notify to include all secondary servers.
 * Both   - [feature] Defined keys can now be optionally used with rndc. (Issue #636 #389)
@@ -52,12 +11,26 @@
 * Server - [improvement] Provide better configuration logging.
 * Server - [improvement] Made form validation global.
 * Server - [improvement] Moved feature minimum version notices.
-* Server - [improvement] Form validation is done inline now (less zone records).
+* Server - [improvement] Form validation is done inline now.
 * Server - [improvement] fM 5.0 compatibility.
+* Server - [improvement] Moved RPZ under Config->Options.
+* Server - [improvement] Individual zones now get checked for loadable syntax prior to reloading.
+* Server - [improvement] All configuration pages are sortable.
+* Server - [improvement] An IP address can now be specified for servers to ensure communication availability.
+* Server - [improvement] Comments can be added to zones.
+* Server - [improvement] Managing zone records is revamped and all resource records can be displayed and
+           edited on a single page. (Issue #406)
+* Server - [improvement] When A record values are changed, the checkbox to automatically create/update the PTR
+           is checked by default.
+* Server - [improvement] Added confirmation if leaving zone-records with unsaved changes.
+* Server - [improvement] Top bar provides visual that unsaved changes exist for the active zone.
+* Server - [improvement] Replaced most record actions with icons.
+* Server - [improvement] Zone configuration preview is now available when editing zone records.
+* Server - [improvement] RR type is now a link when viewing all records.
+* Both   - [improvement] Added API parameter to reload a zone. (Issue #645) (Fixed by gianlucagiacometti)
 * Server - [bug] Dynamic zones now pull the zone from the correct directory.
 * Server - [bug] Fixed modifying dnssec policies when an override exists.
 * Server - [bug] Added missing icon to add options for zone templates.
-* Server - [bug] Fixed PHP errors.
 * Server - [bug] Fixed server group member references. (Issue #637)
 * Server - [bug] Fixed message formatting of dynamic zone errors.
 * Server - [bug] Server updates via cron would specify incorrect zone directory. (Issue #638)
@@ -67,6 +40,12 @@
 * Server - [bug] Redirect URL field no longer shows when creating a primary zone.
 * Server - [bug] Disabled servers associated with a key would still show up in the config builds.
 * Server - [bug] Cloned zones of the same parent cannot be of the same name.
+* Server - [bug] Fixed PHP errors. (Issues #641 #642)
+* Server - [bug] MX records now append the domain to the record value when defined.
+* Server - [bug] Added missing support for CAA critical flag.
+* Server - [bug] Fixed inability to add IPv6 subnets to ACLs. (Issue #643)
+* Server - [bug] Page scrolling fixes.
+* Server - [bug] The correct Zones menu item is select when editing zone records.
 
 6.2.0 (2024-10-14)
 ==================

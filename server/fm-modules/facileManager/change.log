@@ -1,41 +1,9 @@
-5.0.0-rc3 (2025-01-??)
-======================
-* Server - [feature] Added a maintenance mode setting.
-* Server - [bug] Fixed duplicate string sanitization for settings values.
-* Client - [improvement] Socket test shows more information in debug mode.
-* Client - [bug] Fixed message typo.
-
-5.0.0-rc2 (2025-01-06)
-======================
-* Server - [improvement] Changed icon for item delete action.
-* Server - [improvement] CSS tweaks.
-
-5.0.0-rc1 (2024-12-31)
-======================
-* Server - [bug] Login banner is retained with login failure messages.
-* Server - [bug] Page scrolling fixes.
-* Server - [bug] Core update bug and display fix.
-
-5.0.0-beta4 (2024-12-30)
-========================
-* Server - [improvement] Viewing admin logs no longer defaults the cursor to the date filter field.
-* Server - [improvement] Module updates now handle file and database changes together.
-* Server - [bug] Users with the manage modules permission can perform upgrades.
-
-5.0.0-beta3 (2024-12-03)
-========================
-* Server - [improvement] Configuration preview and help windows are larger.
-
-5.0.0-beta2 (2024-11-20)
-========================
-* Server - [improvement] Logs can be sorted by timestamp.
-* Server - [bug] Changing sort direction for the first time no longer requires two clicks.
-
-5.0.0-beta1 (2024-11-13)
-========================
+5.0.0 (2025-01-18)
+==================
 * Server - [feature] Added framework for in-field form validation.
 * Server - [feature] Added theme support.
 * Server - [feature] Added setting to require user acceptance of login message.
+* Server - [feature] Added a maintenance mode setting.
 * Server - [improvement] Changelog is now viewed in an iframe.
 * Server - [improvement] Added user permission to view logs.
 * Server - [improvement] Forced password changes cannot be the same as the current password.
@@ -45,11 +13,24 @@
 * Server - [improvement] Made form validation global.
 * Server - [improvement] Supports feature minimum version notices.
 * Server - [improvement] Updated menu styling.
+* Server - [improvement] Logs can be sorted by timestamp.
+* Server - [improvement] Configuration preview and help windows are larger.
+* Server - [improvement] Viewing admin logs no longer defaults the cursor to the date filter field.
+* Server - [improvement] Module updates now handle file and database changes together.
+* Server - [improvement] Changed icon for item delete action.
 * Server - [bug] Forced password changes failed when the mail server was inaccessible.
 * Server - [bug] Editing a user group incorrectly required a name change.
 * Server - [bug] Upgrading fM or any modules inadvertently cleared the upgrade flag of other modules.
 * Server - [bug] Fixed menu display for limited user access.
 * Server - [bug] Cannot select non-active servers in various module forms.
+* Server - [bug] Changing sort direction for the first time no longer requires two clicks.
+* Server - [bug] Users with the manage modules permission can perform upgrades.
+* Server - [bug] Login banner is retained with login failure messages.
+* Server - [bug] Page scrolling fixes.
+* Server - [bug] Core update bug and display fix.
+* Server - [bug] Fixed duplicate string sanitization for settings values.
+* Client - [improvement] Socket test shows more information in debug mode.
+* Client - [bug] Fixed message typo.
 
 4.7.0 (2024-09-30)
 ==================
