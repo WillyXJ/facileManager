@@ -1,3 +1,7 @@
+5.0.1 (2025-01-??)
+==================
+* Server - [bug] Fixed client installs. (Issue #647)
+
 5.0.0 (2025-01-18)
 ==================
 * Server - [feature] Added framework for in-field form validation.
