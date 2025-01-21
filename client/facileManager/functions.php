@@ -522,12 +522,13 @@ function socketTest($host, $port, $timeout = '20') {
 	global $debug;
 
 	$fm = @fsockopen($host, $port, $errno, $errstr, $timeout);
-	if ($debug) {
-		echo fM(sprintf("Socket test failed to %s tcp/%s.\n", $host, $port));
-		echo fM(sprintf("Error [%s]: %s\n", $errno, $errstr));
-	}
-	if (!$fm) return false;
-	else {
+	if (!$fm) {
+		if ($debug) {
+			echo fM(sprintf("Socket test failed to %s tcp/%s.\n", $host, $port));
+			echo fM(sprintf("Error [%s]: %s\n", $errno, $errstr));
+		}
+		return false;
+	} else {
 		fclose($fm);
 		return true;
 	}

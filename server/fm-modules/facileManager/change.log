@@ -1,3 +1,7 @@
+5.0.1 (2025-01-??)
+==================
+* Client - [bug] Fixed socket test debug output.
+
 5.0.0 (2025-01-18)
 ==================
 * Server - [feature] Added framework for in-field form validation.
