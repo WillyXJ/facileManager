@@ -1,3 +1,7 @@
+7.0.1 (2025-01-??)
+==================
+* Server - [bug] Fixed new installations.
+
 7.0.0 (2025-01-18)
 ==================
 * Server - [security] Fixed an issue where unsupported built-in variables would return data.

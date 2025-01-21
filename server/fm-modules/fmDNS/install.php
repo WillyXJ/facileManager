@@ -793,8 +793,8 @@ VALUES
 ('options', 'rpz', 'dnsrps-enable', '( yes | no )', 'no', 'OV', 'global', 'yes', '9.18.0'),
 ('options', 'rpz', 'dnsrps-options', '( string )', 'no', 'OV', 'global', 'no', '9.18.0'),
 ('options', 'rpz', 'log', '( yes | no )', 'no', 'OV', 'domain', 'yes', '9.10.0'),
-('options', 'rpz', 'ede', '( none | forged | blocked | censored | filtered | prohibited )', 'no', 'OV', 'domain', 'yes', '9.19.0')
-('options', 'rpz', 'policy', '( cname | disabled | drop | given | no-op | nodata | nxdomain | passthru | tcp-only )', 'no', 'OV', 'domain', 'yes', '9.10.0'),
+('options', 'rpz', 'ede', '( none | forged | blocked | censored | filtered | prohibited )', 'no', 'OV', 'domain', 'yes', '9.19.0'),
+('options', 'rpz', 'policy', '( cname | disabled | drop | given | no-op | nodata | nxdomain | passthru | tcp-only )', 'no', 'OV', 'domain', 'yes', '9.10.0')
 ;
 INSERTSQL;
 
