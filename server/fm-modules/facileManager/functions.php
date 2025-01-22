@@ -388,7 +388,7 @@ function getTopHeader($help) {
 			</ul>
 			</div>
 HTML;
-				$sections['right'][] = $module_menu;
+				$sections['right'][] = array('drop-down', $module_menu);
 			}
 			
 			/** Include module toolbar items */
@@ -432,7 +432,14 @@ HTML;
 	foreach ($sections as $class => $section_array) {
 		$return_parts .= sprintf('<div class="header-container flex-%s">' . "\n", $class);
 		foreach ($section_array as $section) {
-			if ($section) $return_parts .= sprintf("<div>\n%s</div>\n", $section);
+			if ($section) {
+				if (is_array($section)) {
+					list($klass, $section) = $section;
+				}
+				$class = isset($klass) ? sprintf(' class="%s"', $klass) : '';
+				$return_parts .= sprintf("<div%s>\n%s</div>\n", $class, $section);
+				unset($klass);
+			}
 		}
 		$return_parts .= '</div>' . "\n";
 	}

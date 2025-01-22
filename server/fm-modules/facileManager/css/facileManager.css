@@ -175,7 +175,8 @@ input[type="checkbox"].modules {
 .flex-row-center,
 div.header-container {
 	display: flex;
-    align-items: center;
+	align-items: center;
+	overflow-x: clip;
 }
 .flex-apart {
 	display: flex;
@@ -211,17 +212,18 @@ div.header-container {
 #tophead div.header-container:first-child img {
 	margin-right: 10px;
 }
+#tophead > div.header-container > div.drop-down {
+	padding: 0 1em 0 0;
+}
 #tophead div.flex-right {
 	flex-direction: row-reverse;
+	flex: 1;
 }
 #tophead > div.flex-left > div {
 	border-right-color: var(--top-header-divider);
 }
 #tophead > div.flex-right > div {
 	border-left-color: var(--top-header-divider);
-}
-#tophead > div.flex-right > div:first-of-type {
-	padding: 0 1em 0 0;
 }
 
 #tophead a {
