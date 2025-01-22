@@ -1,4 +1,4 @@
-5.0.1 (2025-01-??)
+5.0.1 (2025-01-21)
 ==================
 * Server - [bug] Fixed client installs. (Issue #647)
 * Client - [bug] Fixed socket test debug output.
