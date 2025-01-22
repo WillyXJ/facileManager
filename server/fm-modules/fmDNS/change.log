@@ -1,6 +1,7 @@
 7.0.1 (2025-01-??)
 ==================
 * Server - [bug] Fixed new installations.
+* Server - [bug] Fixed new client registrations.
 
 7.0.0 (2025-01-18)
 ==================

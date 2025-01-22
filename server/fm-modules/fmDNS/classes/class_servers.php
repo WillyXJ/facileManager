@@ -272,7 +272,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	/**
 	 * Updates the selected server
 	 */
-	function editServer($post) {
+	function updateServer($post) {
 		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		/** Validate entries */
@@ -351,7 +351,7 @@ class fm_module_servers extends fm_shared_module_servers {
 	/**
 	 * Updates the selected server group
 	 */
-	function editGroup($post) {
+	function updateGroup($post) {
 		global $fmdb, $__FM_CONFIG, $global_form_field_excludes;
 		
 		if (empty($post['group_name'])) return __('No group name defined.');
@@ -1212,7 +1212,7 @@ FORM;
 	 * @return array|string
 	 */
 	function update($post) {
-		return ($post['sub_type'] == 'groups') ? $this->editGroup($post) : $this->editServer($post);
+		return ($post['sub_type'] == 'groups') ? $this->updateGroup($post) : $this->updateServer($post);
 	}
 }
 
