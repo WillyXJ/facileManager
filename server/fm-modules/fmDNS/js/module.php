@@ -234,7 +234,7 @@ $(document).ready(function() {
 				if ($.isArray(response)) {
 					/* Set the auto-corrected value */
 					$.each(response[0], function(key, value) {
-						$row_element.find("input[name*=" + key + "]").val(value);
+						$row_element.find("input[name*=" + key + "][type!=\"checkbox\"]").val(value);
 					});
 
 					/* Highlight any errors */

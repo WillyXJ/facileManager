@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}reco
   `record_flags` enum('0','128','256','257','','U','S','A','P') DEFAULT NULL,
   `record_text` varchar(255) DEFAULT NULL,
   `record_comment` varchar(200) DEFAULT NULL,
-  `record_append` enum('yes','no') NOT NULL DEFAULT 'yes',
+  `record_append` enum('yes','no') NOT NULL DEFAULT 'no',
   `record_status` enum('active','disabled','deleted') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`record_id`),
   KEY `idx_domain_id` (`domain_id`),

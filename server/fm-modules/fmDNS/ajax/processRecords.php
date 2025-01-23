@@ -147,9 +147,7 @@ function validateEntry($action, $id, $data, $record_type, $append, $data_array, 
 
 	$messages = array();
 	
-	if ($action == 'create' && !isset($data['record_append']) && in_array($record_type, $append) && isset($data['record_value']) && substr($data['record_value'], -1) != '.') {
-		$data['record_append'] = 'yes';
-	} elseif (!isset($data['record_append']) && in_array($record_type, $append)) {
+	if (!isset($data['record_append']) && in_array($record_type, $append)) {
 		$data['record_append'] = 'no';
 	}
 	if (!empty($data['record_name']) && empty($data['record_value'])) {
