@@ -1,3 +1,7 @@
+7.0.2 (2025-01-??)
+==================
+* Server - [bug] Fixed CNAME append domain functionality. (Issue #650)
+
 7.0.1 (2025-01-21)
 ==================
 * Server - [bug] Fixed new installations.
