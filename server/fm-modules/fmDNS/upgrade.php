@@ -2871,3 +2871,24 @@ function upgradefmDNS_700b3($__FM_CONFIG, $running_version) {
 	
 	return true;
 }
+
+/** 7.0.2 */
+function upgradefmDNS_702($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '7.0.0-beta3', '<') ? upgradefmDNS_700b3($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	$queries[] = "ALTER TABLE `fm_{$__FM_CONFIG['fmDNS']['prefix']}records` CHANGE `record_append` `record_append` enum('yes','no') NOT NULL DEFAULT 'no'";
+
+	/** Run queries */
+	if (isset($queries) && count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	setOption('version', '7.0.2', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}

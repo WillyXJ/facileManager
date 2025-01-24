@@ -159,10 +159,11 @@ strong {
 	max-height: 310px;
 	overflow-y: scroll;
 	margin: 1em 0 0;
+	color: #d0d0d0;
 }
 
 .success {
-	color: #D0D0D0;
+	color: #e3e3e3;
 	max-height: 11em;
 }
 

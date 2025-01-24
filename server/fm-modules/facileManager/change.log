@@ -1,3 +1,7 @@
+5.0.2 (2025-01-24)
+==================
+* Server - [bug] CSS tweaks.
+
 5.0.1 (2025-01-21)
 ==================
 * Server - [bug] Fixed client installs. (Issue #647)
