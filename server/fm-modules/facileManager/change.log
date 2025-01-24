@@ -1,7 +1,10 @@
+5.0.2 (2025-01-24)
+==================
+* Server - [bug] CSS tweaks.
+
 5.0.1 (2025-01-21)
 ==================
 * Server - [bug] Fixed client installs. (Issue #647)
-* Server - [bug] CSS tweak.
 * Client - [bug] Fixed socket test debug output.
 
 5.0.0 (2025-01-18)
