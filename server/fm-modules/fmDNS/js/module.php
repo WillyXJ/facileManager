@@ -208,8 +208,6 @@ $(document).ready(function() {
 		if ($record_value.val() && $record_append.val()) {
 			if ($record_value.val().substr($record_value.val().length - 1) == ".") {
 				$record_append.prop("checked", false);
-			} else {
-				$record_append.prop("checked", true);
 			}
 		}
 
