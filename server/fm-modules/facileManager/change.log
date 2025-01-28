@@ -1,6 +1,7 @@
 5.1.0 (2025-01-??)
 ==================
 * Server - [security] Removed SMTP debug information during password reset form submission. (Issue #653)
+* Server - [bug] Fixed removal of <username> in LDAP settings. (Issue #654)
 
 5.0.2 (2025-01-24)
 ==================
