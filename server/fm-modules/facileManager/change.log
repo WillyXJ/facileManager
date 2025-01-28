@@ -1,3 +1,7 @@
+5.1.0 (2025-01-??)
+==================
+* Server - [security] Removed SMTP debug information during password reset form submission. (Issue #653)
+
 5.0.2 (2025-01-24)
 ==================
 * Server - [bug] CSS tweaks.

@@ -3728,7 +3728,7 @@ function clearUpdateDir() {
  * @param array $images Images to embed in the email
  * @return boolean|string
  */
-function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $images = null) {
+function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $images = null, $options = array(), $output_format = 'hidden') {
 	global $fm_name;
 
 	$phpmailer_file = ABSPATH . 'fm-modules' . DIRECTORY_SEPARATOR . $fm_name . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'PHPMailer' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'PHPMailer.php';
@@ -3742,10 +3742,10 @@ function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $ima
 	$mail = new PHPMailer\PHPMailer\PHPMailer;
 
 	/** Set PHPMailer options from database */
-	if (getOption('show_errors')) $mail->SMTPDebug = PHPMailer\PHPMailer\SMTP::DEBUG_CONNECTION;
 	$mail->Host = getOption('mail_smtp_host');
 	$mail->Port = getOption('mail_smtp_port');
 	$mail->SMTPAuth = getOption('mail_smtp_auth');
+	if ($output_format == 'debug') $mail->SMTPDebug = PHPMailer\PHPMailer\SMTP::DEBUG_CONNECTION;
 	if ($mail->SMTPAuth) {
 		$mail->Username = getOption('mail_smtp_user');
 		$mail->Password = getOption('mail_smtp_pass');
