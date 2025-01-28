@@ -3724,7 +3724,7 @@ function clearUpdateDir() {
  * @param string $subject Email subject
  * @param string $body Email body
  * @param string $altbody Email alternate body (plaintext)
- * @param string/array $from From name and address
+ * @param string|array $from From name and address
  * @param array $images Images to embed in the email
  * @return boolean|string
  */
@@ -3736,21 +3736,24 @@ function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $ima
 		return _('Unable to send email - PHPMailer class is missing.');
 	}
 
+	extract($options);
+
 	require($phpmailer_file);
 	require(dirname($phpmailer_file) . DIRECTORY_SEPARATOR . 'SMTP.php');
 	require(dirname($phpmailer_file) . DIRECTORY_SEPARATOR . 'Exception.php');
 	$mail = new PHPMailer\PHPMailer\PHPMailer;
 
-	/** Set PHPMailer options from database */
-	$mail->Host = getOption('mail_smtp_host');
-	$mail->Port = getOption('mail_smtp_port');
-	$mail->SMTPAuth = getOption('mail_smtp_auth');
+	/** Set PHPMailer options */
 	if ($output_format == 'debug') $mail->SMTPDebug = PHPMailer\PHPMailer\SMTP::DEBUG_CONNECTION;
+	$mail->Host = isset($mail_smtp_host) ? $mail_smtp_host : getOption('mail_smtp_host');
+	$mail->Port = isset($mail_smtp_port) ? $mail_smtp_port : getOption('mail_smtp_port');
+	$mail->SMTPAuth = isset($mail_smtp_auth) ? $mail_smtp_auth : getOption('mail_smtp_auth');
 	if ($mail->SMTPAuth) {
-		$mail->Username = getOption('mail_smtp_user');
-		$mail->Password = getOption('mail_smtp_pass');
+		$mail->Username = isset($mail_smtp_user) ? $mail_smtp_user : getOption('mail_smtp_user');
+		$mail->Password = isset($mail_smtp_pass) ? $mail_smtp_pass : getOption('mail_smtp_pass');
 	}
-	if ($secure = getOption('mail_smtp_tls')) $mail->SMTPSecure = strtolower($secure);
+	$secure = isset($mail_smtp_tls) ? $mail_smtp_tls : getOption('mail_smtp_tls');
+	if ($secure) $mail->SMTPSecure = strtolower($secure);
 
 	if ($from) {
 		if (is_array($from)) {
@@ -3762,7 +3765,7 @@ function sendEmail($sendto, $subject, $body, $altbody = null, $from = null, $ima
 		$mail->From = $from_addr;
 	} else {
 		$mail->FromName = $fm_name;
-		$mail->From = getOption('mail_from');
+		$mail->From = isset($mail_from) ? $mail_from : getOption('mail_from');
 	}
 	$mail->AddAddress($sendto);
 

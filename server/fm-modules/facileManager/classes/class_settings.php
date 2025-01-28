@@ -626,7 +626,7 @@ class fm_settings {
 							</div>
 							<div class="choices">
 							' . $mail_smtp_tls_list . '
-						</div>
+							</div>
 						</div>
 	
 						<div id="setting-row">
@@ -636,6 +636,16 @@ class fm_settings {
 							</div>
 							<div class="choices">
 								<input name="mail_from" id="mail_from" type="email" value="' . $mail_from . '" size="40" placeholder="noreply@mydomain.com" />
+							</div>
+						</div>
+
+						<div id="setting-row">
+							<div class="description">
+								<label>' . _('Test Mail Settings') . '</label>
+								<p>' . _('Test the entered mail settings to ensure functionality.') . '</p>
+							</div>
+							<div class="choices">
+								' . sprintf('<p><a name="test_mail_settings" id="test_mail_settings" class="button">%s</a></p>', _('Test Now')) . '
 							</div>
 						</div>
 					</div>
