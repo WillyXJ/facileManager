@@ -912,6 +912,34 @@ function fmUpgrade_500b1($database) {
 }
 
 
+/** fM v5.1.0 **/
+function fmUpgrade_510($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 55) ? fmUpgrade_500b1($database) : true;
+	
+	$queries = array();
+	if ($success) {
+		$queries[] = "UPDATE `fm_options` SET `option_value` = REPLACE(option_value, '<username>', '{username}') WHERE `option_name`='ldap_dn'";
+		
+		/** Create table schema */
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 56, false);
+	
+	return $success;
+}
+
+
 /**
  * Updates the database with the db version number.
  *

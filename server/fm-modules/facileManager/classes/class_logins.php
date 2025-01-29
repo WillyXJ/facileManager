@@ -531,7 +531,7 @@ This link expires in %s.',
 		if (empty($ldap_group_attribute)) $ldap_group_attribute = getOption('ldap_group_attribute');
 		if (empty($ldap_group_search_dn)) $ldap_group_search_dn = getOption('ldap_group_search_dn');
 
-		$ldap_dn = str_replace('<username>', $username, $ldap_dn);
+		$ldap_dn = str_replace('{username}', $username, $ldap_dn);
 
 		/** Set default ports if none specified */
 		if (!$ldap_port) $ldap_port = 389;
