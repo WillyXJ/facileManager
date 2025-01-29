@@ -3,6 +3,7 @@
 * Server - [security] Removed SMTP debug information during password reset form submission. (Issue #653)
 * Server - [improvement] Updated <username> variable format to {username} for consistency with built-in variables.
 * Server - [bug] Fixed removal of <username> in LDAP settings. (Issue #654)
+* Server - [bug] Fixed logging display of data containing html tags.
 
 5.0.2 (2025-01-24)
 ==================

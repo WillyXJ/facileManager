@@ -120,7 +120,7 @@ function displayLogData($page, $search_sql = null, $sort_direction = 'DESC') {
 
 	for ($i=0; $i<$log_count; $i++) {
 		extract(get_object_vars($result[$i]), EXTR_OVERWRITE);
-		$log_data = nl2br($log_data);
+		$log_data = nl2br(htmlspecialchars($log_data));
 		if (isset($_POST['log_search_query'])) $log_data = str_replace($_POST['log_search_query'], '<span class="highlighted">' . $_POST['log_search_query'] . '</span>', $log_data);
 		$user_name = is_numeric($user_login) ? $fm_name : $user_login;
 		$log_timestamp = date($date_format . ' ' . $time_format . ' e', $log_timestamp);
