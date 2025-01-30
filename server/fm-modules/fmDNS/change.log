@@ -1,3 +1,7 @@
+7.0.3 (2025-01-??)
+==================
+* Server - [bug] Fixed a PHP error when editing reverse zones. (Issue #655)
+
 7.0.2 (2025-01-24)
 ==================
 * Server - [bug] Fixed CNAME append domain functionality. (Issue #650)

@@ -1725,7 +1725,7 @@ HTML;
 								if (filter_var($octet, FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 255))) === false) return false;
 							}
 							continue;
-						} elseif (preg_match("/^(*[a-z\d](-*[a-z\d])*)*$/i", $domain_pieces[$i])) {
+						} elseif (preg_match("/^([a-z\d](-*[a-z\d])*)*$/i", $domain_pieces[$i])) {
 							continue;
 						}
 					}
