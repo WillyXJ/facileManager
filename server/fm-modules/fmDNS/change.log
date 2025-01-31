@@ -5,6 +5,7 @@
 * Server - [bug] Fixed an issue that prevented dynamic zones and DNSSEC signed zones settings from
            getting turned off. (Issue #655)
 * Server - [bug] Fixed record validation page formatting.
+* Server - [bug] Fixed zone row highlight color when zone is checked.
 
 7.0.2 (2025-01-24)
 ==================
