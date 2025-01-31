@@ -71,10 +71,9 @@ foreach($_POST as $name => $array) {
 
 printHeader();
 @printMenu();
+echo printPageHeader(null, __('Record Validation'), false, null, null, 'noscroll');
 
-printf('<div id="body_container" class="flex-column">
-	<h2>%s</h2>
-	<form method="POST" action="zone-records-write.php">
+printf('<form method="POST" action="zone-records-write.php">
 	<input type="hidden" name="domain_id" value="%d">
 	<input type="hidden" name="record_type" value="%s">
 	<input type="hidden" name="map" value="%s">
@@ -87,8 +86,7 @@ printf('<div id="body_container" class="flex-column">
 		<input type="reset" value="%s" onClick="history.go(-1)" class="button" />
 		<input type="submit" name="submit" value="%s" class="button primary" />
 	</p>
-</form>
-</div>', __('Record Validation'), $domain_id, $record_type, $map, $_POST['uri'], $header, $body, __('Back'), __('Submit'));
+</form>', $domain_id, $record_type, $map, $_POST['uri'], $header, $body, __('Back'), __('Submit'));
 
 printFooter();
 
