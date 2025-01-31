@@ -1038,7 +1038,7 @@ HTML;
 			}
 			extract(get_object_vars($fmdb->last_result[0]));
 			
-			if (version_compare($server_client_version, '3.0-alpha1', '<')) continue;
+			if (@version_compare($server_client_version, '3.0-alpha1', '<')) continue;
 			
 			$file_ext = ($domain_mapping == 'forward') ? 'hosts' : 'rev';
 

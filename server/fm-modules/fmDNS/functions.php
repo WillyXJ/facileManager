@@ -691,7 +691,7 @@ function getZoneServers($domain_id, $server_types = array('masters')) {
 			$domain_id = $domain_template_id;
 		}
 		$domain_name_servers = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name_servers');
-		if ($domain_name_servers) {
+		if ($domain_name_servers !== false) {
 			if (!isset($fm_dns_zones)) {
 				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 			}
