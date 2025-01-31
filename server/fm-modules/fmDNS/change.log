@@ -2,6 +2,8 @@
 ==================
 * Server - [bug] Fixed retrieval of name servers when editing records from a dynamic zone. (Issue #655)
 * Server - [bug] Fixed a PHP error when editing reverse zones. (Issue #655)
+* Server - [bug] Fixed an issue that prevented dynamic zones and DNSSEC signed zones settings from
+           getting turned off. (Issue #655)
 
 7.0.2 (2025-01-24)
 ==================

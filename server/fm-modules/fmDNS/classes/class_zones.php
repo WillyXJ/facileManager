@@ -1908,12 +1908,12 @@ HTML;
 		}
 		
 		/** Dynamic updates */
-		if (isset($post['domain_dynamic']) && $post['domain_dynamic'] != 'yes') {
+		if (!isset($post['domain_dynamic']) || $post['domain_dynamic'] != 'yes') {
 			$post['domain_dynamic'] = 'no';
 		}
 		
 		/** DNSSEC */
-		if (isset($post['domain_dnssec']) && $post['domain_dnssec'] != 'yes') {
+		if (!isset($post['domain_dnssec']) || $post['domain_dnssec'] != 'yes') {
 			$post['domain_dnssec'] = 'no';
 		}
 		if (!empty($post['domain_dnssec_sig_expire'])) {
@@ -1921,10 +1921,10 @@ HTML;
 		} else {
 			$post['domain_dnssec_sig_expire'] = 0;
 		}
-		if (isset($post['domain_dnssec_generate_ds']) && $post['domain_dnssec_generate_ds'] != 'yes') {
+		if (!isset($post['domain_dnssec_generate_ds']) || $post['domain_dnssec_generate_ds'] != 'yes') {
 			$post['domain_dnssec_generate_ds'] = 'no';
 		}
-		if (isset($post['domain_dnssec_sign_inline']) && $post['domain_dnssec_sign_inline'] != 'yes') {
+		if (!isset($post['domain_dnssec_sign_inline']) || $post['domain_dnssec_sign_inline'] != 'yes') {
 			$post['domain_dnssec_sign_inline'] = 'no';
 		} else {
 			$post['domain_dnssec_signed'] = 0;
