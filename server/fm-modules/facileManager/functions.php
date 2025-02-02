@@ -252,6 +252,7 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 	}
 
 	$theme = (isset($_SESSION['user']['theme'])) ? $_SESSION['user']['theme'] : getOption('theme');
+	$theme_mode = (isset($_SESSION['user']['theme_mode'])) ? $_SESSION['user']['theme_mode'] : '';
 	
 	$head = $logo = null;
 	
@@ -281,7 +282,7 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 	
 	echo <<<HTML
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" class="default-theme $theme">
+<html xmlns="http://www.w3.org/1999/xhtml" class="default-theme $theme $theme_mode">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>$title</title>

@@ -924,6 +924,9 @@ function fmUpgrade_510($database) {
 	$queries = array();
 	if ($success) {
 		$queries[] = "UPDATE `fm_options` SET `option_value` = REPLACE(option_value, '<username>', '{username}') WHERE `option_name`='ldap_dn'";
+		if (!columnExists("fm_users", 'user_theme_mode')) {
+			$queries[] = "ALTER TABLE `fm_users` ADD `user_theme_mode` enum('Light','Dark','System') NULL DEFAULT 'Light' AFTER `user_theme`";
+		}
 		
 		/** Create table schema */
 		if (count($queries) && $queries[0]) {

@@ -708,6 +708,11 @@ if (isset($__FM_CONFIG)) {
 	$("#manage_item_contents").delegate("#user_theme", "change", function(e) {
 		$("html").removeClass();
 		$("html").addClass("default-theme " + $(this).val());
+		$("#user_theme_mode").change();
+	});
+	$("#manage_item_contents").delegate("#user_theme_mode", "change", function(e) {
+		$("html").removeClass("Light Dark System");
+		$("html").addClass($(this).val());
 	});
 
 	/* Account group association changes */

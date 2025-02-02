@@ -351,6 +351,7 @@ class fm_users {
 		if (isset($post['user_theme'])) {
 			@session_start();
 			$_SESSION['user']['theme'] = $post['user_theme'];
+			$_SESSION['user']['theme_mode'] = $post['user_theme_mode'];
 			session_write_close();
 		}
 
@@ -621,7 +622,7 @@ HTML;
 		$ucaction = ucfirst($action);
 		$disabled = (isset($_GET['id']) && $_SESSION['user']['id'] == $_GET['id']) ? 'disabled' : null;
 		$button_disabled = null;
-		$user_email = $user_default_module = $user_theme = null;
+		$user_email = $user_default_module = $user_theme = $user_theme_mode = null;
 		$hidden = $user_perm_form = $return_form_rows = null;
 		$user_force_pwd_change = $user_template_only = null;
 		$group_name = $group_comment = $user_group = null;
@@ -737,11 +738,16 @@ HTML;
 		
 		if (in_array('user_theme', $form_bits)) {
 			if (!$user_theme) $user_theme = $__FM_CONFIG['default']['theme'];
-			$user_module_options = buildSelect('user_theme', 'user_theme', getThemes(), $user_theme);
-			unset($available_themes);
+			if (!$user_theme_mode) $user_theme_mode = 'System';
+			$user_theme_options = buildSelect('user_theme', 'user_theme', getThemes(), $user_theme);
+			$user_theme_mode_options = buildSelect('user_theme_mode', 'user_theme_mode', enumMYSQLSelect('fm_users', 'user_theme_mode'), $user_theme_mode);
 			$return_form_rows .= '<tr>
 					<th width="33%" scope="row">' . _('Theme') . '</th>
-					<td width="67%">' . $user_module_options . '</td>
+					<td width="67%">' . $user_theme_options . '</td>
+				</tr>
+				<tr>
+					<th width="33%" scope="row">' . _('Theme Mode') . '</th>
+					<td width="67%">' . $user_theme_mode_options . '</td>
 				</tr>';
 		}
 		
