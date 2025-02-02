@@ -1,19 +1,20 @@
 .Ocean {
-    /* Synonym for default-theme */
+	/* Synonym for default-theme */
 }
 
 .Mars {
-    /* Common color changes */
-    --top-header-bg: #583b3b;
-    --top-header-border: #433838;
-    --top-header-divider: #5c5656;
-	--top-header-search-bg: #765353;
-	--top-header-search-border: #9e6262;
+	/* Common color changes */
+	--top-header-bg: light-dark(#583b3b, #322626);
+	--top-header-border: light-dark(#433838, #393939);
+	--top-header-divider: light-dark(#5c5656, #5c5956);
+	--top-header-search-bg: light-dark(#765353, var(--form-field-bg));
+	--top-header-search-border: light-dark(#9e6262, var(--form-input-border));
+	--table-header-border: light-dark(#fff, #583b3b);
 
-    --menu-bg: #352f2f;
-    --menu-divider: #583b3b;
-    --menu-select-highlight: #bc3b3b;
-    --menu-expand-bg: #ebe4e4;
+	--menu-bg: #352f2f;
+	--menu-divider: #583b3b;
+	--menu-select-highlight: #bc3b3b;
+	--menu-expand-bg: #ebe4e4;
 	--submenu-hover: #915353;
 
 	--tooltip-bg: #a45e5e;
@@ -23,17 +24,18 @@
 }
 
 .Forest {
-    /* Common color changes */
-    --top-header-bg: #3d583b;
-    --top-header-border: #384338;
-    --top-header-divider: #565c56;
-	--top-header-search-bg: #56865c;
-	--top-header-search-border: #679E62;
+	/* Common color changes */
+	--top-header-bg: light-dark(#3d583b, #252b24);
+	--top-header-border: light-dark(#384338, #393939);
+	--top-header-divider: light-dark(#565c56, #5c5956);
+	--top-header-search-bg: light-dark(#56865c, var(--form-field-bg));
+	--top-header-search-border: light-dark(#679E62, var(--form-input-border));
+	--table-header-border: light-dark(#fff, #3d583b);
 
-    --menu-bg: #2f352f;
-    --menu-divider: #3b583b;
-    --menu-select-highlight: #44bc3b;
-    --menu-expand-bg: #e4ebe4;
+	--menu-bg: #2f352f;
+	--menu-divider: #3b583b;
+	--menu-select-highlight: #44bc3b;
+	--menu-expand-bg: #e4ebe4;
 	--submenu-hover: #45753b;
 
 	--tooltip-bg: #5ea46a;
@@ -43,18 +45,19 @@
 }
 
 .Beach {
-    /* Common color changes */
-    --top-header-bg: #7e532b;
-    --top-header-border: #433f38;
-    --top-header-divider: #5c5956;
-	--top-header-search-bg: #8e7143;
-	--top-header-search-border: #cda445;
-	--submenu-hover: #ee9d3b;
+	/* Common color changes */
+	--top-header-bg: light-dark(#7e532b, #342c25);
+	--top-header-border: light-dark(#433f38, #393939);
+	--top-header-divider: light-dark(#5c5956, #5c5956);
+	--top-header-search-bg: light-dark(#8e7143, var(--form-field-bg));
+	--top-header-search-border: light-dark(#cda445, var(--form-input-border));
+	--table-header-border: light-dark(#fff, #7e532b);
 
-    --menu-bg: #35322f;
-    --menu-divider: #584b3b;
-    --menu-select-highlight: #ee9d3b;
-    --menu-expand-bg: #ebe8e4;
+	--menu-bg: #35322f;
+	--menu-divider: #584b3b;
+	--menu-select-highlight: #ee9d3b;
+	--menu-expand-bg: #ebe8e4;
+	--submenu-hover: #ee9d3b;
 
 	--tooltip-bg: #a4815e;
 	--tooltip-text: #fff;

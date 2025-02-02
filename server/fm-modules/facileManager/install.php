@@ -280,6 +280,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_users` (
   `user_group` INT(11) DEFAULT NULL,
   `user_default_module` varchar(255) DEFAULT NULL,
   `user_theme` VARCHAR(255) NULL DEFAULT NULL,
+  `user_theme_mode` enum('Light','Dark','System') NULL DEFAULT 'Light',
   `user_auth_type` int(1) NOT NULL DEFAULT '1',
   `user_caps` text,
   `user_last_login` int(10) NOT NULL DEFAULT '0',
