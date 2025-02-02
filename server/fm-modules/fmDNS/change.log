@@ -6,6 +6,7 @@
            getting turned off. (Issue #655)
 * Server - [bug] Fixed record validation page formatting.
 * Server - [bug] Fixed zone row highlight color when zone is checked.
+* Server - [bug] CSS tweak.
 
 7.0.2 (2025-01-24)
 ==================

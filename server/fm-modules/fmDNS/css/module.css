@@ -1,7 +1,7 @@
 tr.import_swap span,
 td.column-actions > .fa-refresh {
 	cursor: pointer;
-	color: #3a62a3;
+	color: var(--primary-link-text);
 }
 
 tr.import_swap input:not([type="checkbox"]) {
