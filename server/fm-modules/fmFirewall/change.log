@@ -1,3 +1,7 @@
+3.2.1 (2025-01-??)
+==================
+* Server - [bug] CSS tweaks.
+
 3.2.0 (2025-01-18)
 ==================
 * Server - [improvement] Made form validation global.

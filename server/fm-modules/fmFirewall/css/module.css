@@ -62,16 +62,13 @@ p.checkbox_desc {
 }
 
 .pass {
-	color: #1b8725;
+	color: var(--icon-secure);
 }
 .block {
-	color: #CB3739;
+	color: var(--icon-delete);
 }
 .reject {
-	color: #e19419;
-}
-.log {
-	color: #4e65e0;
+	color: light-dark(#e19419, #ffb743);
 }
 
 #stack-label {
