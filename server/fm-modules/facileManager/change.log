@@ -1,4 +1,4 @@
-5.1.0 (2025-01-??)
+5.1.0 (2025-02-02)
 ==================
 * Server - [security] Removed SMTP debug information during password reset form submission. (Issue #653)
 * Server - [improvement] Updated <username> variable format to {username} for consistency with built-in variables.

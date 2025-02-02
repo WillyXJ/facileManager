@@ -1,4 +1,4 @@
-7.0.3 (2025-01-??)
+7.0.3 (2025-02-02)
 ==================
 * Server - [bug] Fixed retrieval of name servers when editing records from a dynamic zone. (Issue #655)
 * Server - [bug] Fixed a PHP error when editing reverse zones. (Issue #655)

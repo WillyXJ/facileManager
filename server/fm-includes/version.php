@@ -24,14 +24,14 @@
  *
  * @global string $fm_version
  */
-$fm_version = '5.0.2';
+$fm_version = '5.1.0';
 
 /**
  * Holds the facileManager DB revision, increments when changes are made to the facileManager DB schema.
  *
  * @global int $fm_db_version
  */
-$fm_db_version = 55;
+$fm_db_version = 56;
 
 /**
  * Holds the required PHP version
