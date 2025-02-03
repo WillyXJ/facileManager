@@ -172,7 +172,7 @@
 	--form-popup-bg: light-dark(var(--background-default), var(--menu-bg));
 	--form-input-border: light-dark(#dfdfdf, #4c4c4c);
 	--form-input-disabled: light-dark(#aeaeae, #848484);
-	--form-input-disabled-primary: #7b7b7b;
+	--form-input-disabled-primary: light-dark(#fbfbfb, #5f5e5e);
 	--form-input-disabled-secondary: var(--form-popup-primary-color);
 	--form-field-bg: light-dark(#fff, #616161);
 	--form-label-text: var(--primary-body-text);
