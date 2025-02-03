@@ -98,7 +98,7 @@ if (!$soa_count = getSOACount($domain_id)) {
 $current_user_can_manage_records = currentUserCan('manage_records', $_SESSION['module']);
 
 if ($current_user_can_manage_records && $zone_access_allowed) {
-	$addl_buttons[] = sprintf('<a class="button validate-all-records disabled" disabled="true" /><i class="fa fa-check" aria-hidden="true"></i>%s</a>' . "\n", __('Validate All'));
+	$addl_buttons[] = sprintf('<a class="button green validate-all-records disabled" disabled="true" /><i class="fa fa-check" aria-hidden="true"></i>%s</a>' . "\n", __('Validate All'));
 	$addl_buttons[] = sprintf('<a class="button save-record-submit primary disabled" disabled="true" /><i class="fa fa-floppy-o" aria-hidden="true"></i>%s</a>' . "\n", __('Save All'));
 	if ($soa_count && $ns_count && getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_type') == 'primary') {
 		$addl_buttons[] = '<a href="preview.php" onclick="javascript:void window.open(\'preview.php?server_serial_no=-1&config=zone&domain_id=' . $domain_id . '\',\'1356124444538\',\'' . $__FM_CONFIG['default']['popup']['dimensions'] . ',toolbar=0,menubar=0,location=0,status=0,scrollbars=1,resizable=1,left=0,top=0\');return false;" class="button"><i class="fa fa-search" aria-hidden="true"></i>' . __('Preview') . '</a>';

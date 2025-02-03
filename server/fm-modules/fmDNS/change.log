@@ -1,3 +1,7 @@
+7.0.4 (2025-02-03)
+==================
+* Server - [bug] Fixed CSS of the records "Validate All" button.
+
 7.0.3 (2025-02-02)
 ==================
 * Server - [bug] Fixed retrieval of name servers when editing records from a dynamic zone. (Issue #655)
