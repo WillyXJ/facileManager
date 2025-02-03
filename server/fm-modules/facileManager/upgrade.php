@@ -937,6 +937,10 @@ function fmUpgrade_510($database) {
 		}
 	}
 
+	@session_start();
+	$_SESSION['user']['theme_mode'] = 'Light';
+	session_write_close();
+
 	upgradeConfig('fm_db_version', 56, false);
 	
 	return $success;
