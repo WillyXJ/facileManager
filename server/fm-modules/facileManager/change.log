@@ -1,6 +1,7 @@
 5.1.2 (2025-02-??)
 ==================
 * Server - [bug] Fixed logging of long messages.
+* Server - [bug] Fixed automatic logout when the session expires.
 
 5.1.1 (2025-02-03)
 ==================
