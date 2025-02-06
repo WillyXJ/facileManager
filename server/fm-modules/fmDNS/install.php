@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}file
   `server_serial_no` varchar(255) NOT NULL DEFAULT '0',
   `file_location` ENUM('\$ROOT') NOT NULL DEFAULT '\$ROOT',
   `file_name` VARCHAR(255) NOT NULL,
-  `file_contents` text,
+  `file_contents` mediumtext,
   `file_comment` text,
   `file_status` ENUM( 'active', 'disabled', 'deleted') NOT NULL DEFAULT 'active'
 ) ENGINE = INNODB DEFAULT CHARSET=utf8;
@@ -204,7 +204,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_{$__FM_CONFIG[$module]['prefix']}reco
   `record_ptr_id` int(11) NOT NULL DEFAULT '0',
   `record_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `record_name` varchar(255) DEFAULT '@',
-  `record_value` text,
+  `record_value` mediumtext,
   `record_ttl` varchar(50) NOT NULL DEFAULT '',
   `record_class` enum('IN','CH','HS') NOT NULL DEFAULT 'IN',
   `record_type` enum('A','AAAA','CAA','CERT','CNAME','DHCID','DLV','DNAME','DNSKEY','DS','HINFO','KEY','KX','MX','NAPTR','NS','OPENPGPKEY','PTR','RP','SMIMEA','SSHFP','SRV','TLSA','TXT','URI','URL','CUSTOM') NOT NULL DEFAULT 'A',

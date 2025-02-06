@@ -1,3 +1,7 @@
+5.1.2 (2025-02-??)
+==================
+* Server - [bug] Fixed logging of long messages.
+
 5.1.1 (2025-02-03)
 ==================
 * Server - [bug] Fixed CSS of disabled buttons.
