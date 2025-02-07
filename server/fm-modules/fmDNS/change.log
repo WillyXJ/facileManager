@@ -5,6 +5,8 @@
 * Server - [bug] Fixed zone reload results formatting. (Issue #657)
 * Server - [bug] Fixed automatic 'also-notify' option when the DNS server is associated with
            multiple groups. (Issue #659)
+* Server - [bug] Fixed the issue where Files included in zone configuration would also be appended
+           to the zonefile.
 
 7.0.4 (2025-02-03)
 ==================

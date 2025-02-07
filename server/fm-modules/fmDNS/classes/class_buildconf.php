@@ -1106,7 +1106,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		
 		/** Build includes */
 		$domain_id = (isset($domain->parent_domain_id)) ? $domain->parent_domain_id : $domain->domain_id;
-		$zone_file .= ltrim(str_replace(array('include ', ';'), array('$INCLUDE ', ''), $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $domain_id)));
+		// $zone_file .= ltrim(str_replace(array('include ', ';'), array('$INCLUDE ', ''), $this->getIncludeFiles(0, $server_serial_no, $server_group_ids, $domain_id)));
 
 		/** Sign the zone? */
 		if ($server_serial_no > 0 && $domain->domain_dnssec == 'yes' && $domain->domain_dnssec_sign_inline == 'no') {
