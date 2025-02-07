@@ -2202,7 +2202,18 @@ HTML;
 	function processServerGroups($zone_array, $server_id, $view_id) {
 		global $fmdb, $__FM_CONFIG;
 		
+		$zone_options = '';
+		$auto_also_notify = array();
+
 		extract(get_object_vars($zone_array), EXTR_OVERWRITE);
+
+		/** Is this a clone? Then get clone name servers */
+		if ($parent_domain_id) {
+			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $parent_domain_id, 'domain_', 'domain_id');
+			if ($fmdb->num_rows) {
+				extract(get_object_vars($fmdb->last_result[0]), EXTR_OVERWRITE);
+			}
+		}
 
 		$domain_name_servers = explode(';', $domain_name_servers);
 		if (!count($domain_name_servers) || in_array('0', $domain_name_servers) || 
@@ -2223,12 +2234,8 @@ HTML;
 					
 					if (in_array($server_id, $group_masters)) {
 						if ($group_auto_also_notify == 'yes') {
-							$zone_options = array('also-notify' => $this->resolveServerGroupMembers($group_slaves));
-							// $zone_options = sprintf("\talso-notify { %s };\n", $this->resolveServerGroupMembers($group_slaves));
-						} else {
-							$zone_options = '';
+							$auto_also_notify = array_merge($auto_also_notify, $this->resolveServerGroupMembers($group_slaves));
 						}
-						return array($domain_type, $zone_options);
 					}
 					
 					if (in_array($server_id, $group_slaves)) {
@@ -2246,7 +2253,10 @@ HTML;
 			}
 		}
 		
-		return array($domain_type, '');
+		if (count($auto_also_notify)) {
+			$zone_options = array('also-notify' => $auto_also_notify);
+		}
+		return array($domain_type, $zone_options);
 	}
 	
 	/**
