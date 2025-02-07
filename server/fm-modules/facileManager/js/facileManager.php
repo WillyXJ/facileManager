@@ -56,6 +56,10 @@ if (isset($__FM_CONFIG)) {
 				timeout: 2000,
 				data: form_data,
 				success: function(response) {
+					if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+						doLogout();
+						return false;
+					}
 					if (response == 0 || ! $.isNumeric(response)) {
 						$(".process_all_updates").parent().fadeOut(400);
 					} else {

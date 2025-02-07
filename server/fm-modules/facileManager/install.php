@@ -244,7 +244,7 @@ CREATE TABLE IF NOT EXISTS `$database`.`fm_logs` (
   `account_id` int(11) NOT NULL DEFAULT '1',
   `log_module` varchar(255) NOT NULL,
   `log_timestamp` int(10) NOT NULL DEFAULT '0',
-  `log_data` text NOT NULL,
+  `log_data` mediumtext NOT NULL,
   PRIMARY KEY (`log_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 ;
 TABLESQL;

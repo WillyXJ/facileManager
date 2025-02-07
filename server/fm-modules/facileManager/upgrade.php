@@ -947,6 +947,34 @@ function fmUpgrade_510($database) {
 }
 
 
+/** fM v5.1.2 **/
+function fmUpgrade_512($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 56) ? fmUpgrade_510($database) : true;
+	
+	$queries = array();
+	if ($success) {
+		$queries[] = "ALTER TABLE `fm_logs` MODIFY COLUMN `log_data` MEDIUMTEXT";
+		
+		/** Create table schema */
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 57, false);
+	
+	return $success;
+}
+
+
 /**
  * Updates the database with the db version number.
  *
