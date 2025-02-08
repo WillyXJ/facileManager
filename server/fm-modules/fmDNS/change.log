@@ -1,4 +1,4 @@
-7.0.5 (2025-02-??)
+7.0.5 (2025-02-08)
 ==================
 * Server - [bug] Fixed cases where long custom resource record data and file contents would not save.
 * Server - [bug] Fixed zone reloads with named checks and $INCLUDE statements. (Issue #656)
