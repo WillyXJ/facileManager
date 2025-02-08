@@ -38,10 +38,10 @@ if (is_array($_POST) && count($_POST)) {
 			/** Check the zone file for loadable syntax */
 			$response = $fm_dns_zones->singleZoneReloadSyntaxCheck($domain_id);
 
-			if (!isset($response) || !$response) $response = sprintf('<pre>%s</pre>', makePlainText($fm_dns_zones->buildZoneConfig($domain_id)));
+			if (!isset($response) || !$response) $response = sprintf("<pre>\n%s\n</pre>\n", makePlainText($fm_dns_zones->buildZoneConfig($domain_id)));
 		}
 		
-		// Graphic highlighting
+		/** Graphic highlighting */
 		$response = transformOutput($response);
 
 		echo $response . "<br />\n";

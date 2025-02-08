@@ -47,9 +47,15 @@ function fmUpgrade($database) {
 		<img src="%s" /><span>%s</span>
 	</div>
 	<div id="window"><table class="form-table">' . "\n", $branding_logo, _('Upgrade'));
+
+	/**	Get latest upgrade function */
+	$tmp_all_functions = get_defined_functions();
+	$upgrade_function = preg_grep('/^fmupgrade_.*/', $tmp_all_functions['user']);
+	$upgrade_function = end($upgrade_function);
+	unset($tmp_all_functions);
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? fmUpgrade_510($database) : true;
+	$success = ($GLOBALS['running_db_version'] < $fm_db_version) ? $upgrade_function($database) : true;
 
 	if ($success) {
 		$success = upgradeConfig('fm_db_version', $fm_db_version);
@@ -937,6 +943,7 @@ function fmUpgrade_510($database) {
 		}
 	}
 
+	@session_id($_COOKIE['myid']);
 	@session_start();
 	$_SESSION['user']['theme_mode'] = 'Light';
 	session_write_close();

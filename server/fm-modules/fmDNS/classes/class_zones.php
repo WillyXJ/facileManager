@@ -2623,7 +2623,7 @@ HTML;
 			if ($zone_result->domain_clone_domain_id) $zone_result = $fm_module_buildconf->mergeZoneDetails($zone_result, 'clone');
 			elseif ($zone_result->domain_template_id) $zone_result = $fm_module_buildconf->mergeZoneDetails($zone_result, 'template');
 
-			$zone_file_contents = @$fm_module_buildconf->buildZoneFile($zone_result, 0);
+			$zone_file_contents = str_replace('$INCLUDE', ';', @$fm_module_buildconf->buildZoneFile($zone_result, 0));
 
 			if (method_exists($fm_module_buildconf, 'processConfigsChecks')) {
 				$response = @$fm_module_buildconf->processConfigsChecks(array('server_serial_no' => 0, 'files' => array($zone_result->domain_name . '.conf' => $zone_file_contents)), 'checkzone');

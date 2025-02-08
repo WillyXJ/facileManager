@@ -1,3 +1,13 @@
+7.0.5 (2025-02-08)
+==================
+* Server - [bug] Fixed cases where long custom resource record data and file contents would not save.
+* Server - [bug] Fixed zone reloads with named checks and $INCLUDE statements. (Issue #656)
+* Server - [bug] Fixed zone reload results formatting. (Issue #657)
+* Server - [bug] Fixed automatic 'also-notify' option when the DNS server is associated with
+           multiple groups. (Issue #659)
+* Server - [bug] Fixed the issue where Files included in zone configuration would also be appended
+           to the zonefile.
+
 7.0.4 (2025-02-03)
 ==================
 * Server - [bug] Fixed cases where long custom resource record data and file contents would not save.
