@@ -1,3 +1,7 @@
+7.0.6 (2025-02-??)
+==================
+* Server - [bug] Fixed CAA record flags when upgrading from <7.0.0. (Issue #660)
+
 7.0.5 (2025-02-08)
 ==================
 * Server - [bug] Fixed cases where long custom resource record data and file contents would not save.
