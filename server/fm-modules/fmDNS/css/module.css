@@ -159,9 +159,6 @@ table.form-table > tbody > tr.dnssec-key-addl-options {
 	color: #12c012;
 }
 
-div.record-value-group {
-	overflow: auto;
-}
 div.record-value-group p.record-sub-value {
 	margin: 0;
 	font-size: 11px;
@@ -172,7 +169,7 @@ div.record-value-group > div:not(:nth-child(1)) {
 }
 .display_results > tbody > tr > td input.input-long-wide,
 .display_results > tbody > tr > td textarea {
-		width: 23em;
+		width: 20em;
 }
 
 div[class^="record-value-subgroup"] {
