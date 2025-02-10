@@ -102,6 +102,10 @@ class fm_tools {
 			if (!function_exists('columnExists')) {
 				include(ABSPATH . 'fm-modules/' . $fm_name . '/upgrade.php');
 			}
+			$module_version = getOption('version', 0, $module_name);
+			if (!$module_version) {
+				return sprintf('<p>' . _('%s is not installed.'), '</p>', $module_name);
+			}
 			$function = 'upgrade' . $module_name . 'Schema';
 			if (function_exists($function)) {
 				$output = $function($running_version);

@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] The default module menu is no longer visible in the user properties when there is only
            one module available.
+* Server - [bug] Fixed module upgrades when the module is not installed.
 
 5.1.2 (2025-02-08)
 ==================
