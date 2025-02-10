@@ -164,11 +164,6 @@ class fm_users {
 			}
 		}
 		if (isset($user_caps)) {
-			foreach ($user_caps as $module => $caps_array) {
-				if (array_key_exists('read_only', $caps_array)) {
-					$user_caps[$module] = array('read_only' => 1);
-				}
-			}
 			$log_message .= formatLogKeyData('', 'permissions', $this->getFriendlyCaps($user_caps));
 		}
 		
@@ -234,11 +229,6 @@ class fm_users {
 			}
 		}
 		if (isset($user_caps)) {
-			foreach ($user_caps as $module => $caps_array) {
-				if (array_key_exists('read_only', $caps_array)) {
-					$user_caps[$module] = array('read_only' => 1);
-				}
-			}
 			$log_message .= formatLogKeyData('', 'permissions', $this->getFriendlyCaps($user_caps));
 		}
 		
