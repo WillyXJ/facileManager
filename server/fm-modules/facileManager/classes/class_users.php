@@ -166,6 +166,8 @@ class fm_users {
 		if (isset($user_caps)) {
 			$log_message .= formatLogKeyData('', 'permissions', $this->getFriendlyCaps($user_caps));
 		}
+
+		if (!isset($user_default_module)) $user_default_module = '';
 		
 		$query = "INSERT INTO `fm_users` (`account_id`, `user_login`, `user_password`, `user_comment`, `user_email`, `user_group`, `user_force_pwd_change`, `user_default_module`, `user_caps`, `user_template_only`, `user_status`, `user_auth_type`) 
 				VALUES('{$_SESSION['user']['account_id']}', '$user_login', '" . password_hash($user_password, PASSWORD_DEFAULT) . "', '$user_comment', '$user_email', '$user_group', '$user_force_pwd_change', '$user_default_module', '" . serialize($user_caps) . "', '$user_template_only', '$user_status', $user_auth_type)";
@@ -718,12 +720,14 @@ HTML;
 		
 		if (in_array('user_module', $form_bits)) {
 			$active_modules = ($user_id == $_SESSION['user']['id']) ? getActiveModules(true) : getActiveModules();
-			$user_module_options = buildSelect('user_default_module', 'user_default_module', $active_modules, $user_default_module);
-			unset($active_modules);
-			$return_form_rows .= '<tr>
+			if (count($active_modules) > 1) {
+				$user_module_options = buildSelect('user_default_module', 'user_default_module', $active_modules, $user_default_module);
+				$return_form_rows .= '<tr>
 					<th width="33%" scope="row">' . _('Default Module') . '</th>
 					<td width="67%">' . $user_module_options . '</td>
 				</tr>';
+			}
+			unset($active_modules);
 		}
 		
 		if (in_array('user_theme', $form_bits)) {
