@@ -1,4 +1,4 @@
-7.0.6 (2025-02-??)
+7.0.6 (2025-02-10)
 ==================
 * Server - [bug] Fixed CAA record flags when upgrading from <7.0.0. (Issue #660)
 * Server - [bug] Fixed CSS when managing zone records.
