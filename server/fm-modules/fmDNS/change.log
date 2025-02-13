@@ -1,3 +1,7 @@
+7.0.8 (2025-02-??)
+==================
+* Server - [bug] Fixed zone imports. (Issue #661)
+
 7.0.7 (2025-02-11)
 ==================
 * Server - [bug] Fixed PHP errors.

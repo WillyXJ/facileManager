@@ -269,7 +269,7 @@ class fm_dns_zones {
 			$sql_fields = rtrim($sql_fields, ', ') . ')';
 			$sql_values = rtrim($sql_values, ', ');
 		} else {
-			$exclude = array_merge($global_form_field_excludes, array('domain_id', 'domain_required_servers', 'domain_forward', 'domain_clone_domain_id', 'domain_redirect_url'));
+			$exclude = array_merge((array) $global_form_field_excludes, array('domain_id', 'domain_required_servers', 'domain_forward', 'domain_clone_domain_id', 'domain_redirect_url'));
 		
 			foreach ($post as $key => $data) {
 				if (!in_array($key, $exclude)) {
