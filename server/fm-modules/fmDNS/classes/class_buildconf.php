@@ -2208,7 +2208,7 @@ HTML;
 		extract(get_object_vars($zone_array), EXTR_OVERWRITE);
 
 		/** Is this a clone? Then get clone name servers */
-		if ($parent_domain_id) {
+		if (isset($parent_domain_id) && $parent_domain_id) {
 			basicGet('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', $parent_domain_id, 'domain_', 'domain_id');
 			if ($fmdb->num_rows) {
 				extract(get_object_vars($fmdb->last_result[0]), EXTR_OVERWRITE);

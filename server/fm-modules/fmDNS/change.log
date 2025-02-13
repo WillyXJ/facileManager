@@ -1,3 +1,7 @@
+7.0.7 (2025-02-11)
+==================
+* Server - [bug] Fixed PHP errors.
+
 7.0.6 (2025-02-10)
 ==================
 * Server - [bug] Fixed CAA record flags when upgrading from <7.0.0. (Issue #660)
