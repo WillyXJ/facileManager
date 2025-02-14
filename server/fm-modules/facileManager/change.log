@@ -1,5 +1,7 @@
 5.1.4 (2025-02-??)
 ==================
+* Server - [improvement] FM_NO_REWRITE_TEST is now a supported defined constant to
+           bypass rewrite tests. (Issue #549)
 * Server - [bug] Fixed form validation when adding/updating users. (Issue #662)
 * Server - [bug] Added missing OS icons for Rocky and AlmaLinux. (Issue #663)
 
