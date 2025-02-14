@@ -367,44 +367,44 @@ function getTopHeader($help) {
 		
 		/** Build app dropdown menu */
 		$modules = getAvailableModules();
+		$avail_modules_array = getActiveModules(true);
 		$avail_modules = '';
 		
 		if (count($modules)) {
 			foreach ($modules as $module_name) {
 				if ($module_name == $_SESSION['module']) continue;
-				if (in_array($module_name, getActiveModules(true))) {
-					$avail_modules .= "<li><a href='{$GLOBALS['RELPATH']}?module=$module_name'><span>$module_name</span></a></li>\n";
+				if (in_array($module_name, $avail_modules_array)) {
+					$avail_modules .= sprintf('<li><a href="%1$s?module=%2$s"><span class="menu-icon"><i class="fa fa-cube" aria-hidden="true"></i></span><span>%2$s</span></a></li>' . "\n",
+						$GLOBALS['RELPATH'], $module_name);
 				}
 			}
+			if ($avail_modules) $avail_modules = "<hr />\n" . $avail_modules;
+		}
 			
-			if ($avail_modules) {
-				$module_menu = <<<HTML
-			<div id="menu_mainitems" class="drop-down">
+		$help = _('Help');
+		$github_issues = _('GitHub Issues');
+		$module_menu = <<<HTML
+			<div id="menu_mainitems" class="module-menu">
 			<ul>
-				<li class="has-sub"><a href="#"><span>{$_SESSION['module']}</span><i class="fa fa-caret-down menu-icon" aria-hidden="true"></i></a>
+				<li class="has-sub"><a href="#"><i class="fa fa-bars fa-lg menu-icon" aria-hidden="true"></i></a>
 					<ul class="sub-right">
-					$avail_modules
+						<li><a class="help_link" href="#"><span class="menu-icon"><i class="fa fa-life-ring" aria-hidden="true"></i></span><span>$help</a></span></li>
+						<li><a href="https://github.com/WillyXJ/facileManager/issues" target="_blank"><span class="menu-icon"><i class="fa fa-github" aria-hidden="true"></i></span><span>$github_issues</a></span></li>
+						$avail_modules
 					</ul>
 				</li>
 			</ul>
 			</div>
 HTML;
-				$sections['right'][] = array('drop-down', $module_menu);
-			}
-			
-			/** Include module toolbar items */
-			if (function_exists('buildModuleToolbar')) {
-				list($module_toolbar_left, $module_toolbar_right) = @buildModuleToolbar();
-				$sections['left'][] = $module_toolbar_left;
-				$sections['right'][] = $module_toolbar_right;
-			}
-		} else {
-			$module_menu = null;
-			$fm_name = isset($_SESSION['module']) ? $_SESSION['module'] : $fm_name;
+		$sections['right'][] = array('module-menu', $module_menu);
+		
+		/** Include module toolbar items */
+		if (function_exists('buildModuleToolbar')) {
+			list($module_toolbar_left, $module_toolbar_right) = @buildModuleToolbar();
+			$sections['left'][] = $module_toolbar_left;
+			$sections['right'][] = $module_toolbar_right;
 		}
 	
-		$sections['right'][] = '<a class="help_link" href="#"><i class="fa fa-life-ring fa-lg" aria-hidden="true"></i></a>';
-
 		$help_file = buildHelpFile();
 	
 		if (defined('FM_INCLUDE_SEARCH') && FM_INCLUDE_SEARCH === true) {
