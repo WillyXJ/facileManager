@@ -104,7 +104,7 @@
   
 	--menu-bg: #2f3235;
 	--menu-divider: #3b4b58;
-	--menu-select-highlight: #3b8dbc;
+	--menu-select-highlight: light-dark(#3b8dbc, #2d7fae);
 	--menu-expanded-bg: light-dark(#e4e4eb, #535353);
 	--menu-expanded-text: light-dark(var(--menu-bg), var(--menu-link));
 	--submenu-hover: #566a84;
