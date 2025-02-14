@@ -87,11 +87,11 @@
 	/** Drop down with search */
 	.select2-search input {
 		border-color: #5b5b5b;
-		background: #343434 url(select2.png) no-repeat 100% -22px;
-		background: url(select2.png) no-repeat 100% -22px, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, #343434), color-stop(0.99, #1d1d1d));
-		background: url('select2.png') no-repeat 100% -22px, -webkit-linear-gradient(center bottom, #343434 85%, #1d1d1d 99%);
-		background: url('select2.png') no-repeat 100% -22px, -moz-linear-gradient(center bottom, #343434 85%, #1d1d1d 99%);
-		background: url(select2.png) no-repeat 100% -22px, linear-gradient(to bottom, #343434 85%, #1d1d1d 99%) 0 0;
+		background: #343434 url(/fm-includes/extra/select2/select2.png) no-repeat 100% -22px;
+		background: url(/fm-includes/extra/select2/select2.png) no-repeat 100% -22px, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, #343434), color-stop(0.99, #1d1d1d));
+		background: url('/fm-includes/extra/select2/select2.png') no-repeat 100% -22px, -webkit-linear-gradient(center bottom, #343434 85%, #1d1d1d 99%);
+		background: url('/fm-includes/extra/select2/select2.png') no-repeat 100% -22px, -moz-linear-gradient(center bottom, #343434 85%, #1d1d1d 99%);
+		background: url(/fm-includes/extra/select2/select2.png) no-repeat 100% -22px, linear-gradient(to bottom, #343434 85%, #1d1d1d 99%) 0 0;
 	}
 }
 .default-theme {
@@ -132,6 +132,7 @@
 	--menu-footer-link: #888888;
 	--menu-footer-donate: #ff77a9;
 	--menu-acct-info-actions: #b5b5b5;
+	--menu-acct-info-actions-hover: #d1d1d1;
 	--menu-main-select-bg: #464646;
 	--menu-main-select-text: #fff;
 	--menu-main-badge-bg: #8f8f8f;
@@ -440,6 +441,9 @@ div.header-container {
 }
 #account_info_actions a {
 	color: var(--menu-acct-info-actions);
+}
+#account_info_actions a:hover {
+	color: var(--menu-acct-info-actions-hover);
 }
 #account_info p {
 	margin: 0;

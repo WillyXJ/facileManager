@@ -6,7 +6,20 @@ if (isset($__FM_CONFIG)) {
 	header("Content-Type: text/javascript");
 
 	echo '$(document).ready(function() {
-	
+
+	// Set theme mode from System
+	$.fn.setThemeMode = function() {
+		if ($("html").hasClass("System") && window.matchMedia) {
+			var match = window.matchMedia("(prefers-color-scheme: dark)");
+			$("html").removeClass("Light Dark");
+			if (match.matches === true) {
+				$("html").addClass("Dark");
+			} else {
+				$("html").addClass("Light");
+			}
+		}
+	}
+
 	var KEYCODE_ENTER = 13;
 	var KEYCODE_ESC = 27;
 	
@@ -15,6 +28,7 @@ if (isset($__FM_CONFIG)) {
 	});
 
 	$(function() {
+		$(this).setThemeMode();
 		$(".datepicker").datepicker();
 		$("select:not([class])").select2({minimumResultsForSearch: 10});
 		$("#bulk_action").select2({minimumResultsForSearch: -1, width: "120px", allowClear: true});
@@ -717,6 +731,7 @@ if (isset($__FM_CONFIG)) {
 	$("#manage_item_contents").delegate("#user_theme_mode", "change", function(e) {
 		$("html").removeClass("Light Dark System");
 		$("html").addClass($(this).val());
+		$(this).setThemeMode();
 	});
 
 	/* Account group association changes */

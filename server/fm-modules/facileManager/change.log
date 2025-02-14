@@ -6,6 +6,7 @@
 * Server - [bug] Added missing OS icons for Rocky and AlmaLinux. (Issue #663)
 * Server - [bug] Fixed tool tip CSS.
 * Server - [bug] Updated missing help text and fixed spelling errors.
+* Server - [bug] Fixed dark mode select box CSS based on OS preference. (Issue #664)
 
 5.1.3 (2025-02-10)
 ==================
