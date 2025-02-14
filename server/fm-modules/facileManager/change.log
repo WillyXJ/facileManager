@@ -1,3 +1,7 @@
+5.1.4 (2025-02-??)
+==================
+* Server - [bug] Fixed form validation when adding/updating users. (Issue #662)
+
 5.1.3 (2025-02-10)
 ==================
 * Server - [bug] The default module menu is no longer visible in the user properties when there is only
