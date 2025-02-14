@@ -1,7 +1,6 @@
 5.1.4 (2025-02-??)
 ==================
 * Server - [bug] Fixed form validation when adding/updating users. (Issue #662)
-* Server - [bug] Added missing OS icons for Rocky and AlmaLinux. (Issue #549)
 
 5.1.3 (2025-02-10)
 ==================
