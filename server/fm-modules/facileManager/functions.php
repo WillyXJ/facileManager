@@ -1278,6 +1278,9 @@ function buildHelpFile() {
 			</ul>
 			<p><i>You can reset the authentication method by setting the following in config.inc.php:</i></p>
 			<p><i>define('FM_NO_AUTH', true);</i></p>
+			<p><b>Login Message</b><br />
+			Define a message to be displayed at login (such as a terms and conditions) and optionally require users to acknowledge the message
+			for authenication to succeed.</p>
 			<p><b>Client Registration</b><br />
 			You can choose to allow clients to automatically register in the database or not.</p>
 			<p><b>API Support</b><br />
@@ -1288,12 +1291,24 @@ function buildHelpFile() {
 			<p><b>Mailing</b><br />
 			There are a few things $fm_name and its modules may need to send an e-mail about (such as password reset links). These settings allow
 			you to configure the mailing settings to use for your environment and enable/disable mailing altogether.</p>
+			<p><b>Proxy Server</b><br />
+			Set the appropriate configuration if $fm_name is behind a proxy server for Internet access.</p>
 			<p><b>Date and Time</b><br />
 			Set your preferred timezone, date format, and time format for $fm_name to use throughout all aspects of the app. What you select is
 			how all dates and times will be display including any client configuration files.</p>
+			<p><b>Logging Method</b><br />
+			There are three ways logging methods supported by $fm_name:</p>
+			<ul>
+				<li><b>Built-in</b><br />
+				Events will only be logged to $fm_name.</li>
+				<li><b>syslog</b><br />
+				Events will only be looged to syslog.</li>
+				<li><b>Built-in + syslog</b><br />
+				Events will be logged to $fm_name and syslog.</li>
+			</ul>
 			<p><b>Show Errors</b><br />
 			Choose whether you want $fm_name errors to be displayed as they occur or not. This can be useful if you are having trouble
-			adding or editing opjects.</p>
+			adding or editing objects.</p>
 			<p><b>Temporary Directory</b><br />
 			Periodically $fm_name and its modules may need to create temporary files or directories on your webserver. Specify the local path for it to use.</p>
 			<p><b>Software Update</b><br />
@@ -1304,6 +1319,10 @@ function buildHelpFile() {
 			<p><b>SSH Key Pair</b><br />
 			In order for client configs to be updated via SSH, $fm_name needs a 2048-bit passwordless key pair generated. Without this key pair, 
 			clients cannot use the SSH update method. Click the 'Generate' button to have $fm_name automatically generate the necessary key pair.</p>
+			<p><b>Image Branding</b><br />
+			Add your own image to brand $fm_name. This image will be used on the login screen, navigation header, and automated e-mails.</p>
+			<p><b>Enable Maintenance Mode</b><br />
+			Only users with Super Admin or Module Management privileges are able to authenticate. This is useful during application upgrades.</p>
 		</div>
 	</li>
 	<li>
