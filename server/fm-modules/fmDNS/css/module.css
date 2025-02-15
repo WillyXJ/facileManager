@@ -45,11 +45,11 @@ p.soa_import span {
 #configtypesmenu > #recordmenu > ul > li > a:hover,
 #configtypesmenu > #recordmenu > ul > li > a > span:hover,
 #configtypesmenu > #recordmenu > ul > li:hover > a {
-	background-color: #464646;
+	background-color: var(--menu-submenu-bg);
 	color: #fff;
 }
 #configtypesmenu > #recordmenu > ul > li:hover {
-	background-color: #464646;
+	background-color: var(--menu-submenu-bg);
 	border-radius:5px 5px 0 0;
 }
 #recordmenu { display:block; padding:0; margin: -6px 0 0 4px; }
@@ -63,12 +63,12 @@ p.soa_import span {
 	display:block;
 }
 #recordmenu ul li > ul {
-	display:none; width:auto; position:absolute; top:2.5em; right: 0; padding:2px 0; background-color:rgba(70,70,70,0.95);
+	display:none; width:auto; position:absolute; top:2.5em; right: 0; padding:2px 0; background-color:var(--menu-submenu-bg);
 	border-radius:5px 0 5px 5px;
-	moz-box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
-	-webkit-box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
-	-khtml-box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
-	box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
+	moz-box-shadow: rgba(10,10,10,0.6) 5px 15px 40px -5px;
+	-webkit-box-shadow: rgba(10,10,10,0.6) 5px 15px 40px -5px;
+	-khtml-box-shadow: rgba(10,10,10,0.6) 5px 15px 40px -5px;
+	box-shadow: rgba(10,10,10,0.6) 5px 15px 40px -5px;
 	z-index: 6;
 }
 #recordmenu > ul > li > a:hover {
@@ -80,7 +80,7 @@ p.soa_import span {
 #recordmenu ul li > ul{width:150px;}
 #recordmenu ul li > ul li{display:block; list-style:inside none; padding:0; margin:0; position:relative;}
 #recordmenu ul li > ul li a{ outline:none; display:block; position:relative; margin:0; padding:8px 20px; font:10pt Arial, Helvetica, sans-serif; color:#fff; text-decoration:none; }
-#recordmenu > ul > li > ul > li a:hover{ background-color:rgba(100,100,100,0.95); color: #fff; };
+#recordmenu > ul > li > ul > li a:hover{ background-color:var(--submenu-hover); color: #fff; };
 
 .form-table.zone-form,
 .form-table.zone-template-form {
