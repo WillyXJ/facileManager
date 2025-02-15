@@ -57,7 +57,7 @@
 	--menu-divider: #584b3b;
 	--menu-select-highlight: light-dark(#e99127, #d5811b);
 	--menu-expand-bg: #ebe8e4;
-	--submenu-hover: #ee9d3b;
+	--submenu-hover: light-dark(#c7914f, #a57943);
 
 	--tooltip-bg: #a4815e;
 	--tooltip-text: #fff;
