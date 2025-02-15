@@ -6,7 +6,7 @@
 * Server - [improvement] Added Plum theme and refined existing theme colors.
 * Server - [bug] Fixed form validation when adding/updating users. (Issue #662)
 * Server - [bug] Added missing OS icons for Rocky and AlmaLinux. (Issue #663)
-* Server - [bug] Fixed tool tip CSS.
+* Server - [bug] Various CSS fixes.
 * Server - [bug] Updated missing help text and fixed spelling errors.
 * Server - [bug] Fixed dark mode select box CSS based on OS preference. (Issue #664)
 

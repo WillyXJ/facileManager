@@ -154,7 +154,7 @@
 	--table-rows-build-highlight: #2ea2cc;
 	--table-rows-attn-bg: light-dark(#f5ebeb, #573a3a);
 	--table-rows-attn-highlight: #CB3739;
-	--table-rows-notice-bg: light-dark(#fff8e5, #5c5236);
+	--table-rows-notice-bg: light-dark(#fff8e5, #857a5a);
 	--table-rows-notice-hightlight: #ffb900;
 	--table-rows-ok-bg: light-dark(#e6f6e6, #3d5f3d);
 	--table-rows-ok-hightlight: #00cc00;
@@ -327,7 +327,7 @@ div.header-container {
 	z-index: 5;
 }
 
-#tophead > div.header-container {
+#tophead > div.header-container:last-of-type {
 	overflow-x: clip;
 }
 #tophead > div.header-container > div {
@@ -461,7 +461,8 @@ div.header-container {
 #account_info > div:last-child {
 	padding: 0;
 }
-#menuback hr {
+#menuback hr,
+#menu_mainitems.module-menu hr {
     border: none;
     border-top: 1px solid var(--menu-divider);
 	opacity: .8;
@@ -474,14 +475,14 @@ div.header-container {
 	background-color: var(--menu-bg);
 }
 #menu_footer li:hover {
-	background-color: var(--menu-select-highlight);
+	background-color: #282828;
 }
 #menu_footer a {
 	color: var(--menu-footer-link);
 }
-/* #menu_footer a:hover i {
+#menu_footer a:hover i {
 	color: var(--menu-footer-donate);
-} */
+}
 
 #menu_mainitems {
 	text-align: left;
@@ -593,7 +594,7 @@ div.header-container {
 	width: 200px;
 	position: absolute;
 	padding: 2px 0;
-	background-color: rgba(70,70,70,0.95);
+	background-color: light-dark(rgba(70,70,70,0.95), rgba(42,42,42,0.95));
 	z-index: 6;
 }
 #menu_mainitems > ul > li > a .menu-icon,
@@ -653,11 +654,6 @@ div.header-container {
 #menu_mainitems ul li > ul.sub-right {
 	right: 0;
 	white-space: nowrap;
-}
-#menu_mainitems ul li hr {
-	border-top: 1px solid light-dark(#bec5cb, #555);
-	opacity: 0.5;
-	margin: 0 20px;
 }
 
 #tophead #menu_mainitems > ul > li > a .menu-icon {
