@@ -156,7 +156,7 @@ table.form-table > tbody > tr.dnssec-key-addl-options {
 	opacity: unset;
 }
 .inline-record-validate > i {
-	color: #12c012;
+	color: light-dark(#12c012, #91e691);
 }
 
 div.record-value-group p.record-sub-value {
