@@ -263,7 +263,7 @@ $(document).ready(function() {
 	});
 
 	/* Validate all records and flag for saving */
-	$(".validate-all-records").on("click", function() {
+	$(".validate-all-records").on("click tap", function() {
 		$("#zone-records-form tr.notice").each(function() {
 			$(this).find(".inline-record-validate").click();
 		});
@@ -271,7 +271,8 @@ $(document).ready(function() {
 		setValidateAllStatus();
 	});
 
-	$(".save-record-submit").on("click", function() {
+	$(".save-record-submit").on("click tap", function(e) {
+		e.preventDefault();
 		var $unsaved_changes = $(".inline-record-validate").filter(":visible");
 		if ($unsaved_changes.length > 0) {
 			$("#manage_item").fadeIn(200);
@@ -294,7 +295,7 @@ $(document).ready(function() {
 				is_ajax: 1
 			};
 			var uri_params = {"uri_params":getUrlVars()};
-			var form_data = $("#zone-records-form tr.record-changed input, #zone-records-form tr.record-changed select, #zone-records-form tr.record-changed textarea").serialize() + "&" + $.param(uri_params) + "&" + $.param(addl_form_data);
+			var form_data = $("#zone-records-form tr.record-changed input, #zone-records-form tr.record-changed select, #zone-records-form tr.record-changed textarea, #zone-records-form.CUSTOM").serialize() + "&" + $.param(uri_params) + "&" + $.param(addl_form_data);
 	
 			/** Update the database */
 			var $this				= $(this);

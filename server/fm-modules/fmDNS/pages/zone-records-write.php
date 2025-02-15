@@ -70,7 +70,7 @@ if (isset($update) && is_array($update)) {
 		if (!isset($data['record_append']) && in_array($record_type, $append)) {
 			$data['record_append'] = 'no';
 		}
-		if (isset($data['Delete'])) {
+		if (isset($data['Delete']) || ($record_type == 'CUSTOM' && !$data['record_value'])) {
 			$data['record_status'] = 'deleted';
 			unset($data['Delete']);
 		}
@@ -128,6 +128,9 @@ if (isset($create) && is_array($create)) {
 				$record_type = $tmp_record_type;
 			}
 			if (isset($import_records) || (defined('AJAX') && $record_type == 'ALL')) $record_type = $data['record_type'];
+
+			/** Skip if CUSTOM is empty */
+			if ($record_type == 'CUSTOM' && !$data['record_value']) break;
 			
 			/** Auto-detect IPv4 vs IPv6 A records */
 			if ($record_type == 'A' && strrpos($data['record_value'], ':')) $record_type = 'AAAA';
@@ -140,7 +143,7 @@ if (isset($create) && is_array($create)) {
 			/** Remove double quotes */
 			if (isset($data['record_value'])) $data['record_value'] = str_replace('"', '', $data['record_value']);
 			
-			// Handle bulk import
+			/** Handle bulk import */
 			if (isset($submit) && $submit == 'Import' && isset($data['PTR'])) {
 				list($data['PTR'], $error_msg) = checkPTRZone($data['record_value'], $domain_id);
 			}
