@@ -4,6 +4,7 @@
            bypass rewrite tests. (Issue #549)
 * Server - [improvement] Updated module selection menu to include help links.
 * Server - [improvement] Added Plum theme and refined existing theme colors.
+* Server - [improvement] Pressing Enter now submits popup forms.
 * Server - [bug] Fixed form validation when adding/updating users. (Issue #662)
 * Server - [bug] Added missing OS icons for Rocky and AlmaLinux. (Issue #663)
 * Server - [bug] Fixed tool tip CSS.

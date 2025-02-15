@@ -24,7 +24,8 @@ if (isset($__FM_CONFIG)) {
 	var KEYCODE_ESC = 27;
 	
 	$(document).keyup(function(e) {
-		if (e.keyCode == KEYCODE_ESC) { $("#cancel_button").click(); } 
+		if (e.keyCode == KEYCODE_ESC) { $("#cancel_button").click(); }
+		if (e.keyCode == KEYCODE_ENTER && $(":focus").is("input[type=text], input[type=password]")) { $("#primary_button").click(); }
 	});
 
 	$(function() {
