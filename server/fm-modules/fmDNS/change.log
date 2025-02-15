@@ -2,6 +2,7 @@
 ==================
 * Server - [improvement] CUSTOM resource records are saved with AJAX on the same page.
 * Server - [bug] Various CSS fixes.
+* Server - [bug] Fixed SOA selection button text.
 
 7.0.8 (2025-02-12)
 ==================

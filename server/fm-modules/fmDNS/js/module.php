@@ -54,6 +54,36 @@ $(document).ready(function() {
 				return "You have unsaved changes.";
 			}
 		});
+
+		/* Changing record values */
+		$(".table-results-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change input", function(e) {
+			var $row_element = $(this).parents("tr");
+
+			$row_element.not(".new-record").addClass("build");
+			if (!$row_element.hasClass("attention")) {
+				if ($(this).is(":checkbox") && $(this).attr("name").indexOf("record_skipped") > 0) {
+					$row_element.removeClass("ok").addClass("build record-changed");
+					$row_element.find(".inline-record-validate").hide();
+					$row_element.find(".inline-record-actions").show();
+				} else {
+					$row_element.removeClass("ok").addClass("notice");
+					$row_element.find(".inline-record-validate").show();
+					$row_element.find(".inline-record-actions").show();
+				}
+
+				setValidateAllStatus();
+				setSaveAllStatus();
+			}
+		});
+		$("#soa_template_chosen").on("change", function() {
+			if ($(this).val() == "0") {
+				$("input.button.primary").val("' . __('Validate') . '");
+			} else {
+				$("input.button.primary").val("' . _('Save') . '");
+			}
+		});
+
+		$("#soa_template_chosen").trigger("change");
 	}
 
 	if (onPage("zones-forward.php") || onPage("zones-reverse.php")) {
@@ -583,29 +613,6 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	/* Changing record values */
-	if (onPage("zone-records.php")) {
-		$(".table-results-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change input", function(e) {
-			var $row_element = $(this).parents("tr");
-
-			$row_element.not(".new-record").addClass("build");
-			if (!$row_element.hasClass("attention")) {
-				if ($(this).is(":checkbox") && $(this).attr("name").indexOf("record_skipped") > 0) {
-					$row_element.removeClass("ok").addClass("build record-changed");
-					$row_element.find(".inline-record-validate").hide();
-					$row_element.find(".inline-record-actions").show();
-				} else {
-					$row_element.removeClass("ok").addClass("notice");
-					$row_element.find(".inline-record-validate").show();
-					$row_element.find(".inline-record-actions").show();
-				}
-
-				setValidateAllStatus();
-				setSaveAllStatus();
-			}
-		});
-	}
-
 	/* Automatically select to set/update PTR */
 	$(".table-results-container .display_results").delegate("input[name*=\'record_name\'], input[name*=\'record_value\']", "change input", function(e) {
 		$(this).parents("tr").find("input[name*=\'\[PTR\]\']").prop("checked", true);

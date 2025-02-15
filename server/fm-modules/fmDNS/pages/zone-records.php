@@ -123,7 +123,7 @@ if ($record_type == 'SOA') {
 	$result = $fmdb->get_results($soa_query);
 	$body .= $form . $fm_dns_records->buildSOA($result);
 	if ($current_user_can_manage_records && $zone_access_allowed) {
-		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button" /></p></form>' . "\n", __('Validate'));
+		$body .= sprintf('<p><input type="submit" name="submit" value="%s" class="button primary" /></p></form>' . "\n", __('Validate'));
 	}
 } elseif ($record_type == 'CUSTOM') {
 	$create_update = 'create';
