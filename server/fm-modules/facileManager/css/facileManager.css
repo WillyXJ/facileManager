@@ -2284,10 +2284,11 @@ a.subelement_edit img {
 	z-index: 1001;
 	visibility: hidden;
 	min-width: 120px;
-	bottom: 100%;
+	top: 130%;
+	bottom: auto;
 	left: 50%;
 	margin-left: -120px;
-	margin-bottom: 12px;
+	margin-top: 0;
 	background-color: var(--tooltip-bg);
 	color: var(--tooltip-text);
 	text-align: left;
@@ -2301,14 +2302,14 @@ a.subelement_edit img {
 	transition: opacity .5s;
 }
 
-.tooltip-copy span::after {
+.tooltip-copy span::before {
 	content: " ";
 	position: absolute;
-	top: 100%; /* At the bottom of the tooltip */
+	top: -10px; /* At the bottom of the tooltip */
 	left: 115px;
 	border-width: 5px;
 	border-style: solid;
-	border-color: var(--tooltip-bg) transparent transparent transparent;
+	border-color: transparent transparent var(--tooltip-bg) transparent;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */

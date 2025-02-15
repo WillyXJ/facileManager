@@ -790,7 +790,7 @@ class fm_dns_zones {
 			}
 
 			if ($row->domain_type == 'primary' && $row->domain_clone_domain_id == 0 && currentUserCan('manage_zones', $_SESSION['module'])) {
-				$add_new = displayAddNew($map, $row->domain_id, __('Clone this zone'), 'fa fa-clone', 'plus_subelement');
+				$add_new = displayAddNew($map, $row->domain_id, __('Clone this zone'), 'fa fa-clone', 'plus_subelement', 'bottom');
 			}
 
 			$clones = $this->cloneDomainsList($row->domain_id);
@@ -852,14 +852,14 @@ class fm_dns_zones {
 			}
 
 			if (in_array($row->domain_type, array('primary', 'secondary')) && (currentUserCan(array('manage_zones', 'view_all'), $_SESSION['module']) || $zone_access_allowed)) {
-				$icons[] = sprintf('<a href="config-options.php?domain_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $row->domain_id, __('Configure Additional Options'));
+				$icons[] = sprintf('<a href="config-options.php?domain_id=%d" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $row->domain_id, __('Configure Additional Options'));
 			}
 
 			if ($row->domain_type == 'primary') {
 				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $row->domain_id, 'record_', 'domain_id', 'AND record_type="URL" AND record_name="@"');
 				if ($fmdb->num_rows) {
 					$domain_redirect_url = $fmdb->last_result[0]->record_value;
-					$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-globe" aria-hidden="true"></i></a>', sprintf(__('This domain redirects to %s'), $domain_redirect_url));
+					$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-globe" aria-hidden="true"></i></a>', sprintf(__('This domain redirects to %s'), $domain_redirect_url));
 					if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
 						$response = __('There are no URL RR web servers defined in the Settings to support the URL resource records.');
 						$classes[] = 'attention';
@@ -870,22 +870,22 @@ class fm_dns_zones {
 			if (getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') {
 				basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'keys', 'key_id', 'key_', 'AND domain_id=' . $row->domain_id);
 				if ($fmdb->num_rows) {
-					$icons[] = sprintf('<div class="mini-icon tooltip-copy nowrap"><span><b>%s:</b><br /><textarea>' . trim($row->domain_dnssec_ds_rr) . '</textarea><p>%s</p></span><i class="fa fa-lock secure" title="%s"></i></div>', __('Zone DS RRset'), __('Click to copy'), __('Zone is secured with DNSSEC'));
+					$icons[] = sprintf('<div class="mini-icon tooltip-copy nowrap"><span><b>%s:</b><br /><textarea>' . trim($row->domain_dnssec_ds_rr) . '</textarea><p>%s</p></span><i class="fa fa-lock secure"></i></div>', __('Zone DS RRset'), __('Click to copy'), __('Zone is secured with DNSSEC'));
 				} else {
-					$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-lock insecure" aria-hidden="true"></i></a>', __('Zone is configured but not secured with DNSSEC'));
+					$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-lock insecure" aria-hidden="true"></i></a>', __('Zone is configured but not secured with DNSSEC'));
 					$response = __('There are no DNSSEC keys defined for this zone.');
 					$classes[] = 'attention';
 				}
-				$icons[] = sprintf('<a href="config-keys.php?type=dnssec&domain_id[]=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-key secure" aria-hidden="true"></i></a>', $row->domain_id, __('Manage zone DNSSEC keys'));
+				$icons[] = sprintf('<a href="config-keys.php?type=dnssec&domain_id[]=%d" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-key secure" aria-hidden="true"></i></a>', $row->domain_id, __('Manage zone DNSSEC keys'));
 			}
 			if ($dynamic_zone == 'yes') {
-				$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a>', __('Zone supports dynamic updates'));
+				$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a>', __('Zone supports dynamic updates'));
 			}
 			if ($domain_template_id = getNameFromID($row->domain_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id')) {
-				$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-picture-o" aria-hidden="true"></i></a>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')));
+				$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-picture-o" aria-hidden="true"></i></a>', sprintf(__('Based on %s'), getNameFromID($domain_template_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')));
 			}
 
-			$response = ($response) ? sprintf('<a href="#" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>', $response) : null;
+			$response = ($response) ? sprintf('<a href="#" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a>', $response) : null;
 
 			$class = 'class="' . implode(' ', $classes) . '"';
 			if (is_array($icons)) {
@@ -1347,12 +1347,12 @@ HTML;
 				$clone_id = $clone_results[$i]->domain_id;
 				$return[$clone_id]['clone_name'] = $clone_results[$i]->domain_name;
 				$return[$clone_id]['clone_link'] = 'zone-records.php?map=' . $clone_results[$i]->domain_mapping . '&domain_id=' . $clone_id;
-				$return[$clone_id]['clone_options'] = sprintf('<a href="config-options.php?domain_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $clone_id, __('Configure Additional Options'));
+				$return[$clone_id]['clone_options'] = sprintf('<a href="config-options.php?domain_id=%d" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $clone_id, __('Configure Additional Options'));
 				
 				/** Delete permitted? */
 				if (currentUserCan(array('manage_zones'), $_SESSION['module'], array(0, $domain_id)) &&
 					currentUserCan(array('access_specific_zones'), $_SESSION['module'], array(0, $domain_id))) {
-					$return[$clone_id]['clone_edit'] = sprintf('<a class="subelement_edit tooltip-top mini-icon" name="' . $clone_results[$i]->domain_mapping . '" href="#" id="' . $clone_id . '" data-tooltip="%s">' . $__FM_CONFIG['icons']['edit'] . '</a>', _('Edit'));
+					$return[$clone_id]['clone_edit'] = sprintf('<a class="subelement_edit tooltip-bottom mini-icon" name="' . $clone_results[$i]->domain_mapping . '" href="#" id="' . $clone_id . '" data-tooltip="%s">' . $__FM_CONFIG['icons']['edit'] . '</a>', _('Edit'));
 					$return[$clone_id]['clone_delete'] = str_replace('__ID__', $clone_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 				} else {
 					$return[$clone_id]['clone_delete'] = $return[$clone_id]['clone_edit'] = null;
@@ -1372,10 +1372,10 @@ HTML;
 				$return[$clone_id]['clone_servers'] = $clone_results[$i]->domain_name_servers;
 
 				/** Dynamic updates support */
-				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a>', __('Zone supports dynamic updates')) : null;
+				$return[$clone_id]['dynamic'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dynamic') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-share-alt" aria-hidden="true"></i></a>', __('Zone supports dynamic updates')) : null;
 				
 				/** DNSSEC support */
-				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-lock secure" aria-hidden="true"></i></a>', __('Zone is secured with DNSSEC')) : null;
+				$return[$clone_id]['dnssec'] = (getNameFromID($clone_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_dnssec') == 'yes') ? sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-lock secure" aria-hidden="true"></i></a>', __('Zone is secured with DNSSEC')) : null;
 
 				/** Clone comment */
 				$return[$clone_id]['clone_comment'] = ($clone_results[$i]->domain_comment) ? $clone_results[$i]->domain_comment : '&nbsp;';

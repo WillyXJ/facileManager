@@ -273,7 +273,7 @@ class fm_dns_masters {
 		
 		$edit_name = '<b>' . $row->master_name . '</b>';
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_name .= displayAddNew('masters', $row->master_id, null, 'fa fa-plus-square-o', 'plus_subelement');
+			$edit_name .= displayAddNew('masters', $row->master_id, null, 'fa fa-plus-square-o', 'plus_subelement', 'bottom');
 		}
 		$edit_addresses = nl2br(str_replace(',', "\n", $row->master_addresses));
 		$edit_addresses = $this->getMasterElements($row->master_id);
@@ -564,7 +564,7 @@ HTML;
 				
 				/** Delete permitted? */
 				if (currentUserCan(array('manage_servers'), $_SESSION['module'])) {
-					$return[$element_id]['element_edit'] = '<a class="subelement_edit" name="master" href="#" id="' . $element_id . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+					$return[$element_id]['element_edit'] = '<a class="subelement_edit tooltip-bottom mini-icon" name="master" href="#" id="' . $element_id . '" data-tooltip="' . _('Edit') . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 					$return[$element_id]['element_delete'] = ' ' . str_replace('__ID__', $element_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 				} else {
 					$return[$element_id]['element_delete'] = $return[$element_id]['element_edit'] = null;
