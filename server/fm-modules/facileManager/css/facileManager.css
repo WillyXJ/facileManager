@@ -594,7 +594,7 @@ div.header-container {
 	display: none;
 	width: 200px;
 	position: absolute;
-	padding: 2px 0;
+	padding: 0;
 	background-color: var(--menu-submenu-bg);
 	z-index: 6;
 }
@@ -645,6 +645,12 @@ div.header-container {
 	border-radius: 0 5px 5px 0;
 	box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
 }
+#menu_mainitems.drop-right ul li > ul li:first-child a {
+	border-radius: 0 5px 0 0;
+}
+#menu_mainitems.drop-right ul li > ul li:last-child a {
+	border-radius: 0 0 5px 0;
+}
 #menu_mainitems.module-menu ul li > ul {
 	border-radius: 0 0 5px 5px;
 	box-shadow: rgba(10,10,10,0.4) 0 15px 40px 5px;
@@ -664,6 +670,9 @@ div.header-container {
 #tophead #menu_mainitems ul li.has-sub > a {
 	padding: 17px;
 	border-left: none;
+}
+#menu_mainitems.module-menu ul li > ul.sub-right li:last-child a {
+	border-radius: 0 0 5px 5px;
 }
 
 #subdomain {
