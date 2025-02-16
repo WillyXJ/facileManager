@@ -201,8 +201,17 @@ function autoManagePTR($domain_id, $record_type, $data, $operation = 'add', $old
 	global $__FM_CONFIG, $fmdb;
 
 	$forward_record_id = ($old_record) ? $old_record->record_id : $fmdb->insert_id;
+
+	/* We must have the PTR checkbox checked */
+	if (!isset($data['PTR'])) return;
+
+	/* Get the proper reverse domain_id for the PTR */
+	if (!is_int($data['PTR'])) {
+		$retval = checkPTRZone($data['record_value'], $domain_id);
+		list($data['PTR'], $error_msg) = $retval;
+	}
 	
-	if ($record_type == 'A' && isset($data['PTR']) && zoneAccessIsAllowed(array($data['PTR']))) {
+	if ($record_type == 'A' && zoneAccessIsAllowed(array($data['PTR']))) {
 		$domain = '.' . trimFullStop(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name')) . '.';
 		if ($data['record_name'][0] == '@') {
 			$data['record_name'] = null;
