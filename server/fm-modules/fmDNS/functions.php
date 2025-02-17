@@ -1288,7 +1288,7 @@ function checkPTRZone($ip, $domain_id) {
 	if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
 		return autoCreatePTRZone($zone, $domain_id);
 	}
-	return array(null, __('Reverse zone does not exist.'));
+	return array(null, __('An existing reverse zone does not exist.'));
 }
 
 /**

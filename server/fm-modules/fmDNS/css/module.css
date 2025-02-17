@@ -160,6 +160,9 @@ table.form-table > tbody > tr.dnssec-key-addl-options {
 .inline-record-validate > i {
 	color: light-dark(#12c012, #91e691);
 }
+.validate-error-message {
+	margin-left: 3px;
+}
 
 div.record-value-group p.record-sub-value {
 	margin: 0;

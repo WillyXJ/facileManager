@@ -71,7 +71,6 @@ $(document).ready(function() {
 					$row_element.find(".inline-record-actions").show();
 				}
 
-				setValidateAllStatus();
 				setSaveAllStatus();
 			}
 		});
@@ -220,7 +219,6 @@ $(document).ready(function() {
 
 		setTimeout(function() {
 			setSaveAllStatus();
-			setValidateAllStatus();
 			if ($(".save-record-submit").hasClass("disabled") && $(".validate-all-records").hasClass("disabled")) {
 				$("span.pending-changes").fadeOut(200);
 			}
@@ -265,14 +263,17 @@ $(document).ready(function() {
 						$row_element.find("input[name*=" + key + "][type!=\"checkbox\"]").val(value);
 					});
 
+					$row_element.find(".validate-error").removeClass("validate-error");
+					$row_element.find(".validate-error-message").remove();
+
 					/* Highlight any errors */
 					if ("errors" in response[1]) {
-						$row_element.find(".validate-error").removeClass("validate-error");
 						$.each(response[1]["errors"], function(key, value) {
-							$row_element.find("input[name*=" + key + "]").addClass("validate-error");
+							$element = $row_element.find("input[name*=" + key + "]");
+							$element.addClass("validate-error");
+							$element.after(" <a href=\"#\" class=\"validate-error-message tooltip-bottom\" data-tooltip=\"" + value + "\"><i class=\"fa fa-exclamation-triangle notice\" aria-hidden=\"true\"></i></a>");
 						});
 					} else {
-						$row_element.find(".validate-error").removeClass("validate-error");
 						$row_element.removeClass("notice");
 						$row_element.addClass("record-changed");
 						if ($row_element.hasClass("new-record")) {
@@ -281,7 +282,6 @@ $(document).ready(function() {
 						$this.hide();
 
 						setSaveAllStatus();
-						setValidateAllStatus();
 					}
 				} else if (response.indexOf("popup_response") >= 0) {
 					$("body").addClass("fm-noscroll");
@@ -628,7 +628,6 @@ $(document).ready(function() {
 			$row_element.find(".inline-record-validate").hide();
 			$row_element.find(".inline-record-actions").show();
 
-			setValidateAllStatus();
 			setSaveAllStatus();
 		} else {
 			$row_element.removeClass("attention record-changed");
@@ -981,12 +980,12 @@ function validateTimeFormat(event, that) {
 
 function setSaveAllStatus() {
 	/* Disable save all button if nothing is present to save */
-	var $unsaved_changes = $("#zone-records-form tr.record-changed");
-	if ($unsaved_changes.length <= 0) {
-		$(".save-record-submit").addClass("disabled").attr("disabled", true);
-	} else {
+	setValidateAllStatus();
+	if ($(".validate-all-records").hasClass("disabled")) {
 		$(".save-record-submit").removeClass("disabled").attr("disabled", false);
 		$("span.pending-changes").fadeIn(200);
+	} else {
+		$(".save-record-submit").addClass("disabled").attr("disabled", true);
 	}
 }
 

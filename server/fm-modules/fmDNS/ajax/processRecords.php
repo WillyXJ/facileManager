@@ -150,10 +150,6 @@ function validateEntry($action, $id, $data, $record_type, $append, $data_array, 
 	if (!isset($data['record_append']) && in_array($record_type, $append)) {
 		$data['record_append'] = 'no';
 	}
-	if (!empty($data['record_name']) && empty($data['record_value'])) {
-		$data['record_value'] = '@';
-		$data['record_append'] = 'no';
-	}
 	if (isset($data['Delete'])) {
 		$data['record_status'] = 'deleted';
 		unset($data['Delete']);
@@ -168,7 +164,7 @@ function validateEntry($action, $id, $data, $record_type, $append, $data_array, 
 				$data['record_value'] = join("\n", $tmp_value);
 			}
 		} elseif ($record_type != 'HINFO' && (!isset($data['record_value']) || empty($data['record_value']))) {
-			$messages['errors']['record_value'] = __('Invalid');
+			$messages['errors']['record_value'] = __('This field cannot be empty.');
 		}
 		if ($record_type != 'PTR' && (!isset($data['record_name']) || empty($data['record_name']))) {
 			$data['record_name'] = '@';
@@ -177,31 +173,27 @@ function validateEntry($action, $id, $data, $record_type, $append, $data_array, 
 			$data[$key] = trim($val, '"\'');
 			
 			if ($key == 'record_name' && $record_type != 'PTR') {
-				if (!$val) {
-					$val = '@';
-					$data[$key] = $val;
-				}
 				if ($data['record_status'] == 'active' && !verifyName($domain_info['id'], $val, $id, true, $record_type, $data_array)) {
-					$messages['errors'][$key] = __('Invalid');
+					$messages['errors'][$key] = __('Names can only contain letters, numbers, hyphens (-), underscores (_), or @. However, @ is not valid for CNAME records. Additionally, the same name cannot exist for A and CNAME records.');
 				}
 			}
 			
 			if (in_array($key, array('record_priority', 'record_weight', 'record_port'))) {
 				if (!empty($val) && verifyNumber($val) === false) {
-					$messages['errors'][$key] = __('Invalid');
+					$messages['errors'][$key] = __('This field must be a number.');
 				}
 			}
 			
 			if ($key == 'record_ttl') {
 				if (!empty($val) && verifyTTL($val) === false) {
-					$messages['errors'][$key] = __('Invalid');
+					$messages['errors'][$key] = __('This field must be in TTL format which consists of numbers and time-based letters (s, m, h, d, w, y). Examples include 300, 5d, or 1y4w9d.');
 				}
 			}
 			
 			if ($record_type == 'A') {
 				if ($key == 'record_value') {
 					if (verifyIPAddress($val) === false) {
-						$messages['errors'][$key] = __('Invalid IP');
+						$messages['errors'][$key] = __('IP address must be in valid IPv4 or IPv6 format.');
 					}
 				}
 				if ($key == 'PTR' && !isset($messages['errors']['record_value'])) {
@@ -423,7 +415,7 @@ function verifyTTL($ttl) {
 	if (count($matches) > 1) return false;
 	
 	foreach ($matches[0] as $match) {
-		$split = preg_split('/[smhdw]/i', $match);
+		$split = preg_split('/[smhdwy]/i', $match);
 		if (!verifyNumber($split[0])) return false;
 	}
 	

@@ -1,6 +1,7 @@
 7.0.9 (2025-02-??)
 ==================
 * Server - [improvement] CUSTOM resource records are saved with AJAX on the same page.
+* Server - [improvement] Record validation shows messages why a field is invalid.
 * Server - [bug] Various CSS fixes.
 * Server - [bug] Fixed SOA selection button text.
 * Server - [bug] Fixed automatic PTR management. (Issue #665)
