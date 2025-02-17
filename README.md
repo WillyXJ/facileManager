@@ -22,7 +22,7 @@ same server as the web interface.  The client runs on the servers to manage.
 
 Please note: Internet Explorer is not supported - it's too tiresome.
 
-Minimum browser versions -- https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/light-dark#browser_compatibility
+[Minimum browser versions](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/light-dark#browser_compatibility)
 
 Prerequisites
 -------------
