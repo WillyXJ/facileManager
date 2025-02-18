@@ -290,6 +290,7 @@ function printHeader($subtitle = 'auto', $css = 'facileManager', $help = 'no-hel
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/$css.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/dark.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/themes.css?ver=$fm_version" type="text/css" />
+		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-modules/$fm_name/css/no-dark.css?ver=$fm_version" type="text/css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/jquery-ui.min.css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/font-awesome/css/font-awesome.min.css" />
 		<link rel="stylesheet" href="{$GLOBALS['RELPATH']}fm-includes/extra/open-sans.css" type="text/css" />
