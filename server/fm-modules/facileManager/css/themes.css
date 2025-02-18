@@ -66,6 +66,7 @@
 }
 
 .Plum {
+	/* Common color changes */
 	--top-header-bg: light-dark(#513b58, #322c36);
 	--top-header-border: light-dark(#3f3843, #393939);
 	--top-header-divider: light-dark(#5a565c, #595660);
@@ -84,4 +85,3 @@
 
 	--info-icon: light-dark(#733aa3, #ac92c3);
 }
-

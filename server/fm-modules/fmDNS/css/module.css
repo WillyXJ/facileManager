@@ -158,7 +158,7 @@ table.form-table > tbody > tr.dnssec-key-addl-options {
 	opacity: unset;
 }
 .inline-record-validate > i {
-	color: light-dark(#12c012, #91e691);
+	color: #12c012;
 }
 .validate-error-message {
 	margin-left: 3px;
@@ -192,4 +192,12 @@ div[class^="record-value-subgroup"] > div {
 }
 #tophead span.pending-changes a {
 	color: var(--table-rows-notice-hightlight);
+}
+
+
+/* Dark mode */
+@supports(color: light-dark(#fff, #000)) {
+	.inline-record-validate > i {
+		color: light-dark(#12c012, #91e691);
+	}
 }

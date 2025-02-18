@@ -68,7 +68,7 @@ p.checkbox_desc {
 	color: var(--icon-delete);
 }
 .reject {
-	color: light-dark(#e19419, #ffb743);
+	color: #e19419;
 }
 
 #stack-label {
@@ -114,4 +114,12 @@ div .global-search-results {
 
 .policy-negate div:first-child {
 	padding-right: 8px;
+}
+
+
+/* Dark mode */
+@supports(color: light-dark(#fff, #000)) {
+	.reject {
+		color: light-dark(#e19419, #ffb743);
+	}
 }

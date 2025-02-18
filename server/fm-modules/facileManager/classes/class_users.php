@@ -745,7 +745,7 @@ HTML;
 					<th width="33%" scope="row">' . _('Theme') . '</th>
 					<td width="67%">' . $user_theme_options . '</td>
 				</tr>
-				<tr>
+				<tr class="theme-mode-selector">
 					<th width="33%" scope="row">' . _('Theme Mode') . '</th>
 					<td width="67%">' . $user_theme_mode_options . '</td>
 				</tr>';
