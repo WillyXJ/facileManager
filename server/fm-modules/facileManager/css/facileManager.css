@@ -34,7 +34,7 @@
 	--background-white: #fff;
 	--primary-link-text: light-dark(#3a62a3, #73c5ea);
 	--icon-link: var(--primary-link-text);
-	--icon-delete: light-dark(#c11515, #ffacac);
+	--icon-delete: light-dark(#c11515, #e96565);
 	--icon-secure: light-dark(#09a30c, #5fd661);
 	--mini-icon: light-dark(#c0c0c0, #d8d8d8);
 
@@ -1344,6 +1344,23 @@ span:not(.mini-icon) i.fa-question-circle {
 .column-actions i.delete,
 i.delete {
 	color: var(--icon-delete);
+}
+a.delete {
+	padding: 6px 3px 3px;
+}
+.column-actions label i.delete:hover,
+a.delete:hover {
+	background-color: var(--icon-delete);
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+.column-actions label i.delete:hover {
+	padding: 5px;
+}
+.column-actions label i.delete:hover,
+a.delete:hover i {
+	color: #fff;
 }
 .column-actions i.preview {
 	color: var(--icon-link);
