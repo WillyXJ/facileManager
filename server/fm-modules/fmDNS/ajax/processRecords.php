@@ -231,6 +231,12 @@ function validateEntry($action, $id, $data, $record_type, $append, $data_array, 
 					}
 				}
 			}
+
+			if ($key == 'record_key_tag') {
+				if ((!isset($data[$key])) || empty($data[$key])) {
+					$messages['errors'][$key] = __('The Key Tag may not be empty.');
+				}
+			}
 		}
 	} elseif ($record_type == 'SOA') {
 		if ($_POST['create']['soa_template_chosen']) {
