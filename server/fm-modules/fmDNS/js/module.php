@@ -66,7 +66,7 @@ $(document).ready(function() {
 					$row_element.find(".inline-record-validate").hide();
 					$row_element.find(".inline-record-actions").show();
 				} else {
-					$row_element.removeClass("ok").addClass("notice");
+					$row_element.removeClass("build record-changed ok").addClass("notice");
 					$row_element.find(".inline-record-validate").show();
 					$row_element.find(".inline-record-actions").show();
 				}
@@ -981,11 +981,12 @@ function validateTimeFormat(event, that) {
 function setSaveAllStatus() {
 	/* Disable save all button if nothing is present to save */
 	setValidateAllStatus();
-	if ($(".validate-all-records").hasClass("disabled")) {
+	var $unsaved_changes = $("#zone-records-form tr.record-changed");
+	if ($unsaved_changes.length <= 0) {
+		$(".save-record-submit").addClass("disabled").attr("disabled", true);
+	} else {
 		$(".save-record-submit").removeClass("disabled").attr("disabled", false);
 		$("span.pending-changes").fadeIn(200);
-	} else {
-		$(".save-record-submit").addClass("disabled").attr("disabled", true);
 	}
 }
 
