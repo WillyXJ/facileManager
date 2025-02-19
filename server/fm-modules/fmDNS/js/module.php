@@ -66,7 +66,7 @@ $(document).ready(function() {
 					$row_element.find(".inline-record-validate").hide();
 					$row_element.find(".inline-record-actions").show();
 				} else {
-					$row_element.removeClass("build record-changed ok").addClass("notice");
+					$row_element.removeClass("record-changed ok").addClass("notice");
 					$row_element.find(".inline-record-validate").show();
 					$row_element.find(".inline-record-actions").show();
 				}
