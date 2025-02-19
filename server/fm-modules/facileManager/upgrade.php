@@ -931,7 +931,7 @@ function fmUpgrade_510($database) {
 	if ($success) {
 		$queries[] = "UPDATE `fm_options` SET `option_value` = REPLACE(option_value, '<username>', '{username}') WHERE `option_name`='ldap_dn'";
 		if (!columnExists("fm_users", 'user_theme_mode')) {
-			$queries[] = "ALTER TABLE `fm_users` ADD `user_theme_mode` enum('Light','Dark','System') NULL DEFAULT 'Light' AFTER `user_theme`";
+			$queries[] = "ALTER TABLE `fm_users` ADD `user_theme_mode` enum('Light','Dark','System') NULL DEFAULT 'System' AFTER `user_theme`";
 		}
 		
 		/** Create table schema */
@@ -945,7 +945,7 @@ function fmUpgrade_510($database) {
 
 	@session_id($_COOKIE['myid']);
 	@session_start();
-	$_SESSION['user']['theme_mode'] = 'Light';
+	$_SESSION['user']['theme_mode'] = 'System';
 	session_write_close();
 
 	upgradeConfig('fm_db_version', 56, false);
@@ -977,6 +977,34 @@ function fmUpgrade_512($database) {
 	}
 
 	upgradeConfig('fm_db_version', 57, false);
+	
+	return $success;
+}
+
+
+/** fM v5.2.0 **/
+function fmUpgrade_520($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 57) ? fmUpgrade_512($database) : true;
+	
+	$queries = array();
+	if ($success) {
+		$queries[] = "ALTER TABLE `fm_users` MODIFY `user_theme_mode` enum('Light','Dark','System') NULL DEFAULT 'System'";
+		
+		/** Create table schema */
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 58, false);
 	
 	return $success;
 }
