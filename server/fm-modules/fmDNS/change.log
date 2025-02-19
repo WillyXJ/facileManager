@@ -2,6 +2,7 @@
 ==================
 * Server - [improvement] CUSTOM resource records are saved with AJAX on the same page.
 * Server - [improvement] Record validation shows messages why a field is invalid.
+* Server - [improvement] Added word wrapping of long record values when in display mode.
 * Server - [bug] Various CSS fixes.
 * Server - [bug] Fixed SOA selection button text.
 * Server - [bug] Fixed automatic PTR management. (Issue #665)

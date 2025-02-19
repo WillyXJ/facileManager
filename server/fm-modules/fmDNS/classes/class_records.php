@@ -610,6 +610,12 @@ class fm_dns_records {
 			}
 		
 			if ($show_value) {
+				if (strpos($record_value, "\n") === false) {
+					$record_value = strlen($record_value) > 80 ? wordwrap($record_value, 80, ' \<br />', true) : $record_value;
+				} else {
+					$record_value = nl2br($record_value);
+				}
+				
 				$field_values['data']['Value']['Value'] = $record_value;
 				if ((in_array($record_type, $append) || in_array($selected_type, $append)) && $record_append == 'yes') $field_values['data']['Value']['Value'] .= '<span class="grey">.' . $domain . '</span>';
 			}
