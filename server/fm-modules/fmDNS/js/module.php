@@ -74,15 +74,6 @@ $(document).ready(function() {
 				setSaveAllStatus();
 			}
 		});
-		$("#soa_template_chosen").on("change", function() {
-			if ($(this).val() == "0") {
-				$("input.button.primary").val("' . __('Validate') . '");
-			} else {
-				$("input.button.primary").val("' . _('Save') . '");
-			}
-		});
-
-		$("#soa_template_chosen").trigger("change");
 	}
 
 	if (onPage("zones-forward.php") || onPage("zones-reverse.php")) {
@@ -226,9 +217,16 @@ $(document).ready(function() {
 	});
 
 	/* Validate the record and flag for saving */
-	$("#zone-records-form").delegate(".inline-record-validate", "click tap", function() {
+	$("#zone-records-form").delegate(".inline-record-validate", "click tap", function(e) {
+		e.preventDefault();
+		if ($(this).checkRequiredFields("#zone-records-form") === false) {
+			return false;
+		}
 		var $this = $(this);
 		var $row_element = $(this).parents("tr");
+		if (!$row_element.length) {
+			var $row_element = $("#zone-records-form");
+		}
 
 		/** (un)check append box */
 		var $record_value = $row_element.find("input[name*=\'record_value\']");
@@ -282,6 +280,13 @@ $(document).ready(function() {
 						$this.hide();
 
 						setSaveAllStatus();
+					}
+				} else if (response == "Success") {
+					if (!$(".submit-success").length) {
+						$this.after("<span class=\"submit-success\"><i class=\"fa fa-check\" aria-hidden=\"true\"></i></span>");
+						$(".submit-success").delay(2000).fadeOut(200, function() {
+							$(".submit-success").remove();
+						});
 					}
 				} else if (response.indexOf("popup_response") >= 0) {
 					$("body").addClass("fm-noscroll");

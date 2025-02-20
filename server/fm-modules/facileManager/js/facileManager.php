@@ -57,6 +57,7 @@ if (isset($__FM_CONFIG)) {
 			$("table.sortable th").not(".header-nosort").first().addClass("header-sorted");
 		}
 		$("#login_form input").change();
+		$("form .required").closest("tr").children("th").children("label").addClass("required");
 	});
 	
 	$(function displayHideProcessAll() {
@@ -653,9 +654,10 @@ if (isset($__FM_CONFIG)) {
     /* Popup form submissions */
     $("#manage_item_contents").delegate("input[type=submit].primary:not(.follow-action)", "click tap", function(e) {
 		e.preventDefault();
-		if ($(this).checkRequiredFields() === false) {
+		if ($(this).checkRequiredFields("#manage_item_contents") === false) {
 			return false;
 		}
+		$form_table = $("div.popup-contents table");
 
 		var uri_params = {"uri_params":getUrlVars()};
 		var form_data = $("div.popup-contents form").serialize() + "&" + $.param(uri_params);
@@ -669,6 +671,23 @@ if (isset($__FM_CONFIG)) {
 				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
 					return false;
+				} else if ($.isArray(response)) {
+					/* Set the auto-corrected value */
+					$.each(response[0], function(key, value) {
+						$form_table.find("input[name*=" + key + "][type!=\"checkbox\"][type!=\"radio\"]").val(value);
+					});
+
+					$form_table.find(".validate-error").removeClass("validate-error");
+					$form_table.find(".validate-error-message").remove();
+
+					/* Highlight any errors */
+					if ("errors" in response[1]) {
+						$.each(response[1]["errors"], function(key, value) {
+							$element = $form_table.find("input[name*=" + key + "]");
+							$element.addClass("validate-error");
+							$element.after(" <a href=\"#\" class=\"validate-error-message tooltip-bottom\" data-tooltip=\"" + value + "\"><i class=\"fa fa-exclamation-triangle notice\" aria-hidden=\"true\"></i></a>");
+						});
+					}
 				} else if (response != "Success" && !$.isNumeric(response)) {
 					$("#popup_response").html("<p>" + response + "</p>");
 
@@ -1368,9 +1387,9 @@ if (isset($__FM_CONFIG)) {
 	}
 
 	/* Check if all required fields are filled */
-	$.fn.checkRequiredFields = function() {
+	$.fn.checkRequiredFields = function(e) {
 		isValid = true;
-		$("#manage_item_contents input.required").each(function() {
+		$(e + " input.required").each(function() {
 			if ($(this).is(":visible") && $(this).val() === "") {
 				$(this).addClass("validate-error");
 				isValid = false;
@@ -1383,9 +1402,8 @@ if (isset($__FM_CONFIG)) {
 	}
 
 	/* Inline form validation */
-	$("#manage_item_contents").delegate("input.required", "keyup blur", function(e) {
-		/** Update the database */
-		var $this				= $(this);
+	$("#manage_item_contents, .form-table").delegate("input.required", "keyup blur", function(e) {
+		var $this = $(this);
 
 		if ($this.val() != "") {
 			$this.removeClass("validate-error");

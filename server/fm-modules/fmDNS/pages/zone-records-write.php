@@ -163,7 +163,7 @@ if (isset($create) && is_array($create)) {
 	}
 }
 
-if (isset($record_type) && $domain_id && !isset($import_records)) {
+if (isset($record_type) && ($domain_id || (!$domain_id && $record_type == 'SOA')) && !isset($import_records)) {
 	if (defined('AJAX')) {
 		exit('Success');
 	} elseif (isset($_POST['uri'])) {

@@ -1455,3 +1455,46 @@ function getMinimumFeatureVersion($feature, $option = '', $format = 'message', $
 	return '';
 }
 
+
+/**
+ * Throws a form validation error
+ *
+ * @since 7.1.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param integer $code Error code to throw
+ * @param string|array $value Optional value to pass in error message
+ * @return string
+ */
+function moduleThrowErrorCode($code, $value = '') {
+	switch ($code) {
+		case 500:
+			$message = _('There are no items defined.');
+			break;
+		case 501:
+			break;
+		case 502:
+			break;
+		case 503:
+			break;
+		case 504:
+			break;
+		case 601:
+			break;
+		case 602:
+			break;
+		case 603:
+			break;
+		case 700:
+			break;
+		case 701:
+			break;
+		case 702:
+			break;
+		default:
+			break;
+	}
+
+	return $message;
+}
