@@ -71,6 +71,26 @@ if (is_array($_POST) && count($_POST) && currentUserCan($allowed_capabilities, $
 	if (!$perms) {
 		returnUnAuth('text');
 	}
+
+	/* Handle SOA */
+	if ($_POST['item_type'] == 'soa' && isset($_POST['action']) && $_POST['action'] == 'process-record-updates') {
+		list($return, $errors) = $fm_dns_records->validateRecordUpdates('array');
+		/* Submit if there are no errors */
+		if (!count($errors)) {
+			/* Set $_POST var from returned array */
+			if (isset($_POST['create'])) {
+				$_POST['create'][0] = $return;
+			} else {
+				$keys = array_keys($_POST['update']);
+				$_POST['update'][$keys[0]] = $return;
+			}
+			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/pages/zone-records-write.php');
+		} else {
+			header("Content-type: application/json");
+			echo json_encode(array($return, $errors));
+		}
+		exit;
+	}
 	
 	if (isset($_POST['item_id'])) $id = $_POST['item_id'];
 	$server_serial_no = isset($_POST['server_serial_no']) ? $_POST['server_serial_no'] : null;

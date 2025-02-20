@@ -191,10 +191,11 @@ HTML;
 				global $fm_dns_records;
 				if (!isset($fm_dns_records)) include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_records.php');
 
-				$form = '<form method="POST" action="zone-records-validate.php">
+				$form = $popup_header . '<form name="manage" id="manage">
+					<input type="hidden" name="page" id="page" value="soa" />
+					<input type="hidden" name="action" value="process-record-updates" />
 					<input type="hidden" name="domain_id" value="0" />
 					<input type="hidden" name="record_type" value="SOA" />' . "\n";
-				$form .= $popup_header;
 
 				$form .= $fm_dns_records->buildSOA($data, array('template_name'), $force_action);
 				// $popup_footer = str_replace('button primary', 'button primary follow-action', $popup_footer);
