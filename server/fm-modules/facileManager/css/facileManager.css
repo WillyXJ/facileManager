@@ -69,7 +69,7 @@
 	--table-rows-build-highlight: #2ea2cc;
 	--table-rows-attn-bg: light-dark(#f5ebeb, #573a3a);
 	--table-rows-attn-highlight: #CB3739;
-	--table-rows-notice-bg: light-dark(#fff8e5, #857a5a);
+	--table-rows-notice-bg: light-dark(#fff8e5, #86865f);
 	--table-rows-notice-hightlight: #ffb900;
 	--table-rows-ok-bg: light-dark(#e6f6e6, #3d5f3d);
 	--table-rows-ok-hightlight: #00cc00;
@@ -986,10 +986,6 @@ thead {
 	white-space: nowrap;
 }
 
-tbody {
-	background: var(--form-popup-bg);
-}
-
 .form-table {
 	border-collapse: collapse;
 	margin-top: 1em;
@@ -998,7 +994,7 @@ tbody {
 .form-table td {
 	margin-bottom: 9px;
 	padding: 0px 20px 0px 0;
-	border-bottom: 8px solid var(--form-popup-bg);
+	border-bottom: 8px solid transparent;
 	font-size: 14px;
 }
 .form-table td strong {
@@ -1008,7 +1004,7 @@ tbody {
 	font-size: 14px;
 	text-align: left;
 	padding: 6px 10px 10px 0;
-	border-bottom: 8px solid var(--form-popup-bg);
+	border-bottom: 8px solid transparent;
 	width: 140px;
 	vertical-align: top;
 	text-align: right;
