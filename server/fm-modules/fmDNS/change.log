@@ -8,6 +8,7 @@
 * Server - [bug] Fixed SOA selection button text.
 * Server - [bug] Fixed automatic PTR management. (Issue #665)
 * Server - [bug] Fixed record changes when key tag is empty.
+* Server - [bug] Fixed missing logging of SOA record changes.
 
 7.0.8 (2025-02-12)
 ==================

@@ -151,14 +151,22 @@ class fm_dns_records {
 	function update($domain_id, $id, $record_type, $array, $skipped_record = false) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_zones;
 		
+		$_domain_id = 0;
+		
 		/** Get correct domain name */
-		$record_domain_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'domain_id');
-		$_domain_id = ($record_domain_id == $domain_id) ? $domain_id : $record_domain_id;
+		if ($record_type == 'SOA') {
+			$soa_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name');
+			$log_message = sprintf(__('Updated a SOA template (%s) with the following details'), $soa_name) . ":\n";
+			$domain_name = _('None');
+		} else {
+			$record_domain_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'domain_id');
+			$_domain_id = ($record_domain_id == $domain_id) ? $domain_id : $record_domain_id;
 
-		$domain_name = displayFriendlyDomainName(getNameFromID($_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
-		$record_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'record_name');
-		$log_message = sprintf(__('Updated a record (%s) with the following details'), $record_name) . ":\n";
-		$log_message .= ($_domain_id) ? formatLogKeyData('', 'domain', $domain_name) : null;
+			$domain_name = displayFriendlyDomainName(getNameFromID($_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+			$record_name = ($record_type == 'SOA') ? $record_type : getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'record_name');
+			$log_message = sprintf(__('Updated a record (%s) with the following details'), $record_name) . ":\n";
+			$log_message .= ($_domain_id) ? formatLogKeyData('', 'domain', $domain_name) : null;
+		}
 
 		$table = ($record_type == 'SOA') ? 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa' : 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records';
 		$field = ($record_type == 'SOA') ? 'soa_id' : 'record_id';
@@ -940,6 +948,18 @@ HTML;
 					$this->updateSOAReload($child_id, 'yes');
 				}
 			}
+
+			/** Log it */
+			$domain_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+			$soa_name = getNameFromID($soa_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name');
+			$old_soa_name = getNameFromID($old_soa_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name');
+			if (!$old_soa_name) $old_soa_name = __('Custom');
+			$log_message = __('Assigned a SOA template') . ":\n";
+			$log_message .= ($domain_id) ? formatLogKeyData('', 'domain', $domain_name) : null;
+			$log_message .= formatLogKeyData('', 'old soa', $old_soa_name);
+			$log_message .= formatLogKeyData('', 'new soa', $soa_name);
+
+			addLogEntry($log_message);
 		}
 	}
 	
