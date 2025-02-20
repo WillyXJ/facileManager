@@ -109,7 +109,7 @@ echo printPageHeader(array('message' => $response, 'class' => $response_class), 
 
 
 if ($current_user_can_manage_records && $zone_access_allowed) {
-	$form = '<form method="POST" action="zone-records-validate.php" id="zone-records-form" class="' . $record_type . '">
+	$form = '<form id="zone-records-form" class="' . $record_type . '">
 <input type="hidden" name="domain_id" value="' . $domain_id . '" />
 <input type="hidden" name="record_type" value="' . $record_type . '" />
 <input type="hidden" name="map" value="' . $map . '" />
