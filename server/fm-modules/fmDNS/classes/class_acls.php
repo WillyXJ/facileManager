@@ -259,7 +259,7 @@ class fm_dns_acls {
 		
 		$edit_name = '<b>' . $row->acl_name . '</b>';
 		if (currentUserCan('manage_servers', $_SESSION['module'])) {
-			$edit_name .= displayAddNew('acl', $row->acl_id, null, 'fa fa-plus-square-o', 'plus_subelement');
+			$edit_name .= displayAddNew('acl', $row->acl_id, null, 'fa fa-plus-square-o', 'plus_subelement', 'bottom');
 		}
 		$edit_addresses = nl2br(str_replace(',', "\n", $row->acl_addresses));
 		$edit_addresses = $this->getACLElements($row->acl_id);
@@ -626,7 +626,7 @@ HTML;
 					
 					/** Delete permitted? */
 					if (currentUserCan(array('manage_servers'), $_SESSION['module'])) {
-						$return[$element_id]['element_edit'] = '<a class="subelement_edit" name="acl" href="#" id="' . $element_id . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
+						$return[$element_id]['element_edit'] = '<a class="subelement_edit tooltip-bottom mini-icon" name="acl" href="#" id="' . $element_id . '" data-tooltip="' . _('Edit') . '">' . $__FM_CONFIG['icons']['edit'] . '</a>';
 						$return[$element_id]['element_delete'] = ' ' . str_replace('__ID__', $element_id, $__FM_CONFIG['module']['icons']['sub_delete']);
 					} else {
 						$return[$element_id]['element_delete'] = $return[$element_id]['element_edit'] = null;

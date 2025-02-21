@@ -2935,3 +2935,32 @@ function upgradefmDNS_706($__FM_CONFIG, $running_version) {
 	
 	return true;
 }
+
+/** 7.1.0 */
+function upgradefmDNS_710($__FM_CONFIG, $running_version) {
+	global $fmdb;
+	
+	$success = version_compare($running_version, '7.0.6', '<') ? upgradefmDNS_706($__FM_CONFIG, $running_version) : true;
+	if (!$success) return false;
+	
+	/** Run queries */
+	if (isset($queries) && count($queries) && $queries[0]) {
+		foreach ($queries as $schema) {
+			$fmdb->query($schema);
+		}
+	}
+
+	/** Delete unused files */
+	$files_to_delete = array('pages/zone-records-validate.php');
+	$this_dir = dirname(__FILE__);
+	foreach ($files_to_delete as $file) {
+		$filename = $this_dir . '/' . $file;
+		if (is_writable($filename)) {
+			unlink($filename);
+		}
+	}
+
+	setOption('version', '7.1.0', 'auto', false, 0, 'fmDNS');
+	
+	return true;
+}

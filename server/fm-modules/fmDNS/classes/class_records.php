@@ -151,14 +151,22 @@ class fm_dns_records {
 	function update($domain_id, $id, $record_type, $array, $skipped_record = false) {
 		global $fmdb, $__FM_CONFIG, $fm_dns_zones;
 		
+		$_domain_id = 0;
+		
 		/** Get correct domain name */
-		$record_domain_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'domain_id');
-		$_domain_id = ($record_domain_id == $domain_id) ? $domain_id : $record_domain_id;
+		if ($record_type == 'SOA') {
+			$soa_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name');
+			$log_message = sprintf(__('Updated a SOA template (%s) with the following details'), $soa_name) . ":\n";
+			$domain_name = _('None');
+		} else {
+			$record_domain_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'domain_id');
+			$_domain_id = ($record_domain_id == $domain_id) ? $domain_id : $record_domain_id;
 
-		$domain_name = displayFriendlyDomainName(getNameFromID($_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
-		$record_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'record_name');
-		$log_message = sprintf(__('Updated a record (%s) with the following details'), $record_name) . ":\n";
-		$log_message .= ($_domain_id) ? formatLogKeyData('', 'domain', $domain_name) : null;
+			$domain_name = displayFriendlyDomainName(getNameFromID($_domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+			$record_name = ($record_type == 'SOA') ? $record_type : getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'record_name');
+			$log_message = sprintf(__('Updated a record (%s) with the following details'), $record_name) . ":\n";
+			$log_message .= ($_domain_id) ? formatLogKeyData('', 'domain', $domain_name) : null;
+		}
 
 		$table = ($record_type == 'SOA') ? 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa' : 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records';
 		$field = ($record_type == 'SOA') ? 'soa_id' : 'record_id';
@@ -610,6 +618,12 @@ class fm_dns_records {
 			}
 		
 			if ($show_value) {
+				if (strpos($record_value, "\n") === false) {
+					$record_value = strlen($record_value) > 80 ? wordwrap($record_value, 80, ' \<br />', true) : $record_value;
+				} else {
+					$record_value = nl2br($record_value);
+				}
+				
 				$field_values['data']['Value']['Value'] = $record_value;
 				if ((in_array($record_type, $append) || in_array($selected_type, $append)) && $record_append == 'yes') $field_values['data']['Value']['Value'] .= '<span class="grey">.' . $domain . '</span>';
 			}
@@ -729,6 +743,7 @@ class fm_dns_records {
 		<strong>%s</strong>
 		%s
 	</div>', __('Select a Template'), $soa_templates);
+			$soa_name = null;
 		}
 	
 		if (array_search('create_template', $show) !== false) {
@@ -748,8 +763,8 @@ HTML;
 		if (array_search('template_name', $show) !== false) {
 			$soa_default_checked = ($soa_id == $this->getDefaultSOA()) ? 'checked' : null;
 			$template_name = sprintf('<tr id="soa_template_name" style="display: %1$s">
-			<th>%2$s</th>
-			<td><input type="text" name="%3$s[%7$d][soa_name]" size="25" value="%4$s" /><br />
+			<th><label>%2$s</label></th>
+			<td><input type="text" name="%3$s[%7$d][soa_name]" size="25" value="%4$s" class="required" /><br />
 			<input type="checkbox" id="soa_default" name="%3$s[%7$d][soa_default]" value="yes" %5$s /><label for="soa_default"> %6$s</label></td>
 		</tr>', $template_name_show_hide, __('Template Name'), $action, $soa_name,
 					$soa_default_checked, __('Make Default Template'), $soa_id);
@@ -778,28 +793,28 @@ HTML;
 	<div id="custom-soa-form">
 	<table class="form-table">
 		<tr>
-			<th>{$labels[0]}</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_master_server]" size="25" value="$soa_master_server" $disabled /></td>
+			<th><label>{$labels[0]}</label></th>
+			<td><input type="text" name="{$action}[$soa_id][soa_master_server]" size="25" value="$soa_master_server" class="required" $disabled /></td>
 		</tr>
 		<tr>
-			<th>{$labels[1]}</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_email_address]" size="25" value="$soa_email_address" $disabled /></td>
+			<th><label>{$labels[1]}</label></th>
+			<td><input type="text" name="{$action}[$soa_id][soa_email_address]" size="25" value="$soa_email_address" class="required" $disabled /></td>
 		</tr>
 		<tr>
-			<th>{$labels[2]}</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_refresh]" size="25" value="$soa_refresh" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
+			<th><label>{$labels[2]}</label></th>
+			<td><input type="text" name="{$action}[$soa_id][soa_refresh]" size="25" value="$soa_refresh" class="required" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
 		</tr>
 		<tr>
-			<th>{$labels[3]}</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_retry]" size="25" value="$soa_retry" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
+			<th><label>{$labels[3]}</label></th>
+			<td><input type="text" name="{$action}[$soa_id][soa_retry]" size="25" value="$soa_retry" class="required" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
 		</tr>
 		<tr>
-			<th>{$labels[4]}</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_expire]" size="25" value="$soa_expire" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
+			<th><label>{$labels[4]}</label></th>
+			<td><input type="text" name="{$action}[$soa_id][soa_expire]" size="25" value="$soa_expire" class="required" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
 		</tr>
 		<tr>
-			<th>{$labels[5]}</th>
-			<td><input type="text" name="{$action}[$soa_id][soa_ttl]" size="25" value="$soa_ttl" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
+			<th><label>{$labels[5]}</label></th>
+			<td><input type="text" name="{$action}[$soa_id][soa_ttl]" size="25" value="$soa_ttl" class="required" onkeydown="return validateTimeFormat(event, this)" $disabled /></td>
 		</tr>
 		$template_append
 		$create_template
@@ -933,6 +948,18 @@ HTML;
 					$this->updateSOAReload($child_id, 'yes');
 				}
 			}
+
+			/** Log it */
+			$domain_name = displayFriendlyDomainName(getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name'));
+			$soa_name = getNameFromID($soa_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name');
+			$old_soa_name = getNameFromID($old_soa_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name');
+			if (!$old_soa_name) $old_soa_name = __('Custom');
+			$log_message = __('Assigned a SOA template') . ":\n";
+			$log_message .= ($domain_id) ? formatLogKeyData('', 'domain', $domain_name) : null;
+			$log_message .= formatLogKeyData('', 'old soa', $old_soa_name);
+			$log_message .= formatLogKeyData('', 'new soa', $soa_name);
+
+			addLogEntry($log_message);
 		}
 	}
 	
@@ -1130,6 +1157,399 @@ HTML;
 		return sprintf('<a href="%s?%s">%s</s>', $GLOBALS['basename'], join('&', $uri), $record_type);
 	}
 	
+
+	/**
+	 * Validates the record for saving
+	 *
+	 * @since 7.0.0
+	 * @package facileManager
+	 * @subpackage fmDNS
+	 *
+	 * @param string $output Output format to return
+	 */
+	function validateRecordUpdates($output = 'json') {
+		global $__FM_CONFIG, $append;
+
+		extract($_POST);
+		if (isset($_POST['uri_params'])) {
+			extract($_POST['uri_params'], EXTR_OVERWRITE);
+		}
+
+		/* RR types that allow record append */
+		$append = array('CNAME', 'NS', 'MX', 'SRV', 'DNAME', 'RP', 'NAPTR');
+
+		$create_update = 'update';
+		$GLOBALS['new_cname_rrs'] = array();
+
+		if (isset($_POST['create'])) {
+			$create_update = 'create';
+		}
+
+		/** Get real record_type */
+		if ($record_type == 'ALL') {
+			$record_type = ($create_update == 'update') ? getNameFromID(array_keys($_POST[$create_update])[0], 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'record_type') : $_POST[$create_update][array_keys($_POST[$create_update])[0]]['record_type'];
+		}
+
+		if (isset($_POST[$create_update]['soa_template_chosen']) && $_POST[$create_update]['soa_template_chosen']) {
+			/** Save the soa_template_chosen in domains table and end */
+			$this->assignSOA($_POST[$create_update]['soa_template_chosen'], $domain_id);
+			return 'Success';
+		}
+		unset($_POST[$create_update]['soa_template_chosen']);
+	
+		if (isset($_POST['update'])) {
+			$_POST[$create_update] = $this->buildUpdateArray($domain_id, $record_type, $_POST[$create_update], $append);
+		}
+
+		/** Fix this! */
+		$domain_info['id']          = $domain_id;
+		$domain_info['name']        = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_name');
+		// $domain_info['map']         = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_mapping');
+		// $domain_info['clone_of']    = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_clone_domain_id');
+		// $domain_info['template_id'] = getNameFromID($domain_id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'domains', 'domain_', 'domain_id', 'domain_template_id');
+
+		foreach ($_POST[$create_update] as $id => $data) {
+			list($valid_data, $input_error) = $this->validateEntry($create_update, $id, $data, $record_type, $append, $_POST[$create_update], $domain_info);
+			if (!isset($input_error)) unset($input_error);
+		}
+
+		if ($output == 'json') {
+			header("Content-type: application/json");
+			return json_encode(array($valid_data, $input_error));
+		} else {
+			return array($valid_data, $input_error);
+		}
+	}
+
+
+	function buildUpdateArray($domain_id, $record_type, $data_array, $append) {
+		$exclude_keys = array('record_skipped');
+		if (!in_array($record_type, $append)) {
+			$exclude_keys[] = 'record_append';
+		}
+		
+		$sql_records = buildSQLRecords($record_type, $domain_id);
+		if (!count($sql_records) && $record_type == 'SOA') {
+			return $data_array;
+		}
+		$raw_changes = compareValues($data_array, $sql_records);
+		if (count($raw_changes)) {
+			foreach ($raw_changes as $i => $data_array) {
+				foreach ($exclude_keys as $key) {
+					if (!array_key_exists($key, $data_array)) {
+						unset($sql_records[$i][$key]);
+					}
+				}
+				$changes[$i] = array_merge((array) $sql_records[$i], (array) $raw_changes[$i]);
+			}
+		} else {
+			return $data_array;
+		}
+		unset($sql_records, $raw_changes);
+		
+		return $changes;
+	}
+
+
+	function validateEntry($action, $id, $data, $record_type, $append, $data_array, $domain_info) {
+		global $map, $__FM_CONFIG, $fmdb;
+
+		$messages = array();
+		
+		if (!isset($data['record_append']) && in_array($record_type, $append)) {
+			$data['record_append'] = 'no';
+		}
+		if (isset($data['Delete'])) {
+			$data['record_status'] = 'deleted';
+			unset($data['Delete']);
+		}
+		if ($record_type != 'SOA') {
+			if (!empty($data['record_value'])) {
+				$data['record_value'] = str_replace(array('"', "'"), '', $data['record_value']);
+				if (strpos($data['record_value'], "\n")) {
+					foreach (explode("\n", $data['record_value']) as $line) {
+						$tmp_value[] = trim($line);
+					}
+					$data['record_value'] = join("\n", $tmp_value);
+				}
+			} elseif ($record_type != 'HINFO' && (!isset($data['record_value']) || empty($data['record_value']))) {
+				$messages['errors']['record_value'] = __('This field cannot be empty.');
+			}
+			if ($record_type != 'PTR' && (!isset($data['record_name']) || empty($data['record_name']))) {
+				$data['record_name'] = '@';
+			}
+			foreach ($data as $key => $val) {
+				$data[$key] = trim($val, '"\'');
+				
+				if ($key == 'record_name' && $record_type != 'PTR') {
+					if ($data['record_status'] == 'active' && !$this->verifyName($domain_info['id'], $val, $id, true, $record_type, $data_array)) {
+						$messages['errors'][$key] = __('Names can only contain letters, numbers, hyphens (-), underscores (_), or @. However, @ is not valid for CNAME records. Additionally, the same name cannot exist for A and CNAME records.');
+						continue;
+					}
+				}
+				
+				if (in_array($key, array('record_priority', 'record_weight', 'record_port'))) {
+					if (!empty($val) && verifyNumber($val) === false) {
+						$messages['errors'][$key] = __('This field must be a number.');
+						continue;
+					}
+				}
+				
+				if ($key == 'record_ttl') {
+					if (!empty($val) && $this->verifyTTL($val) === false) {
+						$messages['errors'][$key] = __('This field must be in TTL format which consists of numbers and time-based letters (s, m, h, d, w, y). Examples include 300, 5d, or 1y4w9d.');
+						continue;
+					}
+				}
+				
+				if ($record_type == 'A') {
+					if ($key == 'record_value') {
+						if (verifyIPAddress($val) === false) {
+							$messages['errors'][$key] = __('IP address must be in valid IPv4 or IPv6 format.');
+							continue;
+						}
+					}
+					if ($key == 'PTR' && !isset($messages['errors']['record_value'])) {
+						$retval = checkPTRZone($data['record_value'], $domain_info['id']);
+						list($val, $error_msg) = $retval;
+						if ($val == null) {
+							$messages['errors']['record_value'] = $error_msg;
+						} else {
+							$data[$key] = $val;
+						}
+					}
+				}
+				
+				if ($record_type == 'PTR') {
+					if ($key == 'record_name') {
+						if ($map == 'reverse') {
+							if (verifyIPAddress(buildFullIPAddress($data['record_name'], $domain_info['name'])) === false) {
+								$messages['errors'][$key] = __('Invalid record');
+								continue;
+							}
+						} else {
+							if (!$this->verifyCNAME('yes', $data['record_name'], false, true)) {
+								$messages['errors'][$key] = __('Invalid record');
+								continue;
+							}
+						}
+					}
+				}
+				
+				if ((in_array($record_type, array('CNAME', 'DNAME', 'MX', 'NS', 'SRV', 'NAPTR'))) || 
+						$record_type == 'PTR' && $key == 'record_value') {
+					if ($key == 'record_value') {
+						$val = ((isset($data['record_append']) && $data['record_append'] == 'yes') || $val == '@') ? trim($val, '.') : trim($val, '.') . '.';
+						$data[$key] = $val;
+						if ((isset($data['record_append']) && !$this->verifyCNAME($data['record_append'], $val)) || ($record_type == 'NS' && !$this->validateHostname($val))) {
+							$messages['errors'][$key] = __('Invalid value');
+							continue;
+						}
+					}
+				}
+	
+				if ($key == 'record_key_tag') {
+					if ((!isset($data[$key])) || empty($data[$key])) {
+						$messages['errors'][$key] = __('The Key Tag may not be empty.');
+						continue;
+					}
+				}
+			}
+		} elseif ($record_type == 'SOA') {
+			if (!isset($data['soa_append'])) {
+				$data['soa_append'] = 'no';
+			}
+			foreach ($data as $key => $val) {
+				if (in_array($key, array('domain_id', 'soa_status'))) continue;
+				if ($key == 'soa_email_address') {
+					if (!isEmailAddressValid($val) && !$this->verifyCNAME($data['soa_append'], $val, false, true)) {
+						$messages['errors'][$key] = __('Invalid email address format');
+						continue;
+					}
+					$val = strpos($val, '@') ? str_replace('@', '.', rtrim($val, '.') . '.') : $val ;
+					$data[$key] = $val;
+				}
+				if (in_array($key, array('soa_master_server', 'soa_email_address'))) {
+					$val = rtrim($val, '.');
+					if (isset($_POST['update']) && strpos($_POST['update'][$id]['soa_master_server'], $domain_info['name']) && strpos($_POST['update'][$id]['soa_email_address'], $domain_info['name'])) {
+						$new_val = rtrim(str_replace($domain_info['name'], '', $val), '.');
+						if ($new_val != rtrim($val, '.')) {
+							$data['soa_append'] = 'yes';
+						}
+						$val = $new_val;
+					}
+					if ($data['soa_append'] == 'no') {
+						$val .= '.';
+					}
+				}
+				if ($key != 'soa_append') {
+					if (in_array($key, array('soa_master_server', 'soa_email_address'))) {
+						$val = $data['soa_append'] == 'yes' ? trim($val, '.') : trim($val, '.') . '.';
+						$data[$key] = $val;
+						if (!$this->verifyCNAME($data['soa_append'], $val, false) || ($key == 'soa_master_server' && !$this->validateHostname($val))) {
+							$messages['errors'][$key] = __('Invalid1');
+							continue;
+						}
+					} else {
+						if (in_array($key, array('soa_refresh', 'soa_retry', 'soa_expire', 'soa_ttl'))) {
+							if (!empty($val) && $this->verifyTTL($val) === false) {
+								$messages['errors'][$key] = __('Invalid');
+								continue;
+							}
+						// } elseif (array_key_exists('soa_template', $data) && $data['soa_template'] == 'yes') {
+							// if (!$this->verifyNAME($val, $id, false)) {
+							// 	$messages['errors'][$key] = __('Invalid');
+							// }
+						}
+					}
+				}
+				if ($key == 'soa_name') {
+					/** Does the record already exist for this account? */
+					basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'soa', $data['soa_name'], 'soa_', 'soa_name', "AND soa_template='yes' AND soa_id!='$id'");
+					if ($fmdb->num_rows) $messages['errors'][$key] = __('This name already exists.');
+				}
+				
+				// if (!isset($messages['errors']) || !count($messages['errors'])) {
+				// 	$html .= buildInputReturn($action, $id, $key, $val);
+				// } else $html = null;
+			}
+		} else {
+			unset($data);
+		}
+		
+		return array($data, $messages);
+	}
+
+
+	function verifyName($domain_id, $record_name, $id, $allow_null = true, $record_type = null, $data_array = null) {
+		global $fmdb, $__FM_CONFIG;
+		
+		if (!$allow_null && !strlen($record_name)) return false;
+		
+		/** Ensure singleton RR type from existing records */
+		$sql = ($record_type != 'CNAME') ? " AND record_type='CNAME'" : " AND record_id!=$id";
+		basicGetList('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_id', 'record_', "AND record_name='$record_name' AND domain_id=$domain_id $sql AND record_status='active'", null, false, 'ASC');
+		if ($fmdb->num_rows) {
+			foreach ($fmdb->last_result as $res_array) {
+				if (isset($_POST['update']) && is_array($_POST['update']) 
+					&& array_key_exists($res_array->record_id, $_POST['update']) 
+					&& (array_key_exists('Delete', $_POST['update'][$res_array->record_id]) 
+						|| $_POST['update'][$res_array->record_id]['record_status'] != 'active')) {
+					continue;
+				}
+				if (array_key_exists($res_array->record_id, $data_array)) {
+					if ($data_array[$res_array->record_id]['record_status'] == 'active') {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			}
+		}
+		/** Ensure no updates create duplicate CNAME RR */
+		// if (is_array($_POST['update']) && is_array($_POST['create']) && $record_type == 'CNAME') {
+		// 	$tmp_array = array();
+		// 	foreach ($_POST['update'] as $k => $v) {
+		// 		if ($v['record_name'] == $record_name && $v['record_status'] == 'active' && !array_key_exists('Delete', $v)) $tmp_array[] = $_POST['update'][$k];
+		// 	}
+		// 	foreach ($_POST['create'] as $k => $v) {
+		// 		if ($v['record_name'] == $record_name && $v['record_status'] == 'active') $tmp_array[] = $_POST['create'][$k];
+		// 	}
+		// 	if (count(array_column($tmp_array, 'record_status')) > 1) return false;
+		// 	unset($tmp_array);
+		// }
+
+		/** Ensure singleton RR type from new records */
+		if (in_array($record_name, $GLOBALS['new_cname_rrs'])) {
+			return false;
+		} elseif ($record_type == 'CNAME') {
+			$GLOBALS['new_cname_rrs'][] = $record_name;
+		}
+		
+		if (substr($record_name, 0, 1) == '*' && substr_count($record_name, '*') < 2) {
+			return true;
+		} elseif (preg_match('/^[a-z0-9_\-.]+$/i', $record_name) == true
+				&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $record_name) == true) {
+			if (in_array($record_type, array('A', 'MX'))) {
+				return $this->validateHostname($record_name);
+			}
+			return true;
+		} elseif ($record_name == '@' && $record_type != 'CNAME') {
+			return true;
+		}
+		
+		return false;
+	}
+
+	function verifyCNAME($append, $record, $allow_null = true, $allow_underscore = false) {
+		if (!$allow_null && !strlen($record)) return false;
+		
+		if (preg_match('/^[a-z0-9_\-.]+$/i', $record) == true) {
+			if ($append == 'yes') {
+				if (strstr($record, '.') == false) {
+					return true;
+				} else {
+					if (preg_match('/\d{1,3}\.\d{1,3}\-\d{1,3}/', $record)) return true;
+				}
+			} else {
+				return substr($record, -1, 1) == '.';
+			}
+			return true;
+		} else if (in_array($record, array('@', '*.'))) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Returns whether record hostname is valid or not
+	 *
+	 * @since 2.1
+	 * @package fmDNS
+	 *
+	 * @param string $hostname Hostname to check
+	 * @return boolean
+	 */
+	function validateHostname($hostname) {
+		if ($hostname[0] == '-' || strpos($hostname, '_') !== false) {
+			return false;
+		}
+		
+		return true;
+	}
+
+	/**
+	 * Returns whether record TTL is valid or not
+	 *
+	 * @since 3.0
+	 * @package fmDNS
+	 *
+	 * @param string $ttl TTL to check
+	 * @return boolean
+	 */
+	function verifyTTL($ttl) {
+		/** Return true if $ttl is a number */
+		if (verifyNumber($ttl)) return true;
+
+		/** Ensure first character is a number */
+		if (!verifyNumber(substr($ttl, 0, 1))) return false;
+		
+		/** Check if last character is a-z */
+		if (!preg_match('/[a-z]/i', substr($ttl, -1))) return false;
+		
+		/** Check for s, m, h, d, w */
+		preg_match_all('/\d+[a-z]/i', $ttl, $matches);
+		
+		/** Something is wrong */
+		if (count($matches) > 1) return false;
+		
+		foreach ($matches[0] as $match) {
+			$split = preg_split('/[smhdwy]/i', $match);
+			if (!verifyNumber($split[0])) return false;
+		}
+		
+		return true;
+	}
 }
 
 if (!isset($fm_dns_records))

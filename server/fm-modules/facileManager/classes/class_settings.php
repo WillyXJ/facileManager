@@ -357,7 +357,7 @@ class fm_settings {
 						<div class="description">
 							<label for="auth_method">' . _('Authentication Method') . '</label>
 							<p><i>' . _('None') . '</i> - ' . _('Authentication will not be used and all users will have full access.') . '</p>
-							<p><i>' . _('Builtin Authentication') . '</i> - ' . sprintf(_('Users are authenticated against %s thus allowing them to have specific privileges within the application.'), $fm_name) . '</p>
+							<p><i>' . _('Built-in Authentication') . '</i> - ' . sprintf(_('Users are authenticated against %s thus allowing them to have specific privileges within the application.'), $fm_name) . '</p>
 							<p><i>' . _('LDAP Authentication') . '</i> - ' . _('Allows users to authenticate against a LDAP server. This option only appears if the PHP LDAP module is loaded.') . '</p>
 						</div>
 						<div class="choices">

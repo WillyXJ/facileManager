@@ -54,6 +54,26 @@ $(document).ready(function() {
 				return "You have unsaved changes.";
 			}
 		});
+
+		/* Changing record values */
+		$(".table-results-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change input", function(e) {
+			var $row_element = $(this).parents("tr");
+
+			$row_element.not(".new-record").addClass("build");
+			if (!$row_element.hasClass("attention")) {
+				if ($(this).is(":checkbox") && $(this).attr("name").indexOf("record_skipped") > 0) {
+					$row_element.removeClass("ok").addClass("build record-changed");
+					$row_element.find(".inline-record-validate").hide();
+					$row_element.find(".inline-record-actions").show();
+				} else {
+					$row_element.removeClass("record-changed ok").addClass("notice");
+					$row_element.find(".inline-record-validate").show();
+					$row_element.find(".inline-record-actions").show();
+				}
+
+				setSaveAllStatus();
+			}
+		});
 	}
 
 	if (onPage("zones-forward.php") || onPage("zones-reverse.php")) {
@@ -190,7 +210,6 @@ $(document).ready(function() {
 
 		setTimeout(function() {
 			setSaveAllStatus();
-			setValidateAllStatus();
 			if ($(".save-record-submit").hasClass("disabled") && $(".validate-all-records").hasClass("disabled")) {
 				$("span.pending-changes").fadeOut(200);
 			}
@@ -198,9 +217,16 @@ $(document).ready(function() {
 	});
 
 	/* Validate the record and flag for saving */
-	$("#zone-records-form").delegate(".inline-record-validate", "click tap", function() {
+	$("#zone-records-form").delegate(".inline-record-validate", "click tap", function(e) {
+		e.preventDefault();
+		if ($(this).checkRequiredFields("#zone-records-form") === false) {
+			return false;
+		}
 		var $this = $(this);
 		var $row_element = $(this).parents("tr");
+		if (!$row_element.length) {
+			var $row_element = $("#zone-records-form");
+		}
 
 		/** (un)check append box */
 		var $record_value = $row_element.find("input[name*=\'record_value\']");
@@ -235,14 +261,17 @@ $(document).ready(function() {
 						$row_element.find("input[name*=" + key + "][type!=\"checkbox\"]").val(value);
 					});
 
+					$row_element.find(".validate-error").removeClass("validate-error");
+					$row_element.find(".validate-error-message").remove();
+
 					/* Highlight any errors */
 					if ("errors" in response[1]) {
-						$row_element.find(".validate-error").removeClass("validate-error");
 						$.each(response[1]["errors"], function(key, value) {
-							$row_element.find("input[name*=" + key + "]").addClass("validate-error");
+							$element = $row_element.find("input[name*=" + key + "]");
+							$element.addClass("validate-error");
+							$element.after(" <a href=\"#\" class=\"validate-error-message tooltip-bottom\" data-tooltip=\"" + value + "\"><i class=\"fa fa-exclamation-triangle notice\" aria-hidden=\"true\"></i></a>");
 						});
 					} else {
-						$row_element.find(".validate-error").removeClass("validate-error");
 						$row_element.removeClass("notice");
 						$row_element.addClass("record-changed");
 						if ($row_element.hasClass("new-record")) {
@@ -251,7 +280,13 @@ $(document).ready(function() {
 						$this.hide();
 
 						setSaveAllStatus();
-						setValidateAllStatus();
+					}
+				} else if (response == "Success") {
+					if (!$(".submit-success").length) {
+						$this.after("<span class=\"submit-success\"><i class=\"fa fa-check\" aria-hidden=\"true\"></i></span>");
+						$(".submit-success").delay(2000).fadeOut(200, function() {
+							$(".submit-success").remove();
+						});
 					}
 				} else if (response.indexOf("popup_response") >= 0) {
 					$("body").addClass("fm-noscroll");
@@ -263,7 +298,7 @@ $(document).ready(function() {
 	});
 
 	/* Validate all records and flag for saving */
-	$(".validate-all-records").on("click", function() {
+	$(".validate-all-records").on("click tap", function() {
 		$("#zone-records-form tr.notice").each(function() {
 			$(this).find(".inline-record-validate").click();
 		});
@@ -271,7 +306,8 @@ $(document).ready(function() {
 		setValidateAllStatus();
 	});
 
-	$(".save-record-submit").on("click", function() {
+	$(".save-record-submit").on("click tap", function(e) {
+		e.preventDefault();
 		var $unsaved_changes = $(".inline-record-validate").filter(":visible");
 		if ($unsaved_changes.length > 0) {
 			$("#manage_item").fadeIn(200);
@@ -294,7 +330,7 @@ $(document).ready(function() {
 				is_ajax: 1
 			};
 			var uri_params = {"uri_params":getUrlVars()};
-			var form_data = $("#zone-records-form tr.record-changed input, #zone-records-form tr.record-changed select, #zone-records-form tr.record-changed textarea").serialize() + "&" + $.param(uri_params) + "&" + $.param(addl_form_data);
+			var form_data = $("#zone-records-form tr.record-changed input, #zone-records-form tr.record-changed select, #zone-records-form tr.record-changed textarea, #zone-records-form.CUSTOM").serialize() + "&" + $.param(uri_params) + "&" + $.param(addl_form_data);
 	
 			/** Update the database */
 			var $this				= $(this);
@@ -582,29 +618,6 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	/* Changing record values */
-	if (onPage("zone-records.php")) {
-		$(".table-results-container .display_results").delegate("input:not([id^=\'record_delete_\']), select, textarea", "change input", function(e) {
-			var $row_element = $(this).parents("tr");
-
-			$row_element.not(".new-record").addClass("build");
-			if (!$row_element.hasClass("attention")) {
-				if ($(this).is(":checkbox") && $(this).attr("name").indexOf("record_skipped") > 0) {
-					$row_element.removeClass("ok").addClass("build record-changed");
-					$row_element.find(".inline-record-validate").hide();
-					$row_element.find(".inline-record-actions").show();
-				} else {
-					$row_element.removeClass("ok").addClass("notice");
-					$row_element.find(".inline-record-validate").show();
-					$row_element.find(".inline-record-actions").show();
-				}
-
-				setValidateAllStatus();
-				setSaveAllStatus();
-			}
-		});
-	}
-
 	/* Automatically select to set/update PTR */
 	$(".table-results-container .display_results").delegate("input[name*=\'record_name\'], input[name*=\'record_value\']", "change input", function(e) {
 		$(this).parents("tr").find("input[name*=\'\[PTR\]\']").prop("checked", true);
@@ -620,7 +633,6 @@ $(document).ready(function() {
 			$row_element.find(".inline-record-validate").hide();
 			$row_element.find(".inline-record-actions").show();
 
-			setValidateAllStatus();
 			setSaveAllStatus();
 		} else {
 			$row_element.removeClass("attention record-changed");
@@ -973,6 +985,7 @@ function validateTimeFormat(event, that) {
 
 function setSaveAllStatus() {
 	/* Disable save all button if nothing is present to save */
+	setValidateAllStatus();
 	var $unsaved_changes = $("#zone-records-form tr.record-changed");
 	if ($unsaved_changes.length <= 0) {
 		$(".save-record-submit").addClass("disabled").attr("disabled", true);

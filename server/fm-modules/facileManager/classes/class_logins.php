@@ -273,13 +273,13 @@ class fm_login {
 		$fm_db_version = getOption('fm_db_version');
 		$auth_method = ($fm_db_version >= 18) ? getOption('auth_method') : true;
 		if ($auth_method) {
-			/** Use Builtin Auth when Default Auth Method is LDAP but user is defined with 'facileManager/Builtin' */
+			/** Use Built-in Auth when Default Auth Method is LDAP but user is defined with 'facileManager/Built-in' */
 			$result = $fmdb->query("SELECT * FROM `fm_users` WHERE `user_login` = '$user_login' and `user_auth_type`=1 and `user_status`='active'");
 			if (isset($fmdb->last_result) && is_array($fmdb->last_result) && $fmdb->last_result[0]->user_login == $user_login) {
 				$auth_method = 1;
 			}
 
-			/** Builtin Authentication */
+			/** Built-in Authentication */
 			if ($auth_method == 1) {
 				if ($fm_db_version >= 18) {
 					$result = $fmdb->get_results("SELECT * FROM `fm_users` WHERE `user_status`='active' AND `user_auth_type`=1 AND `user_template_only`='no' AND `user_login`='$user_login'");

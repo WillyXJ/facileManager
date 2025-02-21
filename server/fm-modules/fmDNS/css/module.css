@@ -45,30 +45,30 @@ p.soa_import span {
 #configtypesmenu > #recordmenu > ul > li > a:hover,
 #configtypesmenu > #recordmenu > ul > li > a > span:hover,
 #configtypesmenu > #recordmenu > ul > li:hover > a {
-	background-color: #464646;
+	background-color: var(--menu-submenu-bg);
 	color: #fff;
 }
 #configtypesmenu > #recordmenu > ul > li:hover {
-	background-color: #464646;
+	background-color: var(--menu-submenu-bg);
 	border-radius:5px 5px 0 0;
 }
 #recordmenu { display:block; padding:0; margin: -6px 0 0 4px; }
 #recordmenu > ul {list-style:inside none; padding:0; margin:0;}
 #recordmenu > ul > li {list-style: none; padding:3px 1em 2px 0; margin:0; display:block; position:relative;}
-#recordmenu > ul > li > a{ outline:none; display:block; position:relative; text-decoration:none; padding-bottom: 6px; }
-#recordmenu > ul > li.has-sub > a:before{ content:''; position:absolute; top:10px; right:-.5em; border:4px solid transparent; border-top:4px solid #000; }
-#recordmenu > ul > li.has-sub:hover > a:before{top:10px; border-top: 4px solid #fff;}
+#recordmenu > ul > li > a{ outline:none; display:block; position:relative; text-decoration:none; padding-bottom: 6px; color: var(--tab-unselected-text); }
+#recordmenu > ul > li.has-sub > a:before{ content:''; position:absolute; top:15px; right:-.5em; border:4px solid transparent; border-top:4px solid var(--tab-unselected-text); }
+#recordmenu > ul > li.has-sub:hover > a:before{top:15px; border-top: 4px solid #fff;}
 #recordmenu ul li.has-sub:hover > a:after{top:0; bottom:0;}
 #recordmenu ul li.has-sub:hover > ul, #recordmenu ul li.has-sub:hover > div {
 	display:block;
 }
 #recordmenu ul li > ul {
-	display:none; width:auto; position:absolute; top:2.5em; right: 0; padding:2px 0; background-color:rgba(70,70,70,0.95);
+	display:none; width:auto; position:absolute; top:2.5em; right: 0; padding: 0; background-color:var(--menu-submenu-bg);
 	border-radius:5px 0 5px 5px;
-	moz-box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
-	-webkit-box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
-	-khtml-box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
-	box-shadow: rgba(10,10,10,0.4) 5px 15px 40px -5px;
+	moz-box-shadow: rgba(10,10,10,0.6) 5px 15px 40px -5px;
+	-webkit-box-shadow: rgba(10,10,10,0.6) 5px 15px 40px -5px;
+	-khtml-box-shadow: rgba(10,10,10,0.6) 5px 15px 40px -5px;
+	box-shadow: rgba(10,10,10,0.6) 5px 15px 40px -5px;
 	z-index: 6;
 }
 #recordmenu > ul > li > a:hover {
@@ -80,7 +80,9 @@ p.soa_import span {
 #recordmenu ul li > ul{width:150px;}
 #recordmenu ul li > ul li{display:block; list-style:inside none; padding:0; margin:0; position:relative;}
 #recordmenu ul li > ul li a{ outline:none; display:block; position:relative; margin:0; padding:8px 20px; font:10pt Arial, Helvetica, sans-serif; color:#fff; text-decoration:none; }
-#recordmenu > ul > li > ul > li a:hover{ background-color:rgba(100,100,100,0.95); color: #fff; };
+#recordmenu > ul > li > ul > li a:hover{ background-color:var(--submenu-hover); color: #fff; }
+#recordmenu > ul > li > ul > li:first-child a { border-radius: 5px 0 0 0; }
+#recordmenu > ul > li > ul > li:last-child a { border-radius: 0 0 5px 5px; }
 
 .form-table.zone-form,
 .form-table.zone-template-form {
@@ -155,8 +157,15 @@ table.form-table > tbody > tr.dnssec-key-addl-options {
 .inline-record-actions a:hover {
 	opacity: unset;
 }
-.inline-record-validate > i {
+.inline-record-validate > i,
+.submit-success i {
 	color: #12c012;
+}
+.submit-success i {
+	margin-left: 1em;
+}
+.validate-error-message {
+	margin-left: 3px;
 }
 
 div.record-value-group p.record-sub-value {
@@ -187,4 +196,13 @@ div[class^="record-value-subgroup"] > div {
 }
 #tophead span.pending-changes a {
 	color: var(--table-rows-notice-hightlight);
+}
+
+
+/* Dark mode */
+@supports(color: light-dark(#fff, #000)) {
+	.inline-record-validate > i,
+	.submit-success i {
+		color: light-dark(#12c012, #91e691);
+	}
 }

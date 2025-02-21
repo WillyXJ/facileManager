@@ -771,7 +771,6 @@ function buildModuleMenu() {
 		addSubmenuPage('zones.php', __('Reverse'), __('Reverse Zones'), null, $_SESSION['module'], 'zones-reverse.php', null, null, $badge_counts['reverse']);
 		addSubmenuPage('zones.php', __('Groups'), __('Zones Groups'), array('view_all'), $_SESSION['module'], 'zones-groups.php');
 		addSubmenuPage('zones.php', null, __('Records'), null, $_SESSION['module'], 'zone-records.php');
-		addSubmenuPage('zones.php', null, __('Record Validation'), null, $_SESSION['module'], 'zone-records-validate.php');
 	
 	addObjectPage(array(__('Config'), 'sliders'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php');
 		addSubmenuPage('config-servers.php', _('Servers'), __('Name Servers'), array('manage_servers', 'build_server_configs', 'view_all'), $_SESSION['module'], 'config-servers.php', null, null, getModuleBadgeCounts('servers'));
@@ -1288,7 +1287,7 @@ function checkPTRZone($ip, $domain_id) {
 	if (getOption('auto_create_ptr_zones', $_SESSION['user']['account_id'], $_SESSION['module']) == 'yes') {
 		return autoCreatePTRZone($zone, $domain_id);
 	}
-	return array(null, __('Reverse zone does not exist.'));
+	return array(null, __('An existing reverse zone does not exist.'));
 }
 
 /**
@@ -1455,3 +1454,46 @@ function getMinimumFeatureVersion($feature, $option = '', $format = 'message', $
 	return '';
 }
 
+
+/**
+ * Throws a form validation error
+ *
+ * @since 7.1.0
+ * @package facileManager
+ * @subpackage fmDNS
+ *
+ * @param integer $code Error code to throw
+ * @param string|array $value Optional value to pass in error message
+ * @return string
+ */
+function moduleThrowErrorCode($code, $value = '') {
+	switch ($code) {
+		case 500:
+			$message = _('There are no items defined.');
+			break;
+		case 501:
+			break;
+		case 502:
+			break;
+		case 503:
+			break;
+		case 504:
+			break;
+		case 601:
+			break;
+		case 602:
+			break;
+		case 603:
+			break;
+		case 700:
+			break;
+		case 701:
+			break;
+		case 702:
+			break;
+		default:
+			break;
+	}
+
+	return $message;
+}

@@ -1,3 +1,17 @@
+5.2.0 (2025-02-21)
+==================
+* Server - [improvement] FM_NO_REWRITE_TEST is now a supported defined constant to
+           bypass rewrite tests. (Issue #549)
+* Server - [improvement] Updated module selection menu to include help links.
+* Server - [improvement] Added Plum theme and refined existing theme colors.
+* Server - [improvement] Pressing Enter now submits popup forms.
+* Server - [bug] Fixed form validation when adding/updating users. (Issue #662)
+* Server - [bug] Added missing OS icons for Rocky and AlmaLinux. (Issue #663)
+* Server - [bug] Various CSS fixes.
+* Server - [bug] Updated missing help text and fixed spelling errors.
+* Server - [bug] Fixed dark mode select box CSS based on OS preference. (Issue #664)
+* Server - [bug] Fixed and disabled dark mode for browsers that don't support light-dark() CSS function. (Issue #666)
+
 5.1.3 (2025-02-10)
 ==================
 * Server - [bug] The default module menu is no longer visible in the user properties when there is only

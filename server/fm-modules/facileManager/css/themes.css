@@ -13,14 +13,14 @@
 
 	--menu-bg: #352f2f;
 	--menu-divider: #583b3b;
-	--menu-select-highlight: #bc3b3b;
+	--menu-select-highlight: light-dark(#bc3b3b, #a24141);
 	--menu-expand-bg: #ebe4e4;
 	--submenu-hover: #915353;
 
 	--tooltip-bg: #a45e5e;
 	--tooltip-text: #fff;
 
-	--info-icon: #a33a3a;
+	--info-icon: light-dark(#a33a3a, #cd5454);
 }
 
 .Forest {
@@ -34,11 +34,11 @@
 
 	--menu-bg: #2f352f;
 	--menu-divider: #3b583b;
-	--menu-select-highlight: #44bc3b;
+	--menu-select-highlight: light-dark(#44bc3b, #369a2e);
 	--menu-expand-bg: #e4ebe4;
 	--submenu-hover: #45753b;
 
-	--tooltip-bg: #5ea46a;
+	--tooltip-bg: light-dark(#5ea46a, #40844b);
 	--tooltip-text: #fff;
 
 	--info-icon: #45a33a;
@@ -55,9 +55,9 @@
 
 	--menu-bg: #35322f;
 	--menu-divider: #584b3b;
-	--menu-select-highlight: #ee9d3b;
+	--menu-select-highlight: light-dark(#e99127, #d5811b);
 	--menu-expand-bg: #ebe8e4;
-	--submenu-hover: #ee9d3b;
+	--submenu-hover: light-dark(#c7914f, #a57943);
 
 	--tooltip-bg: #a4815e;
 	--tooltip-text: #fff;
@@ -65,3 +65,23 @@
 	--info-icon: #d37a37;
 }
 
+.Plum {
+	/* Common color changes */
+	--top-header-bg: light-dark(#513b58, #322c36);
+	--top-header-border: light-dark(#3f3843, #393939);
+	--top-header-divider: light-dark(#5a565c, #595660);
+	--top-header-search-bg: light-dark(#6c5876, var(--form-field-bg));
+	--top-header-search-border: light-dark(#7e6b88, var(--form-input-border));
+  
+	--menu-bg: #332f35;
+	--menu-divider: #4b3b58;
+	--menu-select-highlight: light-dark(#9755c0, #8652a6);
+	--menu-expanded-bg: light-dark(#e8e4eb, #535353);
+	--menu-expanded-text: light-dark(var(--menu-bg), var(--menu-link));
+	--submenu-hover: #705684;
+
+	--tooltip-bg: #7d5ea4;
+	--tooltip-text: #f8f8f8;
+
+	--info-icon: light-dark(#733aa3, #ac92c3);
+}

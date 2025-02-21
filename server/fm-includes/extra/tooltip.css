@@ -66,7 +66,9 @@
 [data-tooltip]:after {
 	z-index: 1000;
 	padding: 12px;
-	width: 265px;
+	width: max-content;
+	max-width: 265px;
+	min-width: 70px;
 	background-color: var(--tooltip-bg);
 	color: var(--tooltip-text);
 	content: attr(data-tooltip);
