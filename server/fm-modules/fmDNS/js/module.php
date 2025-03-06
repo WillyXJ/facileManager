@@ -620,7 +620,11 @@ $(document).ready(function() {
 	
 	/* Automatically select to set/update PTR */
 	$(".table-results-container .display_results").delegate("input[name*=\'record_name\'], input[name*=\'record_value\']", "change input", function(e) {
-		$(this).parents("tr").find("input[name*=\'\[PTR\]\']").prop("checked", true);
+		var $checkbox = $(this).parents("tr").find("input[name*=\'\[PTR\]\']");
+
+		if ($checkbox.parents("label").text() == "' . __('Update PTR') . '") {
+			$checkbox.prop("checked", true);
+		}
 	});
 
 	/* Record delete checkbox */

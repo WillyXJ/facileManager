@@ -1,3 +1,7 @@
+7.1.1 (2025-03-??)
+==================
+* Server - [bug] Create PTR checkbox no longer gets automatically checked. (Issue #669)
+
 7.1.0 (2025-02-21)
 ==================
 * Server - [improvement] CUSTOM resource records are saved with AJAX on the same page.
