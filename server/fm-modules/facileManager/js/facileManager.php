@@ -566,6 +566,32 @@ if (isset($__FM_CONFIG)) {
 		return false;
 	});
 	
+	$("#test_mail_settings").click(function() {
+		var $this = $(this);
+
+		var form_data = $("#fm_mailing_options").find("input, select, textarea").serialize() + "&" + $.param({item_type: "fm_test_mail_settings"});
+		
+		$("#manage_item").fadeIn(200);
+		$("#manage_item_contents").html("<p>' . _('Processing...please wait.') . ' <i class=\"fa fa-spinner fa-spin\"></i></p>");
+
+		$.ajax({
+			type: "POST",
+			url: "fm-modules/facileManager/ajax/processPost.php",
+			data: form_data,
+			success: function(response)
+			{
+				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
+					doLogout();
+					return false;
+				} else {
+					$("#manage_item_contents").html(response);
+				}
+			}
+		});
+		
+		return false;
+	});
+	
 	/** Maintenance Mode toggle */
 	$(".toggle-maintenance-mode").click(function() {
         var $this 		= $(this);

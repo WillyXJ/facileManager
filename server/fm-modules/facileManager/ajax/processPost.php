@@ -53,7 +53,7 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 
 /** Handle forced software update checks */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_software_update_check') {
-	if (!currentUserCan('manage_settings')) returnUnAuth('response-close');
+	if (!currentUserCan('manage_settings')) returnUnAuth('window');
 
 	include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
 	$fm_new_version_available = isNewVersionAvailable($fm_name, $fm_version, 'force');
@@ -75,9 +75,40 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 		echo 'admin-modules.php';
 	}
 
+/** Handle test mail */
+} elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_test_mail_settings') {
+	if (!currentUserCan('manage_settings')) returnUnAuth('window');
+
+	echo buildPopup('header', _('Test E-Mail Output'));
+	if (!isset($_POST['mail_smtp_auth'])) {
+		$_POST['mail_smtp_user'] = $_POST['mail_smtp_pass'] = '';
+	}
+
+	$sendto = getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_email');
+	if (!$sendto) {
+		printf('<p>%s</p>', _('Unable to send email -- this user account does not have an email address defined.'));
+	} else {
+		include(ABSPATH . 'fm-includes' . DIRECTORY_SEPARATOR . 'version.php');
+
+		echo '<p>';
+		/** Send test mail */
+		sendEmail($sendto,
+			sprintf('%s %s', $fm_name, _('Test E-Mail')),
+			sprintf(_('This test message was sent by %s using %s %s on %s.'), 
+				getNameFromID($_SESSION['user']['id'], 'fm_users', 'user_', 'user_id', 'user_login'),
+				$fm_name, 'v' . $fm_version,
+				$_SERVER['SERVER_NAME']),
+			null, array($fm_name, $_POST['mail_from']), null,
+			$_POST, 'debug');
+
+		echo "</p>\n";
+	}
+
+	echo buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+
 /** Handle maintenance mode */
 } elseif (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_type'] == 'fm_maintenance_mode') {
-	if (!currentUserCan('manage_modules')) returnUnAuth('response-close');
+	if (!currentUserCan('manage_modules')) returnUnAuth('window');
 
 	if (isset($_POST['mode_status'])) {
 		$modes = array('disabled', 'active');
