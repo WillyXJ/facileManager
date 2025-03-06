@@ -1445,6 +1445,9 @@ HTML;
 		$response = '';
 		$failures = false;
 		for ($i=0; $i<$name_server_count; $i++) {
+			/** Use server_address if available */
+			if (!isset($name_servers[$i]->server_address) || !$name_servers[$i]->server_address) $name_servers[$i]->server_address = $name_servers[$i]->server_name;
+			
 			if (isset($post_result)) unset($post_result);
 			switch($name_servers[$i]->server_update_method) {
 				case 'cron':
@@ -1458,7 +1461,7 @@ HTML;
 				case 'http':
 				case 'https':
 					/** Test the port first */
-					if (!socketTest($name_servers[$i]->server_name, $name_servers[$i]->server_update_port, 10)) {
+					if (!socketTest($name_servers[$i]->server_address, $name_servers[$i]->server_update_port, 10)) {
 						$post_result = '[' . $name_servers[$i]->server_name . '] ' . sprintf(__('Failed: could not access %s (tcp/%d).'), $name_servers[$i]->server_update_method, $name_servers[$i]->server_update_port) . "\n";
 						$response .= $post_result;
 						$failures = true;
@@ -1466,7 +1469,7 @@ HTML;
 					}
 					
 					/** Remote URL to use */
-					$url = $name_servers[$i]->server_update_method . '://' . $name_servers[$i]->server_name . ':' . $name_servers[$i]->server_update_port . '/fM/reload.php';
+					$url = $name_servers[$i]->server_update_method . '://' . $name_servers[$i]->server_address . ':' . $name_servers[$i]->server_update_port . '/fM/reload.php';
 					
 					/** Data to post to $url */
 					$post_data = array('action' => 'reload',
@@ -1478,7 +1481,7 @@ HTML;
 					
 					break;
 				case 'ssh':
-					$server_remote = runRemoteCommand($name_servers[$i]->server_name, "sudo php /usr/local/facileManager/fmDNS/client.php zones id=$domain_id", 'return', $name_servers[$i]->server_update_port);
+					$server_remote = runRemoteCommand($name_servers[$i]->server_address, "sudo php /usr/local/facileManager/fmDNS/client.php zones id=$domain_id", 'return', $name_servers[$i]->server_update_port);
 
 					if (is_array($server_remote)) {
 						if (array_key_exists('output', $server_remote) && (!count($server_remote['output'])) || strpos($server_remote['output'][0], 'successful') !== false) {
