@@ -693,7 +693,7 @@ VALUES
 ('options', 'udp-receive-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
 ('options', 'udp-send-buffer', '( integer )', 'no', 'O', NULL, 'no', '9.18.0'),
 ('options', 'update-check-ksk', '( yes | no )', 'no', 'OVZ', 'PS', 'yes', NULL),
-('options', 'update-policy', '( local | { update-policy-rule } )', 'no', 'Z', 'PS', 'no', NULL),
+('options', 'update-policy', '( local | { update-policy-rule } )', 'no', 'Z', 'P', 'no', NULL),
 ('options', 'update-quota', '( integer )', 'no', 'O', NULL, 'no', '9.19.9'),
 ('options', 'use-alt-transfer-source', '( yes | no )', 'no', 'OVZ', 'PS', 'yes', NULL),
 ('options', 'use-queryport-pool', '( yes | no )', 'no', 'S', NULL, 'yes', NULL),

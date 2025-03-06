@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Create PTR checkbox no longer gets automatically checked. (Issue #669)
 * Server - [bug] Zone reloads use the server address if configured. (Issue #668)
+* Server - [bug] Zone option update-policy incorrectly set on server group secondaries. (Issue #670)
 
 7.1.0 (2025-02-21)
 ==================

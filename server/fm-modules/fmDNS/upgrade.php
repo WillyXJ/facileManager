@@ -32,12 +32,22 @@ function upgradefmDNSSchema($running_version) {
 	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
-	$success = version_compare($running_version, '7.0.6', '<') ? upgradefmDNS_706($__FM_CONFIG, $running_version) : true;
+	$success = version_compare($running_version, '7.1.1', '<') ? upgradefmDNS_711($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
 	
 	setOption('client_version', $__FM_CONFIG['fmDNS']['client_version'], 'auto', false, 0, 'fmDNS');
 		
 	return true;
+}
+
+function deleteUnusedFiles($files_to_delete) {
+	$this_dir = dirname(__FILE__);
+	foreach ($files_to_delete as $file) {
+		$filename = $this_dir . '/' . $file;
+		if (is_writable($filename)) {
+			unlink($filename);
+		}
+	}
 }
 
 /** 1.0-b5 */
@@ -2837,14 +2847,7 @@ function upgradefmDNS_700b2($__FM_CONFIG, $running_version) {
 	}
 
 	/** Delete unused files */
-	$files_to_delete = array('pages/config-rpz.php');
-	$this_dir = dirname(__FILE__);
-	foreach ($files_to_delete as $file) {
-		$filename = $this_dir . '/' . $file;
-		if (is_writable($filename)) {
-			unlink($filename);
-		}
-	}
+	deleteUnusedFiles(array('pages/config-rpz.php'));
 
 	setOption('version', '7.0.0-beta2', 'auto', false, 0, 'fmDNS');
 	
@@ -2936,12 +2939,14 @@ function upgradefmDNS_706($__FM_CONFIG, $running_version) {
 	return true;
 }
 
-/** 7.1.0 */
-function upgradefmDNS_710($__FM_CONFIG, $running_version) {
+/** 7.1.1 */
+function upgradefmDNS_711($__FM_CONFIG, $running_version) {
 	global $fmdb;
 	
 	$success = version_compare($running_version, '7.0.6', '<') ? upgradefmDNS_706($__FM_CONFIG, $running_version) : true;
 	if (!$success) return false;
+
+	$queries[] = "UPDATE `fm_{$__FM_CONFIG['fmDNS']['prefix']}functions` SET `def_zone_support` = 'P' WHERE `def_option` = 'update-policy'";
 	
 	/** Run queries */
 	if (isset($queries) && count($queries) && $queries[0]) {
@@ -2951,16 +2956,10 @@ function upgradefmDNS_710($__FM_CONFIG, $running_version) {
 	}
 
 	/** Delete unused files */
-	$files_to_delete = array('pages/zone-records-validate.php');
-	$this_dir = dirname(__FILE__);
-	foreach ($files_to_delete as $file) {
-		$filename = $this_dir . '/' . $file;
-		if (is_writable($filename)) {
-			unlink($filename);
-		}
-	}
+	deleteUnusedFiles(array('pages/zone-records-validate.php'));
 
-	setOption('version', '7.1.0', 'auto', false, 0, 'fmDNS');
+	setOption('version', '7.1.1', 'auto', false, 0, 'fmDNS');
 	
 	return true;
 }
+
