@@ -1274,7 +1274,8 @@ i.text_icon {
 #response a {
 	text-decoration: underline;
 }
-#response.attention {
+#response.attention,
+#config_check.error {
 	border-color: light-dark(#f0b1b1, #9d4444);
 	background-color: light-dark(#f7cdcd, #915d5d);
 	color: light-dark(#000, #d4d4d4);
@@ -2233,8 +2234,6 @@ a.subelement_edit img {
 	background-repeat: no-repeat;
 }
 #config_check.error {
-	border-color: #B22400;
-	background-color: #EAC1B7;
 	background-image: url('../../facileManager/images/redshield64.png');
 	background-repeat: no-repeat;
 }
