@@ -145,14 +145,14 @@ if (file_exists(ABSPATH . 'config.inc.php')) {
 					if (currentUserCan('manage_modules')) {
 						echo $_SERVER['REQUEST_URI'];
 					} else {
-						@session_destroy();
+						$fm_login->logout();
 						printf('<p class="failed">%s</p>', sprintf(_('%s is currently undergoing maintenance. Please try again later.'), $fm_name));
 					}
 				} elseif (isUpgradeAvailable()) {
 					if (currentUserCan(array('do_everything', 'manage_modules')) || (getOption('fm_db_version') < 32 && $_SESSION['user']['fm_perms'] & 1)) {
 						echo $GLOBALS['RELPATH'] . 'fm-upgrade.php';
 					} else {
-						@session_destroy();
+						$fm_login->logout();
 						printf('<p class="failed">%s</p>', sprintf(_('The database for %s and its modules still needs to be upgraded.<br />Please contact a privileged user.'), $fm_name));
 					}
 				} else echo $_SERVER['REQUEST_URI'];

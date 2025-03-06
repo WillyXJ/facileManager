@@ -371,6 +371,10 @@ class fm_login {
 			setcookie('fmid', '');
 			@session_destroy();
 			unset($_COOKIE['fmid']);
+		} else {
+			@session_start();
+			@session_unset();
+			@session_destroy();
 		}
 	}
 	
