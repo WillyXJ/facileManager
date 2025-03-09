@@ -97,17 +97,17 @@ if (arrayKeysExist(array('genserial', 'addserial', 'install', 'upgrade', 'ssh'),
 								'latest_core_version' => $fm_version,
 								'latest_module_version' => $current_module_version
 							);
-				}
-				
-				/** Get proxy server information to pass to the client */
-				$data['proxy_info'] = array();
-				if (getOption('proxy_enable')) {
-					$proxyauth = getOption('proxy_user') . ':' . getOption('proxy_pass');
-					if ($proxyauth == ':') $proxyauth = null;
-					$data['proxy_info'] = array(
-						CURLOPT_PROXY => getOption('proxy_host') . ':' . getOption('proxy_port'),
-						CURLOPT_PROXYUSERPWD => $proxyauth
-					);
+					
+					/** Get proxy server information to pass to the client */
+					$data['proxy_info'] = array();
+					if (getOption('proxy_enable')) {
+						$proxyauth = getOption('proxy_user') . ':' . getOption('proxy_pass');
+						if ($proxyauth == ':') $proxyauth = null;
+						$data['proxy_info'] = array(
+							CURLOPT_PROXY => getOption('proxy_host') . ':' . getOption('proxy_port'),
+							CURLOPT_PROXYUSERPWD => $proxyauth
+						);
+					}
 				}
 				
 				// Probably need to move/remove this

@@ -3,6 +3,7 @@
 * Server - [improvement] Added ability to test SMTP settings. (Issue #652)
 * Server - [bug] Dark mode color fixes.
 * Server - [bug] Fixed incorrect login redirection after site status message is displayed.
+* Server - [bug] Fixed PHP error. (Issue #671)
 
 5.2.0 (2025-02-21)
 ==================
