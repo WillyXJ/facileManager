@@ -35,6 +35,11 @@ class fm_settings {
 		
 		$log_message = _('Set system settings to the following:') . "\n";
 		
+		/** Ensure https enforcement is enabled with API support */
+		if (isset($_POST['api_token_support']) && $_POST['api_token_support'] == 1) {
+			$_POST['enforce_ssl'] = 1;
+		}
+		
 		foreach ($_POST as $key => $data) {
 			if (!in_array($key, $exclude)) {
 				unset($data_array);
@@ -43,7 +48,7 @@ class fm_settings {
 					$account_id = $_SESSION['user']['account_id'];
 					$data = $data[$account_id];
 				} else $account_id = 0;
-				
+
 				/** Check if the option has changed */
 				$current_value = getOption($key, $account_id);
 				unset($account_id);
