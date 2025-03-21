@@ -1,6 +1,7 @@
 5.3.1 (2025-??-??)
 ==================
 * Server - [bug] Fixed CSS of disabled checkboxes.
+* Server - [bug] Fixed the ability to clear mailing secure connection type in the settings.
 
 5.3.0 (2025-03-13)
 ==================

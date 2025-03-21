@@ -272,7 +272,7 @@ class fm_settings {
 		$mail_smtp_user = getOption('mail_smtp_user');
 		$mail_smtp_pass = getOption('mail_smtp_pass');
 		$mail_smtp_tls = (getOption('mail_smtp_tls'));
-		$mail_smtp_tls_list = buildSelect('mail_smtp_tls', 'mail_smtp_tls', array('', 'SSL', 'TLS'), $mail_smtp_tls);
+		$mail_smtp_tls_list = buildSelect('mail_smtp_tls', 'mail_smtp_tls', array('', 'SSL', 'TLS'), $mail_smtp_tls, '1', '', false, null, 'allow-clear');
 		
 		$mail_from = getOption('mail_from');
 		
