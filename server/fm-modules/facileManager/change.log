@@ -1,3 +1,7 @@
+5.3.1 (2025-??-??)
+==================
+* Server - [bug] Fixed CSS of disabled checkboxes.
+
 5.3.0 (2025-03-13)
 ==================
 * Server - [improvement] Added ability to test SMTP settings. (Issue #652)
