@@ -45,7 +45,7 @@ if (file_exists($fm_client_functions)) {
 }
 
 /** Check if running supported version */
-$data['server_version'] = detectFWVersion();
+$data['server_version'] = detectAppVersion();
 
 /** Build the configs provided by $url */
 $retval = buildConf($url, $data);
