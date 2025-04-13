@@ -1,5 +1,6 @@
 0.10.1 (2025-0?-??)
 ===================
+* Server - [bug] Fixed PHP errors. (Issue #674)
 * Client - [bug] Added missing leases file for ALT OS. (Issue #675)
 
 0.10.0 (2025-01-18)
