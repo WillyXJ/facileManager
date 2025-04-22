@@ -29,7 +29,7 @@
  */
 
 /** Client version */
-$data['server_client_version'] = '0.10.0';
+$data['server_client_version'] = '0.10.1';
 
 error_reporting(0);
 
@@ -89,7 +89,8 @@ if ($dump_leases || $delete_lease) {
 		'/var/db/dhcpd.leases',
 		'/var/lib/dhcp/dhcpd.leases',
 		'/var/lib/dhcpd/dhcpd.leases',
-		'/var/lib/dhcp3/dhcpd.leases'
+		'/var/lib/dhcp3/dhcpd.leases',
+		'/var/lib/dhcp/dhcpd/state/dhcpd.leases'
 	);
 	foreach ($lease_file_locations as $leasefile) {
 		if (file_exists($leasefile)) {

@@ -39,6 +39,11 @@ if (isset($__FM_CONFIG)) {
 			width: "200px",
 			minimumResultsForSearch: 10
 		});
+		$("select.allow-clear").select2({
+			width: "200px",
+			minimumResultsForSearch: 10,
+			allowClear: true
+		});
 		$("#admin-tools-select select").select2({
 			containerCss: { "min-width": "300px" },
 			minimumResultsForSearch: 10,

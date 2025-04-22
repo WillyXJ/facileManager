@@ -1010,6 +1010,36 @@ function fmUpgrade_520($database) {
 }
 
 
+/** fM v5.3.1 **/
+function fmUpgrade_531($database) {
+	global $fmdb;
+	
+	$success = true;
+	
+	/** Prereq */
+	$success = ($GLOBALS['running_db_version'] < 58) ? fmUpgrade_520($database) : true;
+	
+	$queries = array();
+	if ($success) {
+		if (getOption('api_token_support') == 1) {
+			setOption('enforce_ssl', 1, 'auto', false);
+		}
+		
+		/** Create table schema */
+		if (count($queries) && $queries[0]) {
+			foreach ($queries as $schema) {
+				$fmdb->query($schema);
+				if (!$fmdb->result || $fmdb->sql_errors) return false;
+			}
+		}
+	}
+
+	upgradeConfig('fm_db_version', 59, false);
+	
+	return $success;
+}
+
+
 /**
  * Updates the database with the db version number.
  *

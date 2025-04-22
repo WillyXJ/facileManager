@@ -29,7 +29,7 @@ Prerequisites
 
 facileManager (server) requires the following:
 
-* PHP 5.5.0+ with MySQL support
+* PHP 7.3.0+ with MySQL support
 * MySQL 5.0 or later
   * Required MySQL user privileges on the database include
 
