@@ -1,3 +1,11 @@
+5.3.1 (2025-??-??)
+==================
+* Server - [bug] Fixed CSS of disabled checkboxes.
+* Server - [bug] Fixed the ability to clear mailing secure connection type in the settings.
+* Server - [bug] Fixed an issue where enabling API support did not actually enable SSL enforcement.
+           NOTE: This upgrade will ensure SSL is enforced if API support is already enabled.
+* Client - [bug] Fixed checking for binary executable permissions. (Issue #673)
+
 5.3.0 (2025-03-13)
 ==================
 * Server - [improvement] Added ability to test SMTP settings. (Issue #652)

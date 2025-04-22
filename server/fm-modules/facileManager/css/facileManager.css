@@ -277,7 +277,7 @@ input[type="checkbox"]:checked:after {
 }
 input[type="checkbox"].disabled:checked {
 	color: var(--form-input-disabled);
-	background-color: var(--form-input-disabled-primary);
+	opacity: 0.5;
 	background-image: unset;
 }
 input[type="checkbox"].modules {
