@@ -988,9 +988,11 @@ function findProgram($program) {
 
 	if (function_exists('is_executable')) {
 		while ($this_path = current($path)) {
-			$perms = fileperms($program);
-			if (is_executable("$this_path/$program") || ($perms & 0x0040) || ($perms & 0x0008) || ($perms & 0x0001)) {
-				return "$this_path/$program";
+			if (file_exists("$this_path/$program")) {
+				$perms = fileperms("$this_path/$program");
+				if (is_executable("$this_path/$program") || ($perms & 0x0040) || ($perms & 0x0008) || ($perms & 0x0001)) {
+					return "$this_path/$program";
+				}
 			}
 			next($path);
 		}
