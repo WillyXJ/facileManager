@@ -1,4 +1,4 @@
-5.3.1 (2025-??-??)
+5.3.1 (2025-04-21)
 ==================
 * Server - [bug] Fixed CSS of disabled checkboxes.
 * Server - [bug] Fixed the ability to clear mailing secure connection type in the settings.
