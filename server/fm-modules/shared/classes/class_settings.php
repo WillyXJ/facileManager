@@ -71,7 +71,9 @@ class fm_module_settings {
 						}
 					}
 					$option_value = $temp_value;
-				} else $option_value = trim($option_value);
+				} elseif (!is_null($option_value)) {
+					$option_value = trim($option_value);
+				}
 				
 				/** Update with the new value */
 				$result = setOption($option, $option_value, $command, true, $_SESSION['user']['account_id'], $_SESSION['module']);
@@ -92,7 +94,7 @@ class fm_module_settings {
 				} elseif (strpos(strtolower($option), 'password')) {
 					$log_value = str_repeat('*', 8);
 				} else {
-					$log_value = trim($option_value);
+					$log_value = (!is_null($option_value)) ? trim($option_value) : $option_value;
 				}
 				$log_message .= ucwords(str_replace('_', ' ', $option)) . ": $log_value\n";
 
