@@ -2501,6 +2501,7 @@ HTML;
 		
 		$dnssec_endtime = getDNSSECExpiration($domain, 'endtime');
 		
+		$dnssec_ksk = [];
 		foreach ($dnssec_key_signing_array['KSK'] as $ksk_array) {
 			$dnssec_ksk[] = '-k ' . $ksk_array[0];
 		}
