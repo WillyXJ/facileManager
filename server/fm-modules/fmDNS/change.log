@@ -1,3 +1,7 @@
+7.1.2 (2025-0?-??)
+==================
+* Server - [bug] Fixed PHP errors. (Issue #680)
+
 7.1.1 (2025-03-13)
 ==================
 * Server - [bug] Create PTR checkbox no longer gets automatically checked. (Issue #669)

@@ -951,7 +951,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$fmdb->query($query);
 		if ($fmdb->num_rows || $include_hint_zone) {
 			$count = $fmdb->num_rows;
-			$zone_result = $fmdb->last_result;
+			if ($count) {
+				$zone_result = $fmdb->last_result;
+			}
 
 			/** Get zone filename format */
 			$file_format = getOption('zone_file_format', $_SESSION['user']['account_id'], $_SESSION['module']);
