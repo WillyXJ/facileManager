@@ -3238,12 +3238,12 @@ function displayAddNew($name = null, $rel = null, $title = null, $style = 'defau
 	if ($name) $name = ' name="' . $name . '"';
 	if ($rel) $rel = ' rel="' . $rel . '"';
 	
-	$image = '<i class="mini-icon ' . $style . '" title="' . $title . '">' . $contents . '</i>';
+	$image = '<i class="mini-icon ' . $style . '">' . $contents . '</i>';
 	if ($style != 'default') {
-		$title = 'null" class="tooltip-' . $position . ' mini-icon" data-tooltip="' . $title;
+		$title = 'class="tooltip-' . $position . ' mini-icon" data-tooltip="' . $title . '"';
 	}
 	
-	return sprintf('<a id="%s" href="#" title="%s"%s%s>%s</a>', $id, $title, $name, $rel, $image);
+	return sprintf('<a id="%s" href="#" %s%s%s>%s</a>', $id, $title, $name, $rel, $image);
 }
 
 
