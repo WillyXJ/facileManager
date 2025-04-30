@@ -36,11 +36,12 @@ if (!isset($title) || empty($title)) {
 	$title = _('Error');
 }
 
-echo buildPopup('header', $title);
 if (strpos($content, '<p') === false) {
 	$content = "<p>$content</p>";
 }
 if (isset($fmdb->last_error)) {
 	$content .= $fmdb->last_error;
 }
-echo $content . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'));
+exit(buildPopup('header', $title)
+	. $content
+	. buildPopup('footer', _('OK'), array('cancel_button' => 'cancel')));

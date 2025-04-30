@@ -38,4 +38,5 @@ printf('<div id="fm-branding">
 		_('&larr; Back')
 	);
 
-exit(printFooter());
+printFooter();
+exit();

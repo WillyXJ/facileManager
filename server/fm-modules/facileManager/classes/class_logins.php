@@ -76,7 +76,8 @@ class fm_login {
 		</div>', $_SERVER['REQUEST_URI'], $branding_logo, _('Login'), _('Username'),
 				_('Password'), $forgot_link, nl2br($login_message));
 		
-		exit(printFooter());
+		printFooter();
+		exit();
 	}
 	
 	

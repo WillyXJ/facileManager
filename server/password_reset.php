@@ -57,7 +57,8 @@ if (count($_POST)) {
 			
 			addLogEntry(_('Changed password'), $fm_name);
 
-			exit(printResetConfirmation());
+			printResetConfirmation();
+			exit();
 		}
 	}
 }

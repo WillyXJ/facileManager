@@ -60,7 +60,7 @@ switch ($step) {
 		if ((!file_exists(ABSPATH . 'config.inc.php') || !file_get_contents(ABSPATH . 'config.inc.php')) || 
 				(@include(ABSPATH . 'config.inc.php') && !@is_array($__FM_CONFIG['db']))) {
 			printHeader(_('Installation'), 'install');
-			displaySetup();
+			echo displaySetup();
 		} else {
 			header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=3');
 			exit;
@@ -102,7 +102,7 @@ switch ($step) {
 			exit;
 		}
 		
-		if ($result && $fmdb->num_rows) {
+		if ($fmdb->num_rows) {
 			/** Check if the default admin account exists */
 			if (!checkAccountCreation($__FM_CONFIG['db']['name'])) {
 				header('Location: ' . $GLOBALS['RELPATH'] . 'fm-install.php?step=4');
@@ -203,7 +203,7 @@ function displaySetup($error = null) {
 		$ssl_show_hide = 'none';
 	}
 	
-	printf('
+	return sprintf('
 <form method="post" action="?step=2">
 	<div id="fm-branding">
 		<img src="%s" /><span>%s</span>

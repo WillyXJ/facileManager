@@ -1908,7 +1908,8 @@ function bailOut($message, $tryagain = 'try again', $title = null) {
 		<img src="%s" /><span>%s</span>
 	</div>
 	<div id="window">%s%s</div>', getBrandLogo(), $title, $message, $tryagain);
-	exit(printFooter());
+	printFooter();
+	exit();
 }
 
 
@@ -3099,7 +3100,7 @@ HTML;
  * @package facileManager
  *
  * @param string $output Output to parse for AJAX call
- * @return string Return for the AJAX call to display
+ * @return string|null Return for the AJAX call to display
  */
 function parseAjaxOutput($output) {
 	global $fmdb;
@@ -3110,10 +3111,10 @@ function parseAjaxOutput($output) {
 			unset($_POST);
 			include_once(ABSPATH . 'fm-modules/facileManager/ajax/formatOutput.php');
 		} else {
-			echo $message_array['content'];
+			return $message_array['content'];
 		}
 	} else {
-		echo _('Success');
+		return _('Success');
 	}
 }
 
