@@ -70,7 +70,7 @@ $response = null;
 if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
 	basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'domain_id', 'AND record_type="URL"');
 	if ($fmdb->num_rows) {
-		$response = sprintf('<p>%s</p>', __('There are no URL RR web servers defined in the Settings to support the URL resource records.'));
+		$response = sprintf('<p>%s</p>', sprintf(__('There are no URL RR web servers defined in the %s to support the URL resource records.'), parseMenuLinks("<a href=\"__menu{{$_SESSION['module']} Settings}\">Settings</a>")));
 		$response_class = 'attention';
 	} else {
 		unset($supported_record_types[array_search('URL', $supported_record_types)]);
@@ -83,16 +83,16 @@ $zone_access_allowed = zoneAccessIsAllowed($parent_domain_ids);
 if (!in_array($record_type, $supported_record_types) && $record_type != 'CUSTOM') $record_type = $default_record_type;
 $addl_title_blocks[] = buildRecordTypes($record_type, $parent_domain_ids, $map, $supported_record_types, $search_query);
 
-if (reloadZone($domain_id)) {
-	if (reloadAllowed($domain_id) && currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) $response = sprintf('<p>%s</p>', sprintf(__('You need to %s this zone'), sprintf('<a href="" class="zone_reload" id="' . $domain_id . '">%s</a>', __('reload'))));
+if (!$response && !$soa_count = getSOACount($domain_id)) {
+	$response = sprintf('<p>%s</p>', __('The SOA record still needs to be created for this zone'));
+	$response_class = 'attention';
 }
-if (!$ns_count = getNSCount($domain_id)) {
+if (!$response && !$ns_count = getNSCount($domain_id)) {
 	$response = sprintf('<p>%s</p>', __('One or more NS records still needs to be created for this zone'));
 	$response_class = 'attention';
 }
-if (!$soa_count = getSOACount($domain_id)) {
-	$response = sprintf('<p>%s</p>', __('The SOA record still needs to be created for this zone'));
-	$response_class = 'attention';
+if (!$response && reloadZone($domain_id)) {
+	if (reloadAllowed($domain_id) && currentUserCan('reload_zones', $_SESSION['module']) && $zone_access_allowed) $response = sprintf('<p>%s</p>', sprintf(__('You need to %s this zone'), sprintf('<a href="" class="zone_reload" id="' . $domain_id . '">%s</a>', __('reload'))));
 }
 
 $current_user_can_manage_records = currentUserCan('manage_records', $_SESSION['module']);
