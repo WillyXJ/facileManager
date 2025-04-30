@@ -1205,7 +1205,7 @@ HTML;
 							( address_match_element )
 						</div>
 						<div id="define_redirect_url" style="display: none">
-							<h4>%s <a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></h4>
+							<h4>%s <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></h4>
 							<input type="text" id="domain_redirect_url" name="domain_redirect_url" size="40" value="" class="required" />
 						</div>
 					</td>
