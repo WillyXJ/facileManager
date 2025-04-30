@@ -4,6 +4,7 @@
 * Server - [bug] Fixed record type menu to exclude URL if there are no URL servers defined.
 * Server - [bug] Changed 'Domain' text references to 'Zone' to be more consistent.
 * Server - [bug] Fixed tooltip icon color for url redirect zone type.
+* Server - [bug] url-redirect zone type can only be selected if URL RR Servers are defined first.
 
 7.1.1 (2025-03-13)
 ==================

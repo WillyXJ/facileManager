@@ -1012,7 +1012,11 @@ HTML;
 
 		$views = buildSelect('domain_view', 'domain_view', availableViews('active'), $domain_view, 4, null, true);
 		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_mapping'), $map, 1, $disabled);
-		$domain_types = buildSelect('domain_type', 'domain_type', array_merge(enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_type'), array('url-redirect')), $domain_type, 1, $disabled);
+		$available_domain_types = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_type');
+		if (getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
+			$available_domain_types = array_merge($available_domain_types, array('url-redirect'));
+		}
+		$domain_types = buildSelect('domain_type', 'domain_type', $available_domain_types, $domain_type, 1, $disabled);
 		$clone = buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1, $disabled);
 		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', availableServers('id'), $domain_name_servers, 1, null, true);
 
