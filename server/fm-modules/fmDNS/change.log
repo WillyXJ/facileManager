@@ -7,6 +7,7 @@
 * Server - [bug] url-redirect zone type can only be selected if URL RR Servers are defined first.
 * Server - [bug] Replaced a missed instance of 'master' with 'primary'.
 * Server - [bug] Fixed zone add properties to display Dynamic and DNSSEC options.
+* Server - [bug] Fixed formatting of empty page results.
 
 7.1.1 (2025-03-13)
 ==================
