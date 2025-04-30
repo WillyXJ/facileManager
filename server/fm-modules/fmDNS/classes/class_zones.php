@@ -550,7 +550,11 @@ class fm_dns_zones {
 					$result = $fmdb->query($query . "'primaries', '" . $required_servers . "')");
 				}
 				$rows_affected += $fmdb->rows_affected;
-				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+
+				global $fm_dns_acls;
+				if (!class_exists('fm_dns_acls')) {
+					include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+				}
 				$log_message .= formatLogKeyData('domain_', 'primaries', $fm_dns_acls->parseACL($required_servers));
 			}
 		} else {
