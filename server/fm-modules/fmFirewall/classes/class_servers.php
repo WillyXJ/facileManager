@@ -83,7 +83,7 @@ class fm_module_servers extends fm_shared_module_servers {
 			}
 		}
 			
-		echo "</tbody>\n</table></div></div>\n";
+		echo "</tbody>\n</table>\n";
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="servers">%s</p>', __('There are no firewall servers.'));
 		}

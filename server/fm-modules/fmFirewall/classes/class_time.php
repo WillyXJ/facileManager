@@ -72,7 +72,7 @@ class fm_module_time {
 			}
 		}
 			
-		echo "</tbody>\n</table></div></div>\n";
+		echo "</tbody>\n</table>\n";
 		if (!$result) {
 			printf('<p id="table_edits" class="noresult" name="time">%s</p>', __('There are no time restrictions defined.'));
 		}
