@@ -127,7 +127,10 @@ if (isset($create) && is_array($create)) {
 			if (isset($tmp_record_type)) {
 				$record_type = $tmp_record_type;
 			}
-			if (isset($import_records) || (defined('AJAX') && $record_type == 'ALL')) $record_type = $data['record_type'];
+			if (isset($import_records) || (defined('AJAX') && $record_type == 'ALL')) {
+				$tmp_record_type = $record_type;
+				$record_type = $data['record_type'];
+			}
 
 			/** Skip if CUSTOM is empty */
 			if ($record_type == 'CUSTOM' && !$data['record_value']) break;

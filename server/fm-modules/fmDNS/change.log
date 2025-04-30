@@ -8,6 +8,8 @@
 * Server - [bug] Replaced a missed instance of 'master' with 'primary'.
 * Server - [bug] Fixed zone add properties to display Dynamic and DNSSEC options.
 * Server - [bug] Fixed formatting of empty page results.
+* Server - [bug] Fixed an issue where adding multiple records of varying types would get added
+           as the same record type.
 
 7.1.1 (2025-03-13)
 ==================
