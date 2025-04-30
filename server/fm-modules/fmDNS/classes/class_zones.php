@@ -2084,7 +2084,7 @@ HTML;
 		
 		/** Slave and stub zones require master servers */
 		if (in_array($post['domain_type'], array('secondary', 'stub'))) {
-			if (empty($post['domain_required_servers']['primaries'])) return __('No master servers defined.');
+			if (empty($post['domain_required_servers']['primaries'])) return __('No primary servers defined.');
 			$post['domain_required_servers'] = $post['domain_required_servers']['primaries'];
 		}
 
