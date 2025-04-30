@@ -70,7 +70,7 @@ class fm_dns_zones {
 				);
 			}
 			$title_array = array_merge((array) $title_array, array(array('title' => __('Group Name'), 'rel' => 'group_name'),
-				array('title' => __('Associated Domains'), 'class' => 'header-nosort'),
+				array('title' => __('Associated Zones'), 'class' => 'header-nosort'),
 				array('title' => _('Comment'), 'class' => 'header-nosort')
 			));
 		} else {
@@ -859,7 +859,7 @@ class fm_dns_zones {
 				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $row->domain_id, 'record_', 'domain_id', 'AND record_type="URL" AND record_name="@"');
 				if ($fmdb->num_rows) {
 					$domain_redirect_url = $fmdb->last_result[0]->record_value;
-					$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-globe" aria-hidden="true"></i></a>', sprintf(__('This domain redirects to %s'), $domain_redirect_url));
+					$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-globe" aria-hidden="true"></i></a>', sprintf(__('This zone redirects to %s'), $domain_redirect_url));
 					if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
 						$response = __('There are no URL RR web servers defined in the Settings to support the URL resource records.');
 						$classes[] = 'attention';
@@ -1243,7 +1243,7 @@ HTML;
 				%s
 			</table>',
 				$action, $domain_id, $classes,
-				__('Domain Name'), $domain_name, $domain_name_length,
+				__('Zone Name'), $domain_name, $domain_name_length,
 				$select_template,
 				__('Views'), __('Leave blank to use the views defined in the template.'), $views,
 				__('Zone Map'), $zone_maps,
@@ -1255,7 +1255,7 @@ HTML;
 				__('Override DNAME Resource Record Setting'), $clone_dname_options_show,
 				__('Use DNAME Resource Records for Clones'), $clone_dname_dropdown,
 				__('DNS Servers'), $name_servers,
-				__('Domain TTL'), __('Leave blank to use the $TTL from the SOA.'), $domain_ttl, $domain_ttl_length,
+				__('Zone TTL'), __('Leave blank to use the $TTL from the SOA.'), $domain_ttl, $domain_ttl_length,
 				__('Zone Transfer Key'), __('Optionally specify a key for transferring this zone (overrides this setting in views).'), $keys,
 				$soa_templates,
 				_('Comment'), $domain_comment,

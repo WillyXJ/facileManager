@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Fixed PHP errors. (Issue #680)
 * Server - [bug] Fixed record type menu to exclude URL if there are no URL servers defined.
+* Server - [bug] Changed 'Domain' text references to 'Zone' to be more consistent.
 
 7.1.1 (2025-03-13)
 ==================

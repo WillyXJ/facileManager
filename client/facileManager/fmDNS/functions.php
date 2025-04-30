@@ -54,7 +54,7 @@ function printModuleHelp () {
      value=XX                 Defines the value of the RR
      ttl=XX                   Defines the TTL of the RR
      priority=XX              Defines the priority of the RR (MX only)
-     append=XX                Defines whether to append the domain or not (yes, no)
+     append=XX                Defines whether to append the zone name or not (yes, no)
      comment=XX               Defines the record comment
      status=XX                Defines the record status (active, disabled)
      newname=XX               Defines the new record name (when action=update)

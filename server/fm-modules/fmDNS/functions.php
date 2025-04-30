@@ -1330,7 +1330,7 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 		return !is_int($retval) ? array(null, $retval) : array($retval, __('Created reverse zone.'));
 	}
 
-	return array(null, __('Forward domain not found.'));
+	return array(null, __('Forward zone not found.'));
 }
 
 /**
