@@ -648,6 +648,11 @@ class fm_dns_zones {
 			/** Delete all associated records */
 			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'domain_id');
 			if ($fmdb->num_rows) {
+				/** Unlink PTR */
+				if ($fmdb->last_result[0]->record_type == 'PTR') {
+					basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $fmdb->last_result[0]->record_id, 'record_ptr_id', 0, 'record_ptr_id');
+				}
+				
 				if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'deleted', 'domain_id') === false) {
 					return formatError(__('The associated records for this zone could not be deleted because a database error occurred.'), 'sql');
 				}
