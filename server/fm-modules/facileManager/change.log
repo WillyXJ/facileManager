@@ -1,4 +1,4 @@
-5.3.2 (2025-??-??)
+5.3.2 (2025-05-01)
 ==================
 * Server - [bug] Fixed PHP8.4 deprecation warnings.
 * Server - [bug] Removed duplicate "Add New" tool-tips.
