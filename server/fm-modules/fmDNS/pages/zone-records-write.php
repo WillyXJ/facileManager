@@ -209,7 +209,7 @@ function autoManagePTR($domain_id, $record_type, $data, $operation = 'add', $old
 	if (!isset($data['PTR'])) return;
 
 	/* Get the proper reverse domain_id for the PTR */
-	if (!is_int($data['PTR'])) {
+	if (!is_numeric($data['PTR'])) {
 		$retval = checkPTRZone($data['record_value'], $domain_id);
 		list($data['PTR'], $error_msg) = $retval;
 	}

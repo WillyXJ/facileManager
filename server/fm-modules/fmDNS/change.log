@@ -10,6 +10,7 @@
 * Server - [bug] Fixed formatting of empty page results.
 * Server - [bug] Fixed an issue where adding multiple records of varying types would get added
            as the same record type.
+* Server - [bug] Fixed A record deletions so automatic reverse zones do not get created.
 
 7.1.1 (2025-03-13)
 ==================
