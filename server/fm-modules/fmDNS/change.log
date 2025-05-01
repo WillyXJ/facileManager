@@ -1,3 +1,22 @@
+7.1.2 (2025-0?-??)
+==================
+* Server - [bug] Fixed PHP errors. (Issue #680)
+* Server - [bug] Fixed record type menu to exclude URL if there are no URL servers defined.
+* Server - [bug] Changed 'Domain' text references to 'Zone' to be more consistent.
+* Server - [bug] Fixed tooltip icon color for url redirect zone type.
+* Server - [bug] url-redirect zone type can only be selected if URL RR Servers are defined first.
+* Server - [bug] Replaced a missed instance of 'master' with 'primary'.
+* Server - [bug] Fixed zone add properties to display Dynamic and DNSSEC options.
+* Server - [bug] Fixed formatting of empty page results.
+* Server - [bug] Fixed an issue where adding multiple records of varying types would get added
+           as the same record type.
+* Server - [bug] Fixed A record deletions so automatic reverse zones do not get created.
+* Server - [bug] When automatic reverse zones get created they no longer use the same SOA as the
+           forward zone (unless it's a template).
+* Server - [bug] When a reverse zone is deleted the related linked PTR records are now unlinked.
+* Server - [bug] Fixed automatic reverse zone creation with PHP 8.4.
+* Client - [bug] Brought clarity to -D and -f parameters.
+
 7.1.1 (2025-03-13)
 ==================
 * Server - [bug] Create PTR checkbox no longer gets automatically checked. (Issue #669)

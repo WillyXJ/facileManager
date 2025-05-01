@@ -39,13 +39,13 @@
  */
 function printModuleHelp () {
 	echo <<<HELP
-   -D                         Name of zone to dump (required by dump-zone)
-   -f                         Filename hosting the zone data (required by dump-zone)
+   -D zone-name               Name of zone to dump (required by dump-zone)
+   -f /path/to/file           Filename hosting the zone data (required by dump-zone)
    -z|zones                   Build all associated zone files
      dump-cache               Dump the DNS cache
      dump-zone                Dump the specified zone data to STDOUT
      clear-cache              Clear the DNS cache
-     id=XX                    Specify the individual DomainID to build and reload
+     id=XX                    Specify the individual ZoneID to build and reload
 	 
      setHost                  Invokes the API functionality
      action=XX                Defines API action to take on a record (add, update, delete)
@@ -54,7 +54,7 @@ function printModuleHelp () {
      value=XX                 Defines the value of the RR
      ttl=XX                   Defines the TTL of the RR
      priority=XX              Defines the priority of the RR (MX only)
-     append=XX                Defines whether to append the domain or not (yes, no)
+     append=XX                Defines whether to append the zone name or not (yes, no)
      comment=XX               Defines the record comment
      status=XX                Defines the record status (active, disabled)
      newname=XX               Defines the new record name (when action=update)

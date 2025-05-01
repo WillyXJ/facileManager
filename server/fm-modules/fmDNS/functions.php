@@ -1315,13 +1315,17 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 		$ptr_array['domain_mapping'] = 'reverse';
 		$ptr_array['domain_name_servers'] = explode(';', $result[0]->domain_name_servers);
 
-		$copy_fields = array('soa_id', 'domain_view', 'domain_type', 'domain_template_id', 'domain_name_servers');
+		$copy_fields = array('domain_view', 'domain_type', 'domain_template_id', 'domain_name_servers');
 		foreach ($copy_fields as $field) {
 			$ptr_array[$field] = $result[0]->$field;
 		}
 
-		global $fm_dns_zones;
+		/** Copy the SOA only if it's a template */
+		if (getNameFromID($result[0]->soa_id, 'fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_template') == 'yes') {
+			$ptr_array['soa_id'] = $result[0]->soa_id;
+		}
 
+		global $fm_dns_zones;
 		if (!class_exists('fm_dns_zones')) {
 			include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_zones.php');
 		}
@@ -1330,7 +1334,7 @@ function autoCreatePTRZone($new_zones, $fwd_domain_id) {
 		return !is_int($retval) ? array(null, $retval) : array($retval, __('Created reverse zone.'));
 	}
 
-	return array(null, __('Forward domain not found.'));
+	return array(null, __('Forward zone not found.'));
 }
 
 /**

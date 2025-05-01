@@ -70,7 +70,7 @@ class fm_dns_zones {
 				);
 			}
 			$title_array = array_merge((array) $title_array, array(array('title' => __('Group Name'), 'rel' => 'group_name'),
-				array('title' => __('Associated Domains'), 'class' => 'header-nosort'),
+				array('title' => __('Associated Zones'), 'class' => 'header-nosort'),
 				array('title' => _('Comment'), 'class' => 'header-nosort')
 			));
 		} else {
@@ -128,7 +128,7 @@ class fm_dns_zones {
 			}
 		}
 			
-		echo "</tbody>\n</table></div></div>\n";
+		echo "</tbody>\n</table>\n";
 		if (!$result) {
 			$message = ($map == 'groups') ? __('There are no zone groups.') : __('There are no zones.');
 			printf('<p id="table_edits" class="noresult" name="domains">%s</p>', $message);
@@ -550,7 +550,11 @@ class fm_dns_zones {
 					$result = $fmdb->query($query . "'primaries', '" . $required_servers . "')");
 				}
 				$rows_affected += $fmdb->rows_affected;
-				include_once(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+
+				global $fm_dns_acls;
+				if (!class_exists('fm_dns_acls')) {
+					include(ABSPATH . 'fm-modules/' . $_SESSION['module'] . '/classes/class_acls.php');
+				}
 				$log_message .= formatLogKeyData('domain_', 'primaries', $fm_dns_acls->parseACL($required_servers));
 			}
 		} else {
@@ -644,6 +648,11 @@ class fm_dns_zones {
 			/** Delete all associated records */
 			basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'domain_id');
 			if ($fmdb->num_rows) {
+				/** Unlink PTR */
+				if ($fmdb->last_result[0]->record_type == 'PTR') {
+					basicUpdate('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', $fmdb->last_result[0]->record_id, 'record_ptr_id', 0, 'record_ptr_id');
+				}
+				
 				if (updateStatus('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $domain_id, 'record_', 'deleted', 'domain_id') === false) {
 					return formatError(__('The associated records for this zone could not be deleted because a database error occurred.'), 'sql');
 				}
@@ -859,7 +868,7 @@ class fm_dns_zones {
 				basicGet('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'records', $row->domain_id, 'record_', 'domain_id', 'AND record_type="URL" AND record_name="@"');
 				if ($fmdb->num_rows) {
 					$domain_redirect_url = $fmdb->last_result[0]->record_value;
-					$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-globe" aria-hidden="true"></i></a>', sprintf(__('This domain redirects to %s'), $domain_redirect_url));
+					$icons[] = sprintf('<a href="JavaScript:void(0);" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="fa fa-globe" aria-hidden="true"></i></a>', sprintf(__('This zone redirects to %s'), $domain_redirect_url));
 					if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
 						$response = __('There are no URL RR web servers defined in the Settings to support the URL resource records.');
 						$classes[] = 'attention';
@@ -1012,7 +1021,14 @@ HTML;
 
 		$views = buildSelect('domain_view', 'domain_view', availableViews('active'), $domain_view, 4, null, true);
 		$zone_maps = buildSelect('domain_mapping', 'domain_mapping', enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_mapping'), $map, 1, $disabled);
-		$domain_types = buildSelect('domain_type', 'domain_type', array_merge(enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_type'), array('url-redirect')), $domain_type, 1, $disabled);
+		$available_domain_types = enumMYSQLSelect('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'domains','domain_type');
+		if (getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
+			$available_domain_types = array_merge($available_domain_types, array('url-redirect'));
+		}
+		if (!$domain_type) {
+			$domain_type = $available_domain_types[0];
+		}
+		$domain_types = buildSelect('domain_type', 'domain_type', $available_domain_types, $domain_type, 1, $disabled);
 		$clone = buildSelect('domain_clone_domain_id', 'domain_clone_domain_id', $this->availableCloneDomains($map, $domain_id), $domain_clone_domain_id, 1, $disabled);
 		$name_servers = buildSelect('domain_name_servers', 'domain_name_servers', availableServers('id'), $domain_name_servers, 1, null, true);
 
@@ -1205,7 +1221,7 @@ HTML;
 							( address_match_element )
 						</div>
 						<div id="define_redirect_url" style="display: none">
-							<h4>%s <a href="JavaScript:void(0);" class="tooltip-top mini-icon" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></h4>
+							<h4>%s <a href="JavaScript:void(0);" class="tooltip-top" data-tooltip="%s"><i class="fa fa-question-circle" aria-hidden="true"></i></a></h4>
 							<input type="text" id="domain_redirect_url" name="domain_redirect_url" size="40" value="" class="required" />
 						</div>
 					</td>
@@ -1243,7 +1259,7 @@ HTML;
 				%s
 			</table>',
 				$action, $domain_id, $classes,
-				__('Domain Name'), $domain_name, $domain_name_length,
+				__('Zone Name'), $domain_name, $domain_name_length,
 				$select_template,
 				__('Views'), __('Leave blank to use the views defined in the template.'), $views,
 				__('Zone Map'), $zone_maps,
@@ -1255,7 +1271,7 @@ HTML;
 				__('Override DNAME Resource Record Setting'), $clone_dname_options_show,
 				__('Use DNAME Resource Records for Clones'), $clone_dname_dropdown,
 				__('DNS Servers'), $name_servers,
-				__('Domain TTL'), __('Leave blank to use the $TTL from the SOA.'), $domain_ttl, $domain_ttl_length,
+				__('Zone TTL'), __('Leave blank to use the $TTL from the SOA.'), $domain_ttl, $domain_ttl_length,
 				__('Zone Transfer Key'), __('Optionally specify a key for transferring this zone (overrides this setting in views).'), $keys,
 				$soa_templates,
 				_('Comment'), $domain_comment,
@@ -2076,7 +2092,7 @@ HTML;
 		
 		/** Slave and stub zones require master servers */
 		if (in_array($post['domain_type'], array('secondary', 'stub'))) {
-			if (empty($post['domain_required_servers']['primaries'])) return __('No master servers defined.');
+			if (empty($post['domain_required_servers']['primaries'])) return __('No primary servers defined.');
 			$post['domain_required_servers'] = $post['domain_required_servers']['primaries'];
 		}
 

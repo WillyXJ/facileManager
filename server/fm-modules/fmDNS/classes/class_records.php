@@ -158,7 +158,7 @@ class fm_dns_records {
 			$soa_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name');
 			$log_message = sprintf(__('Updated a SOA template (%s) with the following details'), $soa_name) . ":\n";
 			$domain_name = _('None');
-		} else {
+		} elseif ($id) {
 			$record_domain_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'domain_id');
 			$_domain_id = ($record_domain_id == $domain_id) ? $domain_id : $record_domain_id;
 
@@ -416,6 +416,9 @@ class fm_dns_records {
 				if ($new) {
 					$supported_record_types = enumMYSQLSelect('fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_type');
 					unset($supported_record_types[array_search('CUSTOM', $supported_record_types)]);
+					if (!getOption('url_rr_web_servers', $_SESSION['user']['account_id'], $_SESSION['module'])) {
+						unset($supported_record_types[array_search('URL', $supported_record_types)]);
+					}
 					sort($supported_record_types);
 					$field_values['data']['Type'] = buildSelect($action . '[_NUM_][record_type]', '_NUM_', $supported_record_types, $record_type, 1, null, false, null, 'record-type');
 				} else {
