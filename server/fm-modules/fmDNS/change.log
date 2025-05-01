@@ -11,6 +11,8 @@
 * Server - [bug] Fixed an issue where adding multiple records of varying types would get added
            as the same record type.
 * Server - [bug] Fixed A record deletions so automatic reverse zones do not get created.
+* Server - [bug] When automatic reverse zones get created they no longer use the same SOA as the
+           forward zone (unless it's a template).
 
 7.1.1 (2025-03-13)
 ==================
