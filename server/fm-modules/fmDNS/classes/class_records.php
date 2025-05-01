@@ -158,7 +158,7 @@ class fm_dns_records {
 			$soa_name = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'soa', 'soa_', 'soa_id', 'soa_name');
 			$log_message = sprintf(__('Updated a SOA template (%s) with the following details'), $soa_name) . ":\n";
 			$domain_name = _('None');
-		} else {
+		} elseif ($id) {
 			$record_domain_id = getNameFromID($id, 'fm_' . $__FM_CONFIG['fmDNS']['prefix'] . 'records', 'record_', 'record_id', 'domain_id');
 			$_domain_id = ($record_domain_id == $domain_id) ? $domain_id : $record_domain_id;
 

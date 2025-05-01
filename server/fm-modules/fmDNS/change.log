@@ -14,6 +14,7 @@
 * Server - [bug] When automatic reverse zones get created they no longer use the same SOA as the
            forward zone (unless it's a template).
 * Server - [bug] When a reverse zone is deleted the related linked PTR records are now unlinked.
+* Server - [bug] Fixed automatic reverse zone creation with PHP 8.4.
 * Client - [bug] Brought clarity to -D and -f parameters.
 
 7.1.1 (2025-03-13)
