@@ -1,3 +1,7 @@
+3.2.4 (2025-0?-??)
+==================
+* Server - [bug] Fixed formatting of empty page results.
+
 3.2.3 (2025-03-30)
 ==================
 * Client - [bug] Fixed ability to build a config. (Issue #676)
