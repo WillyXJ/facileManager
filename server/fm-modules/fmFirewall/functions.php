@@ -338,9 +338,9 @@ function buildModuleMenu() {
 		addSubmenuPage('config-policy.php', __('Policies'), __('Firewall Policy'), array('manage_policies', 'view_all'), $_SESSION['module'], 'config-policy.php');
 		addSubmenuPage('config-policy.php', __('Templates'), __('Policy Templates'), array('manage_policies', 'view_all'), $_SESSION['module'], 'templates-policy.php');
 
-	addObjectPage(array(__('Objects'), 'cubes'), __('Address Groups'), array('manage_addresses', 'view_all'), $_SESSION['module'], 'object-groups.php');
-		addSubmenuPage('object-groups.php', __('Address Groups'), __('Address Groups'), array('manage_addresses', 'view_all'), $_SESSION['module'], 'object-groups.php');
-		addSubmenuPage('object-groups.php', __('Addresses'), __('Addresses'), array('manage_addresses', 'view_all'), $_SESSION['module'], 'objects.php');
+	addObjectPage(array(__('Objects'), 'cubes'), __('Address Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', __('Address Groups'), __('Address Groups'), array('manage_objects', 'view_all'), $_SESSION['module'], 'object-groups.php');
+		addSubmenuPage('object-groups.php', __('Addresses'), __('Addresses'), array('manage_objects', 'view_all'), $_SESSION['module'], 'objects.php');
 		addSubmenuPage('object-groups.php', __('Service Groups'), __('Service Groups'), array('manage_services', 'view_all'), $_SESSION['module'], 'service-groups.php');
 		addSubmenuPage('object-groups.php', __('Services'), __('Services'), array('manage_services', 'view_all'), $_SESSION['module'], 'services.php');
 
