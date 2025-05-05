@@ -1,3 +1,7 @@
+0.10.? (2025-??-??)
+==================
+* Server - [bug] Fixed inconsistent tooltips for "Configure Additional Options."
+
 0.10.1 (2025-04-21)
 ===================
 * Server - [bug] Fixed PHP errors. (Issue #674)

@@ -375,7 +375,7 @@ class fm_wifi_wlans {
 			$edit_status = '<td class="column-actions">' . $edit_status . '</td>';
 			$checkbox = '<input type="checkbox" name="bulk_list[]" value="' . $row->config_id .'" />';
 		}
-		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="mini-icon"><i class="mini-icon fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
+		$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
 		
 		if ($class) $class = 'class="' . $class . '"';
 		if (is_array($icons)) {
