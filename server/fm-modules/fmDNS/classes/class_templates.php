@@ -124,7 +124,7 @@ class fm_module_templates {
 		$star = $row->$field_name == 'yes' ? str_replace(__('Super Admin'), __('Default Template'), $__FM_CONFIG['icons']['star']) : null;
 		
 		if (in_array($row->domain_type, array('primary', 'secondary')) && (currentUserCan(array('manage_zones', 'view_all'), $_SESSION['module']) || zoneAccessIsAllowed(array($row->domain_id)))) {
-			$icons[] = sprintf('<a href="config-options.php?domain_id=%d" class="tooltip-top mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $row->domain_id, __('Configure Additional Options'));
+			$icons[] = sprintf('<a href="config-options.php?domain_id=%d" class="tooltip-bottom mini-icon" data-tooltip="%s"><i class="mini-icon fa fa-sliders" aria-hidden="true"></i></a>', $row->domain_id, __('Configure Additional Options'));
 		}
 
 		if (is_array($icons)) {
