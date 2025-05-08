@@ -921,14 +921,12 @@ h4 {
 	border-bottom: 3px solid var(--table-header-text);
 }
 
-#table_edits.grab1 tbody tr td:first-child i {
-	cursor: url(https://www.google.com/intl/en_ALL/mapfiles/openhand.cur) 8 8, move;
+#table_edits.grab1 tbody tr td i.ui-sortable-handle,
+#table_edits.grab tbody tr td i.ui-sortable-handle {
+		cursor: grab;
 }
-#table_edits.grab tbody:not(.no-grab) tr td:nth-child(2) i {
-	cursor: url(https://www.google.com/intl/en_ALL/mapfiles/openhand.cur) 8 8, move;
-}
-#table_edits.grabbing tbody tr td:nth-child(2) i {
-	cursor: url(https://www.google.com/intl/en_ALL/mapfiles/closedhand.cur) 8 8, move;
+#table_edits.grabbing tbody tr td i.ui-sortable-handle {
+	cursor: grabbing;
 }
 #table_edits.grabbing tbody tr {
 	border: 1px solid var(--table-rows-grabbing-border);
