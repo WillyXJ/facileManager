@@ -801,14 +801,11 @@ function detectOSDistro() {
 			}
 		}
 	} elseif (PHP_OS == 'Darwin') {
-		@exec(findProgram('system_profiler') . ' SPSoftwareDataType 2>/dev/null', $output, $retval);
+		$output = passthru(findProgram('system_profiler') . ' SPSoftwareDataType 2>/dev/null | grep "System Version"', $retval);
 		if (!$retval) {
-			foreach ($output as $line) {
-				$array_line = explode(':', $line);
-				if (trim($array_line[0]) == 'System Version') {
-					$distro = trim($array_line[1]);
-					if (preg_match('/(^Mac OS)|(^OS X)/', $distro)) return 'Apple';
-				}
+			$array_line = explode(':', $output);
+			if (trim($array_line[0]) == 'System Version') {
+				if (preg_match('/(^mac\s?OS)|(^OS X)/i', trim($array_line[1]))) return 'Apple';
 			}
 		}
 	}
