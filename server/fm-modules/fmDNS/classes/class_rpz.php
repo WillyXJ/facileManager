@@ -604,6 +604,11 @@ HTML;
 		if (!empty($post['cfg_data'])) $post['cfg_data'] = sanitize($post['cfg_data'], '-');
 		$post['cfg_type'] = 'rpz';
 
+		/** Ensure policy is defined */
+		if (!isset($post['policy']) || !$post['policy'][0]) {
+			return __('The policy needs to be selected.');
+		}
+
 		unset($post['tab-group-1']);
 		
 		$query = "SELECT * FROM fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config WHERE account_id='{$_SESSION['user']['account_id']}' AND cfg_status!='deleted' AND cfg_type='{$post['cfg_type']}' AND cfg_name='!config_name!' AND view_id='{$post['view_id']}' AND domain_id='{$post['domain_id']}' AND server_serial_no='{$post['server_serial_no']}' AND cfg_id!='{$post['cfg_id']}'";

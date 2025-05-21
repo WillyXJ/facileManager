@@ -2,6 +2,7 @@
 ==================
 * Server - [bug] Fixed RPZ for All Zones with PHP8.4.
 * Server - [bug] Fixed ability to save updates to RPZ configurations. (Issue #688)
+* Server - [bug] Fixed form validation for RPZ. (Issue #649)
 
 7.1.2 (2025-05-01)
 ==================
