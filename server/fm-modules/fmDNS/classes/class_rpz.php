@@ -292,18 +292,17 @@ class fm_module_rpz {
 		$sql_start = "UPDATE `fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}config` SET ";
 		
 		foreach ($include_sub_configs as $handler) {
+			$handler = sanitize($handler);
 			$sql_values = '';
-			$child['cfg_name'] = $handler;
 			$child['cfg_data'] = $post[$handler];
 			
 			foreach ($child as $key => $data) {
-				if (!in_array($key, $include)) continue;
 				$sql_values .= "$key='$data', ";
 			}
 			$sql_values = rtrim($sql_values, ', ');
 			
 			if ($child['cfg_data']) {
-				$log_message .= formatLogKeyData('cfg_', $child['cfg_name'], $child['cfg_data']);
+				$log_message .= formatLogKeyData('cfg_', $handler, $child['cfg_data']);
 			}
 
 			$query = "$sql_start $sql_values WHERE cfg_parent={$post['cfg_id']} AND cfg_name='$handler' LIMIT 1";
@@ -604,6 +603,11 @@ HTML;
 		$post['cfg_name'] = '!config_name!';
 		if (!empty($post['cfg_data'])) $post['cfg_data'] = sanitize($post['cfg_data'], '-');
 		$post['cfg_type'] = 'rpz';
+
+		/** Ensure policy is defined */
+		if (!isset($post['policy']) || !$post['policy'][0]) {
+			return __('The policy needs to be selected.');
+		}
 
 		unset($post['tab-group-1']);
 		

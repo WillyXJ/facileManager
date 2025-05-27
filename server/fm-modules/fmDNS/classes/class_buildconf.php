@@ -1677,10 +1677,9 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 		$named_checkconf = findProgram('named-checkconf');
 		$named_checkzone = findProgram('named-checkzone');
 		
-		$uname = php_uname('n');
 		if (!$named_checkconf || !$named_checkzone) {
 			return sprintf('<div id="config_check" class="info"><p>%s</p></div>', 
-					sprintf(__('The named utilities (specifically named-checkconf and named-checkzone) cannot be found on %s. If they were installed, these configs and zones could be checked for syntax.'), $uname));
+					sprintf(__('The named utilities (specifically named-checkconf and named-checkzone) cannot be found on %s. If they were installed, these configs and zones could be checked for syntax.'), php_uname('n')));
 		}
 		
 		$fm_temp_directory = '/' . ltrim(getOption('fm_temp_directory'), '/');
@@ -2619,7 +2618,10 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 				}
 
 				foreach ($domain_ids as $domain_id) {
-					$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+					$domain = '';
+					if ($domain_id) {
+						$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+					}
 
 					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="0"');
 					foreach ($fmdb->last_result as $record) {
@@ -2650,7 +2652,10 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 					}
 	
 					foreach ($domain_ids as $domain_id) {
-						$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+						$domain = '';
+						if ($domain_id) {
+							$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+						}
 	
 						basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
 						foreach ($fmdb->last_result as $record) {
@@ -2678,7 +2683,10 @@ RewriteRule "^/?(.*)"      "%s" [L,R,LE]
 				}
 
 				foreach ($domain_ids as $domain_id) {
-					$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+					$domain = '';
+					if ($domain_id) {
+						$domain = displayFriendlyDomainName(getNameFromID($domain_id, "fm_{$__FM_CONFIG[$_SESSION['module']]['prefix']}domains", 'domain_', 'domain_id', 'domain_name', null, 'active'));
+					}
 
 					basicGetList('fm_' . $__FM_CONFIG[$_SESSION['module']]['prefix'] . 'config', array('cfg_name'), 'cfg_', 'AND cfg_type="rpz" AND cfg_parent="' . $server_config_result[$i]->cfg_id . '" AND cfg_isparent="no" AND server_serial_no="' . $server_config_result[$i]->server_serial_no . '"');
 					foreach ($fmdb->last_result as $record) {
