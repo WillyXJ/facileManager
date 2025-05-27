@@ -386,7 +386,7 @@ class fm_dhcp_objects {
 			$edit_status .= ($row->config_status == 'active') ? $__FM_CONFIG['icons']['disable'] : $__FM_CONFIG['icons']['enable'];
 			$edit_status .= '</a>';
 			$edit_status .= '<a href="#" class="delete">' . $__FM_CONFIG['icons']['delete'] . '</a>';
-			$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="icons"><i class="icons fa fa-sliders" title="%s" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
+			$icons[] = sprintf('<a href="config-options.php?item_id=%d" class="tooltip-bottom icons" data-tooltip="%s"><i class="icons fa fa-sliders" aria-hidden="true"></i></a>', $row->config_id, __('Configure Additional Options'));
 		}
 		
 		if ($class) $class = 'class="' . $class . '"';
