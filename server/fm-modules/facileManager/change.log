@@ -1,4 +1,4 @@
-5.3.3 (2025-??-??)
+5.3.3 (2025-05-27)
 ==================
 * Server - [bug] Fixed grabbing CSS.
 * Client - [bug] Fix macOS detection.

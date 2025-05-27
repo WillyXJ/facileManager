@@ -1,4 +1,4 @@
-7.1.3 (2025-??-??)
+7.1.3 (2025-05-27)
 ==================
 * Server - [bug] Fixed RPZ for All Zones with PHP8.4.
 * Server - [bug] Fixed ability to save updates to RPZ configurations. (Issue #688)
