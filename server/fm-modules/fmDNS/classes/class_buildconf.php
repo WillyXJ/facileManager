@@ -1758,7 +1758,7 @@ class fm_module_buildconf extends fm_shared_module_buildconf {
 				if (!$retval) {
 					if (count($files_array['files']) == 1) {
 						$tmp_zone_file_array = array_keys($files_array['files']);
-						$zone_files['all'] = array(rtrim($tmp_zone_file_array[0], '.conf') => $tmp_zone_file_array[0]);
+						$zone_files['all'] = array(preg_replace('/.conf$/', '', $tmp_zone_file_array[0]) => $tmp_zone_file_array[0]);
 					}
 					$named_checkzone_results = '';
 					if (array($zone_files)) {
