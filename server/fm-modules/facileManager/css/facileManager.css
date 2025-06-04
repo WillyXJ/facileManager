@@ -10,11 +10,11 @@
 /* Define default-theme here */
 .default-theme {
 	/* Common color changes */
-	--top-header-bg: light-dark(#3b4b58, #2c3236);
-	--top-header-border: light-dark(#383e43, #393939);
-	--top-header-divider: light-dark(#56575c, #5c5956);
-	--top-header-search-bg: light-dark(#585f76, var(--form-field-bg));
-	--top-header-search-border: light-dark(#6b7388, var(--form-input-border));
+	--top-header-bg: light-dark(var(--menu-divider), #2c3236);
+	--top-header-border: #2d2d2d;
+	--top-header-divider: #dcdcdc36;
+	--top-header-search-bg: #00000042;
+	--top-header-search-hover-bg: light-dark(#ffffff25, #ffffff1f);
 
 	--menu-bg: #2f3235;
 	--menu-divider: #3b4b58;
@@ -76,7 +76,7 @@
 
 	--table-header-bg: light-dark(#464646, #2e2e2e);
 	--table-header-text: #f1f1f1;
-	--table-header-border: light-dark(#fff, var(--top-header-bg));
+	--table-header-border: light-dark(#fff, var(--menu-divider));
 	--table-header-sorted: var(--menu-select-highlight);
 
 	--table-rows-grabbing-border: #dfdfdf;
@@ -86,11 +86,11 @@
 	--form-popup-title-primary-color: var(--primary-body-text);
 	--form-popup-title-secondary-color: light-dark(#fff, #bebebe);
 	--form-popup-bg: light-dark(var(--background-default), var(--menu-bg));
-	--form-input-border: light-dark(#dfdfdf, #4c4c4c);
-	--form-input-disabled: light-dark(#aeaeae, #848484);
-	--form-input-disabled-primary: light-dark(#fbfbfb, #5f5e5e);
+	--form-input-border: light-dark(#00000025, #00000060);
+	--form-input-disabled: light-dark(#aeaeae, #696969);
+	--form-input-disabled-primary: light-dark(#fbfbfb, #353535);
 	--form-input-disabled-secondary: var(--form-popup-primary-color);
-	--form-field-bg: light-dark(#fff, #616161);
+	--form-field-bg: light-dark(#fff, #262626);
 	--form-label-text: var(--primary-body-text);
 	--form-field-text: light-dark(var(--primary-body-text), #f0f0f0);
 	--placeholder: light-dark(#bcbcbc, #9c9c9c);
@@ -358,6 +358,14 @@ div.header-container {
 #tophead div.flex-right {
 	flex-direction: row-reverse;
 	flex: 1;
+}
+#tophead > div.flex-left > div:not(:first-child)::before {
+    border-left: 1px solid var(--top-header-divider);
+    content: '';
+    position: absolute;
+    top: 7px;
+    bottom: 7px;
+    margin-left: -2em;
 }
 #tophead > div.flex-left > div {
 	border-right-color: var(--top-header-divider);
@@ -1638,7 +1646,7 @@ a.button.disabled {
 	background-image: -o-linear-gradient(top, var(--form-input-disabled-primary), var(--form-input-disabled-secondary));
 	background-image: linear-gradient(to bottom, var(--form-input-disabled-primary), var(--form-input-disabled-secondary));
 	background-color: var(--form-input-disabled-primary);
-	border-color: light-dark(#d9d9d9, #515151);
+	border-color: light-dark(#d9d9d9, #404040);
 	color: var(--form-input-disabled);
 	cursor: not-allowed;
 }
@@ -2038,12 +2046,18 @@ div.fm-table > div > div.fm-half {
 }
 
 #search_form input[type=text] {
-	width: 90%;
-	border: 1px solid var(--top-header-search-border);
-	line-height: 20px;
+	width: 100%;
+	border: none;
+	line-height: 29px;
+	padding-left: 2.5em;
+	margin-left: -35px;
 	background-color: var(--top-header-search-bg);
 	border-top-left-radius: 3px;
 	border-top-right-radius: 3px;
+}
+#search_form:hover input[type=text],
+#search_form input[type=text]:focus {
+	background-color: var(--top-header-search-hover-bg);
 }
 
 #search_form_container .search_remove {
@@ -2354,4 +2368,3 @@ a.subelement_edit img {
 		width: 16.5em;
 	}
 }
-
