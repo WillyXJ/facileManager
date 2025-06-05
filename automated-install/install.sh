@@ -52,8 +52,8 @@ COLOR_CYAN='\E[36m'
 COLOR_BOLD='\033[1m'
 COLOR_NO_BOLD='\033[0m'
 # Icons
-PASS="(${COLOR_LIGHT_GREEN}✓${COLOR_NONE})"
-FAIL="(${COLOR_LIGHT_RED}x${COLOR_NONE})"
+PASS="(${COLOR_LIGHT_GREEN}\U2713${COLOR_NONE})"
+FAIL="(${COLOR_LIGHT_RED}\U2718${COLOR_NONE})"
 INFO='(i)'
 DASH='(-)'
 QUESTION='(?)'
@@ -139,7 +139,7 @@ checkSupportedOS() {
         return
     fi
 
-    # To be written
+    # To be written for future use
     printf "%b  %b %s\\n" "${OVER}" "${PASS}" "${str}"
     return
 }
@@ -170,13 +170,14 @@ detectPackageManager() {
         # Do we have dnf or yum?
         if findProgram dnf; then
             PKG_MANAGER='dnf'
-        else
+        elif findProgram yum; then
             PKG_MANAGER='yum'
         fi
         PKG_INSTALL="${PKG_MANAGER} install -y"
+    fi
     
     # Nothing else is supported so exit
-    else
+    if [ -z $PKG_MANAGER ]; then
         printf "\\n  %b No supported package manager was found. Please install %b%s%b and rerun the installer with FM_SKIP_DEP_CHECK set to true.\\n" "${FAIL}" "${COLOR_BOLD}" "${packages[@]}" "${COLOR_NO_BOLD}"
         printf "        %bexport FM_SKIP_DEP_CHECK=true%b\\n" "${COLOR_CYAN}" "${COLOR_NONE}"
         exit 1
@@ -329,14 +330,14 @@ checkDigResponse() {
 inArray() {
     local needle="$1"
     local haystack=("${@:2}")
-	local e
-	for e in "${haystack[@]}"; do
-		if [ $(grep -ix "$e" <<< "$needle") ]; then
+    local e
+    for e in "${haystack[@]}"; do
+        if [ $(grep -ix "$e" <<< "$needle") ]; then
             echo "$e"
             return
         fi
-	done
-	echo false
+    done
+    echo false
 }
 
 # Build an array of available modules
@@ -481,7 +482,7 @@ installModule() {
         str="Validating FM_INSTALL_MODULE"
         printf "  %b %s" "${DASH}" "${str}"
         selected_module=$(inArray "${FM_INSTALL_MODULE}" "${AVAILABLE_MODULES[@]}")
-		if [ "${selected_module}" != false ]; then
+        if [ "${selected_module}" != false ]; then
             # Set proper casing for $FM_INSTALL_MODULE
             FM_INSTALL_MODULE=${selected_module}
             printf "%b  %b %s\\n" "${OVER}" "${PASS}" "${str}"
@@ -516,8 +517,8 @@ installModule() {
             module=-1
         fi
         # Ensure only one entry was selected
-    	selected_module=( $(echo $module) )
-		if [ 1 -lt ${#selected_module[@]} ]; then
+        selected_module=( $(echo $module) )
+        if [ 1 -lt ${#selected_module[@]} ]; then
             module=-1
         fi
         selection_error=0
