@@ -5,9 +5,11 @@ facileManager
 facileManager is free software released under the terms of GNU GPL v2.
 Please see LICENSE for license.
 
-Official site: http://www.facilemanager.com
+Official site: https://www.facilemanager.com
 
 Official git repository: https://github.com/WillyXJ/facileManager
+
+Official documentation: https://docs.facilemanager.com
 
 
 Installation instructions for facileManager
