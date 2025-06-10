@@ -2,6 +2,7 @@ name: Bug Report
 description: Create a report to help us improve facileManager and its modules
 title: "[BUG] "
 labels: ["bug-report"]
+type: "Bug"
 projects: ["facileManager"]
 body:
   - type: markdown
