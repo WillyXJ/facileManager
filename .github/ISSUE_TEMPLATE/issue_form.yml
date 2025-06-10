@@ -9,7 +9,7 @@ body:
       value: |
         Thanks for reporting a bug for facileManager and its modules.
 
-        All submitters MUST read the [issue policy and reporting guidelines](https://docs.facilemanager.com/issues/). Bug reports that do not follow the issue policy will be marked as `invalid` and closed. Likewise, bug reports missing required fields will be marked `incomplete` and closed (no hard feelings).
+        All submitters MUST read the [issue policy and reporting guidelines](https://docs.facilemanager.com/issues/){:target="_blank"}. Bug reports that do not follow the issue policy will be marked as `invalid` and closed. Likewise, bug reports missing required fields will be marked `incomplete` and closed (no hard feelings).
         In this event, we ask you to re-submit a complete bug report.
         
         Be sure there are no issues similar to yours that are already open. You can check this by searching the issues in this repository.
@@ -20,13 +20,13 @@ body:
     attributes:
       label: Issue reporting checklist
       options:
-        - label: I have read and understood the [contributors guide](https://github.com/facileManager/facileManager/blob/master/.github/CONTRIBUTING.md).
+        - label: I have read and understood the [contributors guide](https://github.com/facileManager/facileManager/blob/master/.github/CONTRIBUTING.md){:target="_blank"}.
           required: true
-        - label: I have followed the [project prerequisites](https://docs.facilemanager.com/getting-started/prerequisites/).
+        - label: I have followed the [project prerequisites](https://docs.facilemanager.com/getting-started/prerequisites/){:target="_blank"}.
           required: true
-        - label: I have searched this repository for [existing issues](https://github.com/facileManager/facileManager/issues) and [pull requests](https://github.com/facileManager/facileManager/pull) related to my issue/suggestion.
+        - label: I have searched this repository for [existing issues](https://github.com/facileManager/facileManager/issues){:target="_blank"} and [pull requests](https://github.com/facileManager/facileManager/pull){:target="_blank"} related to my issue/suggestion.
           required: true
-        - label: I checked the [FAQs](https://docs.facilemanager.com/faq/) and [official documentation](https://docs.facilemanager.com/).
+        - label: I checked the [FAQs](https://docs.facilemanager.com/faq/){:target="_blank"} and [official documentation](https://docs.facilemanager.com/){:target="_blank"}.
           required: true
 
   - type: input
