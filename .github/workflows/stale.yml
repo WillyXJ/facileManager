@@ -15,7 +15,7 @@ jobs:
           days-before-issue-stale: 90
           days-before-issue-close: 21
           stale-issue-label: "stale"
-          stale-issue-message: "This issue is stale because it has been open for 90 days with no activity."
+          stale-issue-message: "This issue is stale because it has been open for 90 days with no activity. It will be closed in 21 days if there's no further activity."
           close-issue-message: "This issue was closed because it has been inactive for 21 days since being marked as stale."
           exempt-issue-labels: "help-wanted,enhancement,feature-request,module-request,security,in-progress"
           days-before-pr-stale: -1
