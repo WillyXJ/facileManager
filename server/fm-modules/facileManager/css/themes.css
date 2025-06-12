@@ -4,12 +4,8 @@
 
 .Mars {
 	/* Common color changes */
-	--top-header-bg: light-dark(#583b3b, #322626);
-	--top-header-border: light-dark(#433838, #393939);
-	--top-header-divider: light-dark(#5c5656, #5c5956);
-	--top-header-search-bg: light-dark(#765353, var(--form-field-bg));
-	--top-header-search-border: light-dark(#9e6262, var(--form-input-border));
-	--table-header-border: light-dark(#fff, #583b3b);
+	--top-header-bg: light-dark(var(--menu-divider), #322626);
+	--table-header-border: light-dark(#fff, var(--menu-divider));
 
 	--menu-bg: #352f2f;
 	--menu-divider: #583b3b;
@@ -25,15 +21,11 @@
 
 .Forest {
 	/* Common color changes */
-	--top-header-bg: light-dark(#3d583b, #252b24);
-	--top-header-border: light-dark(#384338, #393939);
-	--top-header-divider: light-dark(#565c56, #5c5956);
-	--top-header-search-bg: light-dark(#56865c, var(--form-field-bg));
-	--top-header-search-border: light-dark(#679E62, var(--form-input-border));
-	--table-header-border: light-dark(#fff, #3d583b);
+	--top-header-bg: light-dark(var(--menu-divider), #252b24);
+	--table-header-border: light-dark(#fff, var(--menu-divider));
 
 	--menu-bg: #2f352f;
-	--menu-divider: #3b583b;
+	--menu-divider: #3d583b;
 	--menu-select-highlight: light-dark(#44bc3b, #369a2e);
 	--menu-expand-bg: #e4ebe4;
 	--submenu-hover: #45753b;
@@ -46,15 +38,11 @@
 
 .Beach {
 	/* Common color changes */
-	--top-header-bg: light-dark(#7e532b, #342c25);
-	--top-header-border: light-dark(#433f38, #393939);
-	--top-header-divider: light-dark(#5c5956, #5c5956);
-	--top-header-search-bg: light-dark(#8e7143, var(--form-field-bg));
-	--top-header-search-border: light-dark(#cda445, var(--form-input-border));
-	--table-header-border: light-dark(#fff, #7e532b);
+	--top-header-bg: light-dark(var(--menu-divider), #342c25);
+	--table-header-border: light-dark(#fff, var(--menu-divider));
 
 	--menu-bg: #35322f;
-	--menu-divider: #584b3b;
+	--menu-divider: #7e532b;
 	--menu-select-highlight: light-dark(#e99127, #d5811b);
 	--menu-expand-bg: #ebe8e4;
 	--submenu-hover: light-dark(#c7914f, #a57943);
@@ -67,14 +55,11 @@
 
 .Plum {
 	/* Common color changes */
-	--top-header-bg: light-dark(#513b58, #322c36);
-	--top-header-border: light-dark(#3f3843, #393939);
-	--top-header-divider: light-dark(#5a565c, #595660);
-	--top-header-search-bg: light-dark(#6c5876, var(--form-field-bg));
-	--top-header-search-border: light-dark(#7e6b88, var(--form-input-border));
+	--top-header-bg: light-dark(var(--menu-divider), #322c36);
+	--table-header-border: light-dark(#fff, var(--menu-divider));
   
 	--menu-bg: #332f35;
-	--menu-divider: #4b3b58;
+	--menu-divider: #513b58;
 	--menu-select-highlight: light-dark(#9755c0, #8652a6);
 	--menu-expanded-bg: light-dark(#e8e4eb, #535353);
 	--menu-expanded-text: light-dark(var(--menu-bg), var(--menu-link));
