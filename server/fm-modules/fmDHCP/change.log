@@ -1,3 +1,7 @@
+0.12.3 (2026-??-??)
+==================
+* Server - [bug] Fixed installer and upgrader.
+
 0.12.2 (2026-08-24)
 ==================
 * Both   - [security] Fixed command injection vulnerabilities.

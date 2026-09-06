@@ -20,20 +20,20 @@
  +-------------------------------------------------------------------------+
 */
 
-function upgradefmDHCPSchema($module_name) {
-	global $fmdb;
+function upgradefmDHCPSchema($running_version) {
+	global $fmdb, $__FM_CONFIG;
 	
 	/** Include module variables */
 	@include(dirname(__FILE__) . '/variables.inc.php');
 	
 	/** Get current version */
-	$running_version = getOption('version', 0, 'fmDHCP');
+	if (!$running_version) {
+		$running_version = getOption('version', 0, 'fmDHCP');
+	}
 	
 	/** Checks to support older versions (ie n-3 upgrade scenarios */
 	$success = version_compare($running_version, '0.11.0-beta1', '<') ? upgradefmDHCP_0110b1($__FM_CONFIG, $running_version) : true;
 	if (!$success) return $fmdb->last_error;
-	
-	setOption('client_version', $__FM_CONFIG['fmDHCP']['client_version'], 'auto', false, 0, 'fmDHCP');
 	
 	return true;
 }

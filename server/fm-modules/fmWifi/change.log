@@ -1,3 +1,7 @@
+0.9.4 (2026-??-??)
+==================
+* Server - [bug] Fixed installer and upgrader.
+
 0.9.3 (2026-08-24)
 ==================
 * Both   - [security] Fixed command injection vulnerabilities.

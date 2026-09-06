@@ -21,7 +21,7 @@
 */
 
 function upgradefmSQLPassSchema($running_version) {
-	global $fmdb;
+	global $fmdb, $__FM_CONFIG;
 	
 	/** Include module variables */
 	@include(dirname(__FILE__) . '/variables.inc.php');

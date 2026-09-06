@@ -1,3 +1,7 @@
+7.4.6 (2026-??-??)
+==================
+* Server - [bug] Fixed installer and upgrader.
+
 7.4.5 (2026-09-04)
 ==================
 * Both   - [bug] Fixed configuration build errors introduced in v7.4.4. (Issue #754)

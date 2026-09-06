@@ -1,3 +1,7 @@
+1.12.1 (2026-??-??)
+===================
+* Server - [bug] Fixed installer and upgrader.
+
 1.12.0 (2025-12-26)
 ===================
 * Server - [improvement] Removed href="#" from non-navigational anchor tags.
