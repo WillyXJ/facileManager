@@ -1,6 +1,7 @@
 6.0.8 (2026-??-??)
 ==================
 * Server - [bug] Fixed the module upgrade process to set the correct client version.
+* Server - [bug] Fixed the module upgrade output formatting.
 
 6.0.7 (2026-09-04)
 ==================

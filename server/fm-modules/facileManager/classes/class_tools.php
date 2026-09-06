@@ -104,7 +104,7 @@ class fm_tools {
 			}
 			$module_version = getOption('version', 0, $module_name);
 			if (!$module_version) {
-				return sprintf('<p>' . _('%s is not installed.'), '</p>', $module_name);
+				return sprintf('<p>' . _('No database to upgrade because %s is not installed!') . '</p>', $module_name);
 			}
 			$function = 'upgrade' . $module_name . 'Schema';
 			if (function_exists($function)) {
@@ -112,8 +112,8 @@ class fm_tools {
 			}
 			if ($output !== true) {
 				if ($process == 'quiet') return false;
-				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
-				return sprintf('<p>' . _('%s upgrade failed!') . '</p>%s', $module_name, $error);
+				$error = (getOption('show_errors')) ? $output : null;
+				return sprintf("%s\n<p>" . _('%s upgrade failed!') . '</p>', $error, $module_name);
 			} else {
 				/** Set the module version */
 				setOption('version', $__FM_CONFIG[$module_name]['version'], 'auto', false, 0, $module_name);
@@ -123,8 +123,8 @@ class fm_tools {
 				}
 				if ($fmdb->last_error) {
 					if ($process == 'quiet') return false;
-					$error = (!getOption('show_errors')) ? '<p>' . $fmdb->last_error . '</p>' : null;
-					return sprintf('<p>' . _('%s upgrade failed!') . '</p>%s', $module_name, $error);
+					$error = (getOption('show_errors')) ? '<p>' . $fmdb->last_error . '</p>' : null;
+					return sprintf("%s\n<p>" . _('%s upgrade failed!') . '</p>', $error, $module_name);
 				}
 				setOption('version_check', array('timestamp' => time(), 'data' => null), 'update', true, 0, $module_name);
 			}
@@ -199,10 +199,10 @@ class fm_tools {
 						if ($fmdb->last_error) $message .= $fmdb->last_error;
 					}
 				} else {
-					$message = _('No updated packages are found.');
+					$message = _('No updated packages are found!');
 				}
 				
-				$response = '<strong>' . $module_name . '</strong><br /><pre>' . $message . '</pre>';
+				$response = '<p><strong>' . $module_name . "</strong></p>\n<pre> " . $message . '</pre>';
 				if (strpos($message, '!') === false) $response .= sprintf('<p>%s</p>', _('The next step is to upgrade the database.'));
 				
 				return $response;

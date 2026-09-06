@@ -80,19 +80,33 @@ function returnUnAuth($format = 'window') {
 function transformOutput($text) {
 	global $__FM_CONFIG;
 
+	// remove first <div class="error">...</div> or <div id="error">...</div> across the full text
+	$orig_text = $text;
+	// replace the first matching div with its inner contents (preserve inner HTML)
+	$text = preg_replace("/<div\\s+(?:class|id)\\s*=\\s*(['\"])\\s*error\\s*\\1[^>]*>(.*?)<\\/div>/is", '$2', $text, 1);
+
 	foreach (explode("\n", $text) as $line) {
+		if (trim($line) == '') continue;
+		$p = '';
+		if (strpos($line, '<p>') !== false) {
+			$line = preg_replace('/<p>/', '', $line, 1);
+			$p = '<p>';
+		}
+
 		if (strpos(strtolower($line), _('failed')) !== false) {
 			$line = str_replace('-->', '', $line);
-			$line = sprintf(' %s %s', $__FM_CONFIG['icons']['fail'], trim($line));
+			$line = sprintf(' %s%s %s', $p, $__FM_CONFIG['icons']['fail'], trim($line));
 		} elseif (strpos(strtolower($line), _('successful')) !== false) {
 			$line = str_replace('-->', '', $line);
-			$line = sprintf(' %s %s', $__FM_CONFIG['icons']['ok'], trim($line));
+			$line = sprintf(' %s%s %s', $p, $__FM_CONFIG['icons']['ok'], trim($line));
 		} elseif (strpos(strtolower($line), _('notice')) !== false) {
 			$line = str_replace('-->', '', $line);
-			$line = sprintf(' %s %s', $__FM_CONFIG['icons']['caution'], trim($line));
+			$line = sprintf(' %s%s %s', $p, $__FM_CONFIG['icons']['caution'], trim($line));
+		} else {
+			$line = sprintf(' %s%s', $p, trim($line));
 		}
 		$tmp_output[] = str_replace('-->', $__FM_CONFIG['icons']['ok'], $line);
 	}
 
-	return join("\n", $tmp_output);
+	return (isset($tmp_output)) ? join("\n", $tmp_output) : $orig_text;
 }
