@@ -83,7 +83,7 @@ class fm_tools {
 
 			/** Ensure running_version is set */
 			if (!$running_version) {
-				$running_version = getOption('version', $_SESSION['user']['account_id'], $module_name);
+				$running_version = getOption('version', 0, $module_name);
 			}
 
 			/** Ensure there is actually an upgrade to perform */
@@ -115,7 +115,12 @@ class fm_tools {
 				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
 				return sprintf('<p>' . _('%s upgrade failed!') . '</p>%s', $module_name, $error);
 			} else {
+				/** Set the module version */
 				setOption('version', $__FM_CONFIG[$module_name]['version'], 'auto', false, 0, $module_name);
+				if (!$fmdb->last_error && array_key_exists('client_version', $__FM_CONFIG[$module_name])) {
+					/** Set the module client version */
+					setOption('client_version', $__FM_CONFIG[$module_name]['client_version'], 'auto', false, 0, $module_name);
+				}
 				if ($fmdb->last_error) {
 					if ($process == 'quiet') return false;
 					$error = (!getOption('show_errors')) ? '<p>' . $fmdb->last_error . '</p>' : null;
