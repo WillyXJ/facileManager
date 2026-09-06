@@ -30,6 +30,9 @@ class fm_tools {
 	function installModule($module_name = null) {
 		global $__FM_CONFIG;
 		
+		// Set default message
+		$output = _('Installation function does not exist!');
+
 		if (!$module_name) {
 			return sprintf('<p>%s</p>', _('No module was selected to be installed.'));
 		}
@@ -46,14 +49,14 @@ class fm_tools {
 				$output = $function($__FM_CONFIG['db']['name'], $module_name, 'quiet');
 			}
 			if ($output !== true) {
-				$error = (!getOption('show_errors')) ? "<p>$output</p>" : null;
+				$error = (getOption('show_errors')) ? "<p>$output</p>" : null;
 				return sprintf('<p>' . _('%s installation failed!') . '</p>%s', $module_name, $error);
 			}
 			
-			addLogEntry(sprintf(_('%s %s was born.'), $module_name, $__FM_CONFIG[$module_name]['version']), $module_name);
+			addLogEntry(sprintf(_('%s %s was installed.'), $module_name, $__FM_CONFIG[$module_name]['version']), $module_name);
 		} else return sprintf('<p>' . _('No installation file found for %s.') . '</p>', $module_name);
 		
-		return sprintf('<p>' . _('%s was installed successfully!') . '</p>', $module_name);
+		return true;
 	}
 	
 	/**

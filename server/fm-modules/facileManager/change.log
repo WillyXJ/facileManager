@@ -4,6 +4,8 @@
 * Server - [bug] Fixed the module upgrade output formatting.
 * Server - [bug] Fixed some missing language text in the module upgrade process.
 * Server - [bug] Removed unnecessary popup window when activating/deactivating modules.
+* Server - [bug] Fixed the module installation process to display the correct message when no
+           installation function is found.
 
 6.0.7 (2026-09-04)
 ==================
