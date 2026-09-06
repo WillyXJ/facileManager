@@ -323,7 +323,7 @@ function installDatabase($database) {
 						$content .= $tmp_content;
 					}
 					if ($output == true) {
-						addLogEntry(sprintf(_('%s %s was born.'), $module_name, $fm_version), $module_name);
+						addLogEntry(sprintf(_('%s %s was installed.'), $module_name, $fm_version), $module_name);
 					}
 				}
 			}
@@ -563,7 +563,7 @@ INSERTSQL;
 		}
 	}
 	
-	addLogEntry(sprintf(_('%s %s was born.'), $fm_name, $fm_version), $fm_name);
+	addLogEntry(sprintf(_('%s %s was installed.'), $fm_name, $fm_version), $fm_name);
 
 	return displayProgress(sprintf(_('Creating %s Schema'), $fm_name), $fmdb->result, 'display');
 }

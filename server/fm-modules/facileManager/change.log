@@ -6,6 +6,7 @@
 * Server - [bug] Removed unnecessary popup window when activating/deactivating modules.
 * Server - [bug] Fixed the module installation process to display the correct message when no
            installation function is found.
+* Server - [bug] Changed installation log message.
 
 6.0.7 (2026-09-04)
 ==================
