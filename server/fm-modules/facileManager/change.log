@@ -3,6 +3,7 @@
 * Server - [bug] Fixed the module upgrade process to set the correct client version.
 * Server - [bug] Fixed the module upgrade output formatting.
 * Server - [bug] Fixed some missing language text in the module upgrade process.
+* Server - [bug] Removed unnecessary popup window when activating/deactivating modules.
 
 6.0.7 (2026-09-04)
 ==================

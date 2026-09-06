@@ -41,8 +41,13 @@ if (is_array($_POST) && count($_POST) && currentUserCan('run_tools')) {
 		switch($_POST['task']) {
 			case 'module_install':
 				$module_name = isset($_POST['item']) ? $_POST['item'] : null;
+				$response = $fm_tools->installModule($module_name);
+				if ($response === true) {
+					echo 'Success';
+					exit;
+				}
+				// Display the response in a popup window
 				$response = buildPopup('header', _('Installing Module'));
-				$response .= $fm_tools->installModule($module_name);
 				if ($fmdb->last_error) $response .= $fmdb->last_error;
 				$response .= buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL(_('Modules')));
 				

@@ -1384,8 +1384,11 @@ if (!isset($__FM_CONFIG)) {
 				if (response.indexOf("force_logout") >= 0 || response.indexOf("login_form") >= 0) {
 					doLogout();
 					return false;
+				} else if (response != "Success") {
+					$("#manage_item_contents").html(response);
+				} else {
+					location.reload();
 				}
-				$("#manage_item_contents").html(response);
 			}
 		});
 		

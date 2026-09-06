@@ -185,11 +185,14 @@ if (is_array($_POST) && array_key_exists('item_type', $_POST) && $_POST['item_ty
 	}
 
 	// Graphic highlighting
-	$output = transformOutput($output);
+	$output = trim(transformOutput($output));
 
-	if (isset($output)) $output = "<pre>$output</pre>\n";
-	$output .= "<p class=\"complete\">" . _('Complete') . '.</p>';
-	echo buildPopup('header', ucwords($_POST['bulk_action']) . ' Results') . $output . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL($page));
+	if ($output) {
+		$output .= "<p class=\"complete\">" . _('Complete') . '.</p>';
+		echo buildPopup('header', ucwords($_POST['bulk_action']) . ' Results') . $output . buildPopup('footer', _('OK'), array('cancel_button' => 'cancel'), getMenuURL($page));
+	} else {
+		echo 'Success';
+	}
 
 /** Handle mass updates */
 } elseif (is_array($_POST) && array_key_exists('action', $_POST) && $_POST['action'] == 'process-all-updates') {
