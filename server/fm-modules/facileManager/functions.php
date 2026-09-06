@@ -3416,7 +3416,7 @@ function is_writable_r($dir, $exclude = array()) {
 function downloadfMFile($file) {
 	global $__FM_CONFIG;
 	
-	$message = "Downloading $file\n";
+	$message = sprintf(_('Downloading %s') . "\n", $file);
 	
 	list($tmp_dir, $created) = clearUpdateDir();
 	if (!$created) {
